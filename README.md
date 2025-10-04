@@ -1,6 +1,6 @@
 # campuswhisper
 
-Its an university assistant app. With lots of feature, stuends can easily track information.
+Its an university assistant app. With lots of feature, students can easily track information.
 
 ## Getting Started
 
