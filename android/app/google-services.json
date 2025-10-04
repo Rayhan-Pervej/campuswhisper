@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "285135137392",
+    "project_id": "campuswhisper-a8423",
+    "storage_bucket": "campuswhisper-a8423.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:285135137392:android:f36cebb40db0df6a0b22b5",
+        "android_client_info": {
+          "package_name": "com.rayhanpervej.campuswhisper.campuswhisper"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxpi5jMFeNonVSXbpv5uuMTDhmLJ02zG4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

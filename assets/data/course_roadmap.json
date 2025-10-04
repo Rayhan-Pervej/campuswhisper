@@ -1,0 +1,1667 @@
+{
+  "departments": [
+    {
+      "code": "CSE",
+      "name": "Computer Science and Engineering",
+      "roadmap": [
+        {
+          "semester": "Semester I",
+          "credits": 13,
+          "items": [
+            {
+              "id": "CSE100",
+              "title": "Comp Programming I",
+              "credit": 2,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE100L",
+              "title": "Comp Programming I Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MAT104",
+              "title": "Calculus & Analytical Geometry",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "ENG101",
+              "title": "Listening and Speaking Skills",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "HSI",
+              "title": "Humanities/Social Science Elective I",
+              "credit": 4,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester II",
+          "credits": 14,
+          "items": [
+            {
+              "id": "CSE200",
+              "title": "Comp Programming II",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE100"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE200L",
+              "title": "Comp Programming II Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSE100L"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE201",
+              "title": "Discrete Math",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CHE101",
+              "title": "Concepts in Chemistry",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CHE101L",
+              "title": "Concepts in Chemistry Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "HSII",
+              "title": "Humanities/Social Science Elective II",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester III",
+          "credits": 14,
+          "items": [
+            {
+              "id": "CSE203",
+              "title": "Data Structures",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE200"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE203L",
+              "title": "Data Structures Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSE200L"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE204",
+              "title": "Digital Logic Design",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE204L",
+              "title": "Digital Logic Design Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "ENG102",
+              "title": "English Reading Skills",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["ENG101"],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "HSIII",
+              "title": "Humanities/Social Science Elective III",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester IV",
+          "credits": 14,
+          "items": [
+            {
+              "id": "CSE211",
+              "title": "Algorithms",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE203"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE211L",
+              "title": "Algorithms Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSE203L"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE214",
+              "title": "Computer Organization & Architecture",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE204"],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "PHY101",
+              "title": "University Physics I",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "PHY101L",
+              "title": "University Physics I Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "HSIV",
+              "title": "Humanities/Social Science Elective IV",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester V",
+          "credits": 12,
+          "items": [
+            {
+              "id": "CSE213",
+              "title": "Object Oriented Programming",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE211"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE213L",
+              "title": "Object Oriented Programming Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSE211L"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE216",
+              "title": "Microprocessor & Assembly",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE214"],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE216L",
+              "title": "Microprocessor & Assembly Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSE214"],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE104",
+              "title": "Electrical Circuit Analysis",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE104L",
+              "title": "Electrical Circuit Analysis Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "hardware",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester VI",
+          "credits": 12,
+          "items": [
+            {
+              "id": "CSE303",
+              "title": "Database Management",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE213"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE303L",
+              "title": "Database Management Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSE213L"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE298",
+              "title": "2nd Year Project (Capstone 1)",
+              "credit": 2,
+              "lab": false,
+              "prerequisites": ["CSE213"],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MAT212",
+              "title": "Probability & Statistics for Science & Engg",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["MAT104"],
+              "type": "math",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MAT203",
+              "title": "Linear Algebra",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "math",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester VII",
+          "credits": 13,
+          "items": [
+            {
+              "id": "CSE309",
+              "title": "Web Programming",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE303"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE210",
+              "title": "Electronics I",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE216"],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE210L",
+              "title": "Electronics I Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSE216L"],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "ENG105",
+              "title": "Business English",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["ENG102"],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MAT251",
+              "title": "Multivariable Calculus",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["MAT203"],
+              "type": "math",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester VIII",
+          "credits": 11,
+          "items": [
+            {
+              "id": "CSE451",
+              "title": "Software Engineering",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE309"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE316",
+              "title": "Computer Networks",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE210"],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE316L",
+              "title": "Computer Networks Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSE210L"],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE317",
+              "title": "Numerical Methods",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["MAT251"],
+              "type": "math",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE317L",
+              "title": "Numerical Methods Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["MAT251"],
+              "type": "math",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester IX",
+          "credits": 12,
+          "items": [
+            {
+              "id": "CSE398",
+              "title": "3rd Year Project (Capstone 2)",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE298"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE310",
+              "title": "Electronics II",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE210"],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE310L",
+              "title": "Electronics II Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSE210L"],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE425",
+              "title": "Artificial Intelligence",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE317"],
+              "type": "math",
+              "isPlaceholder": false
+            },
+            {
+              "id": "SpecI",
+              "title": "Specialization Course I",
+              "credit": 2,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester X",
+          "credits": 12,
+          "items": [
+            {
+              "id": "SpecII",
+              "title": "Specialization Course II",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "CSE301",
+              "title": "Finite Automata & Computability",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE211"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "SpecIII",
+              "title": "Specialization Course III",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "CSE315",
+              "title": "Design of Operating Systems",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE213"],
+              "type": "software",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester XI",
+          "credits": 6,
+          "items": [
+            {
+              "id": "SpecIV",
+              "title": "Specialization Course IV",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "SpecV",
+              "title": "Specialization Course V",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "Optional",
+              "title": "Optional for CSE 499",
+              "credit": 0,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester XII",
+          "credits": 6,
+          "items": [
+            {
+              "id": "CSE498",
+              "title": "Final Year Project (Capstone 3)",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE398"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE499",
+              "title": "Thesis/Project Option",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["Optional"],
+              "type": "software",
+              "isPlaceholder": false
+            }
+          ]
+        }
+      ]
+    }
+,
+    {
+      "code": "CSC",
+      "name": "Computer Science",
+      "roadmap": [
+        {
+          "semester": "Semester I",
+          "credits": 14,
+          "items": [
+            {
+              "id": "CSC101",
+              "title": "Introduction to Computer Science",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC101L",
+              "title": "Introduction to Computer Science Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "ENG101",
+              "title": "English Composition",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MAT104",
+              "title": "Calculus & Analytical Geometry",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "math",
+              "isPlaceholder": false
+            },
+            {
+              "id": "PHY101",
+              "title": "Physics I",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "PHY101L",
+              "title": "Physics I Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester II",
+          "credits": 13,
+          "items": [
+            {
+              "id": "CSC201",
+              "title": "Programming Fundamentals",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSC101"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "ENG102",
+              "title": "English Communication Skills",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["ENG101"],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "PHY102",
+              "title": "Physics II",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["PHY101"],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "PHY102L",
+              "title": "Physics II Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["PHY101L"],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "HS2",
+              "title": "Humanities/Social Science Elective",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester III",
+          "credits": 14,
+          "items": [
+            {
+              "id": "CSC203",
+              "title": "Data Structures",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSC201"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC203L",
+              "title": "Data Structures Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSC201"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSE204",
+              "title": "Digital Logic Design",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC204L",
+              "title": "Digital Logic Design Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "SocialSciI",
+              "title": "Social Science I",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": true
+            },
+            {
+              "id": "MAT212",
+              "title": "Probability & Statistics",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["MAT104"],
+              "type": "math",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester IV",
+          "credits": 12,
+          "items": [
+            {
+              "id": "CSC201",
+              "title": "Programming Fundamentals",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC311",
+              "title": "Computer Organization",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSE204"],
+              "type": "hardware",
+              "isPlaceholder": false
+            },
+            {
+              "id": "SocialSciII",
+              "title": "Social Sciences II",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": true
+            },
+            {
+              "id": "ENG105",
+              "title": "Business English",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["ENG102"],
+              "type": "foundation",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester V",
+          "credits": 14,
+          "items": [
+            {
+              "id": "CSC305",
+              "title": "Algorithms",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSC203"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC305L",
+              "title": "Algorithms Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSC203L"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC212",
+              "title": "Object Oriented Programming",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSC201"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC212L",
+              "title": "Object Oriented Programming Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSC201"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC301",
+              "title": "Discrete Mathematics",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "math",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MAT203",
+              "title": "Linear Algebra",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "math",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester VI",
+          "credits": 16,
+          "items": [
+            {
+              "id": "CSC306",
+              "title": "Database Systems",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSC212"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC306L",
+              "title": "Database Systems Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSC212L"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MinorI",
+              "title": "Minor Course I",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "MinorII",
+              "title": "Minor Course II",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "MajorI",
+              "title": "Major Course I",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "LFE201",
+              "title": "Life Skills and Ethics",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester VII",
+          "credits": 13,
+          "items": [
+            {
+              "id": "CSC401",
+              "title": "Operating Systems",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSC311"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC401L",
+              "title": "Operating Systems Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSC311"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MAT301",
+              "title": "Numerical Methods",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["MAT203"],
+              "type": "math",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MinorIII",
+              "title": "Minor Course III",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "MajorII",
+              "title": "Major Course II",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester VIII",
+          "credits": 12,
+          "items": [
+            {
+              "id": "CSC405",
+              "title": "Computer Networks",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSC401"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC455",
+              "title": "Software Engineering",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSC306"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC411",
+              "title": "Theory of Computation",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSC301"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MinorIV",
+              "title": "Minor Course IV",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester IX",
+          "credits": 13,
+          "items": [
+            {
+              "id": "CSC413",
+              "title": "Artificial Intelligence",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSC305"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC430",
+              "title": "Compiler Design",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSC411"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC430L",
+              "title": "Compiler Design Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSC411"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MajorIII",
+              "title": "Major Course III",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "MinorV",
+              "title": "Minor Course V",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester X",
+          "credits": 10,
+          "items": [
+            {
+              "id": "CSC317",
+              "title": "Senior Project",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CSC455"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC317L",
+              "title": "Senior Project Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CSC455"],
+              "type": "software",
+              "isPlaceholder": false
+            },
+            {
+              "id": "InternshipMajorV",
+              "title": "Internship / Major Course V",
+              "credit": 6,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "code": "CEN",
+      "name": "Computer Engineering",
+      "roadmap": [
+        {
+          "semester": "Semester I",
+          "credits": 14,
+          "items": [
+            {
+              "id": "MAT104",
+              "title": "Calculus & Analytical Geometry",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "PHY101",
+              "title": "University Physics I",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "PHY101L",
+              "title": "University Physics I Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "ENG101",
+              "title": "English Composition",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC101",
+              "title": "Introduction to Computer Science",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CSC101L",
+              "title": "Introduction to Computer Science Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester II",
+          "credits": 13,
+          "items": [
+            {
+              "id": "ENG102",
+              "title": "English Communication Skills",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["ENG101"],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "PHY102",
+              "title": "University Physics II",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["PHY101"],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "PHY102L",
+              "title": "University Physics II Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["PHY101L"],
+              "type": "foundation",
+              "isPlaceholder": false
+            },
+            {
+              "id": "HS1",
+              "title": "Humanities/Social Science Elective I",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": true
+            },
+            {
+              "id": "CEN201",
+              "title": "Engineering Mechanics",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester III",
+          "credits": 14,
+          "items": [
+            {
+              "id": "CEN104",
+              "title": "Civil Engineering Materials",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN104L",
+              "title": "Civil Engineering Materials Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MAT212",
+              "title": "Probability & Statistics",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["MAT104"],
+              "type": "math",
+              "isPlaceholder": false
+            },
+            {
+              "id": "HS2",
+              "title": "Humanities/Social Science Elective II",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": true
+            },
+            {
+              "id": "CEN203",
+              "title": "Surveying",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN203L",
+              "title": "Surveying Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester IV",
+          "credits": 13,
+          "items": [
+            {
+              "id": "CEN204",
+              "title": "Mechanics of Solids",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CEN201"],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN204L",
+              "title": "Mechanics of Solids Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CEN201"],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MAT203",
+              "title": "Linear Algebra",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "math",
+              "isPlaceholder": false
+            },
+            {
+              "id": "HS3",
+              "title": "Humanities/Social Science Elective III",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": true
+            },
+            {
+              "id": "ENG105",
+              "title": "Business English",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["ENG102"],
+              "type": "foundation",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester V",
+          "credits": 13,
+          "items": [
+            {
+              "id": "CEN210",
+              "title": "Fluid Mechanics",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN210L",
+              "title": "Fluid Mechanics Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN311",
+              "title": "Structural Analysis",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CEN204"],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MinorI",
+              "title": "Minor Course I",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "HS4",
+              "title": "Humanities/Social Science Elective IV",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester VI",
+          "credits": 18,
+          "items": [
+            {
+              "id": "CEN306",
+              "title": "Reinforced Concrete Design",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CEN311"],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN306L",
+              "title": "Reinforced Concrete Design Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CEN311"],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN305",
+              "title": "Soil Mechanics",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN305L",
+              "title": "Soil Mechanics Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN212",
+              "title": "Hydraulics",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CEN210"],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN212L",
+              "title": "Hydraulics Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CEN210L"],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MinorII",
+              "title": "Minor Course II",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "LFE201",
+              "title": "Life Skills and Ethics",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "foundation",
+              "isPlaceholder": false
+            }
+          ]
+        },
+        {
+          "semester": "Semester VII",
+          "credits": 13,
+          "items": [
+            {
+              "id": "CEN401",
+              "title": "Foundation Engineering",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CEN305"],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN401L",
+              "title": "Foundation Engineering Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CEN305L"],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MAT301",
+              "title": "Numerical Methods",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["MAT203"],
+              "type": "math",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MinorIII",
+              "title": "Minor Course III",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "MajorI",
+              "title": "Major Course I",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester VIII",
+          "credits": 13,
+          "items": [
+            {
+              "id": "CEN310",
+              "title": "Steel Design",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": ["CEN311"],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN310L",
+              "title": "Steel Design Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": ["CEN311"],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN413",
+              "title": "Transportation Engineering",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MinorIV",
+              "title": "Minor Course IV",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "MajorII",
+              "title": "Major Course II",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester IX",
+          "credits": 14,
+          "items": [
+            {
+              "id": "CEN430",
+              "title": "Environmental Engineering",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN430L",
+              "title": "Environmental Engineering Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN317",
+              "title": "Construction Management",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "CEN317L",
+              "title": "Construction Management Lab",
+              "credit": 1,
+              "lab": true,
+              "prerequisites": [],
+              "type": "engineering",
+              "isPlaceholder": false
+            },
+            {
+              "id": "MinorV",
+              "title": "Minor Course V",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "MajorIII",
+              "title": "Major Course III",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            }
+          ]
+        },
+        {
+          "semester": "Semester X",
+          "credits": 9,
+          "items": [
+            {
+              "id": "SeniorProject",
+              "title": "Senior Project / Internship + Major V",
+              "credit": 6,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            },
+            {
+              "id": "MajorIV",
+              "title": "Major Course IV",
+              "credit": 3,
+              "lab": false,
+              "prerequisites": [],
+              "type": "specialization",
+              "isPlaceholder": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+
+
+}
