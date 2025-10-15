@@ -52,6 +52,15 @@ class MyApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
             onGenerateRoute: AppRoutes.generateRouteWithCustomTransitions,
+
+            // Global keyboard dismissal
+            builder: (context, child) {
+              return GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                behavior: HitTestBehavior.opaque,
+                child: child,
+              );
+            },
             home: Builder(
               builder: (context) {
                 return StreamBuilder<User?>(

@@ -1,5 +1,6 @@
-import 'package:campuswhisper/ui/pages/cgpa/cgpa_page.dart';
-import 'package:campuswhisper/ui/pages/course/course_page.dart';
+import 'package:campuswhisper/ui/pages/campus/campus_page.dart';
+import 'package:campuswhisper/ui/pages/study/study_page.dart';
+import 'package:campuswhisper/ui/pages/thread/thread_page.dart';
 import 'package:campuswhisper/ui/widgets/app_dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -22,16 +23,10 @@ class _NavigationPageState extends State<NavigationPage> {
       ),
     ),
 
-    const Center(
-      child: Text(
-        'Search Page',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
-    ),
+    const ThreadPage(),
+    const StudyPage(),
 
-    const CoursePage(),
-
-    const CgpaPage(),
+    const CampusPage(),
 
     const Center(
       child: Text(
@@ -74,12 +69,12 @@ class _NavigationPageState extends State<NavigationPage> {
           BottomNavigationBarItem(
             icon: Icon(Iconsax.book_outline),
             activeIcon: Icon(Iconsax.book_bold),
-            label: 'Course',
+            label: 'Study',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Iconsax.medal_outline),
-            activeIcon: Icon(Iconsax.medal_bold),
-            label: 'CGPA',
+            icon: Icon(Iconsax.building_outline),
+            activeIcon: Icon(Iconsax.building_bold),
+            label: 'Campus',
           ),
           BottomNavigationBarItem(
             icon: Icon(Iconsax.more_square_outline),

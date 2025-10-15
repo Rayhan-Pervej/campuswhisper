@@ -124,7 +124,7 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>> {
 
   void _showDropdownDialog() async {
     if (widget.enabled == false) return;
-
+    FocusManager.instance.primaryFocus?.unfocus();
     if (widget.onTap != null) {
       widget.onTap!();
     }
@@ -253,6 +253,8 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>> {
     setState(() {
       _isDialogOpen = false;
     });
+
+    FocusManager.instance.primaryFocus?.unfocus();
 
     if (result != null) {
       setState(() {

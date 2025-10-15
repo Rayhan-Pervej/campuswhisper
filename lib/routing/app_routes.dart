@@ -8,10 +8,11 @@ import 'package:campuswhisper/ui/pages/Home/home_page.dart';
 import 'package:campuswhisper/ui/pages/auth/sign_up_page.dart';
 import 'package:campuswhisper/ui/pages/cgpa_calculator/cgpa_calculator_page.dart';
 import 'package:campuswhisper/ui/pages/course_roadmap/course_roadmap_page.dart';
+import 'package:campuswhisper/ui/pages/course_routine.dart/course_routine_page.dart';
 import 'package:campuswhisper/ui/pages/scholarship/scholarship_page.dart';
 import 'package:flutter/material.dart';
 import 'package:campuswhisper/ui/pages/auth/login_page.dart';
-import 'package:campuswhisper/ui/pages/cgpa/cgpa_page.dart';
+import 'package:campuswhisper/ui/pages/campus/campus_page.dart';
 import 'package:campuswhisper/ui/pages/navigation/navigation_page.dart';
 import 'package:provider/provider.dart';
 
@@ -21,7 +22,7 @@ class AppRoutes {
   static const String signUp = '/signup';
   static const String navigation = '/navigation';
   static const String home = '/home';
-  static const String cgpa = '/cgpa';
+  static const String cgpa = '/campus';
   static const String cgpaCalculator = '/cgpa_calculator';
   static const String scholarship = '/scholarship';
   static const String coursePlan = '/course_plan';
@@ -30,6 +31,14 @@ class AppRoutes {
   // Route generator
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case courseRoutine:
+        return MaterialPageRoute(
+          builder: (_) => ChangeNotifierProvider(
+            create: (_) => CourseRoadmapProvider(),
+            child: const CourseRoutinePage(),
+          ),
+          settings: settings,
+        );
       case coursePlan:
         return MaterialPageRoute(
           builder: (_) => ChangeNotifierProvider(
@@ -76,7 +85,7 @@ class AppRoutes {
 
       case cgpa:
         return MaterialPageRoute(
-          builder: (_) => const CgpaPage(),
+          builder: (_) => const CampusPage(),
           settings: settings,
         );
 
@@ -132,7 +141,7 @@ class AppRoutes {
 
       case cgpa:
         return CustomPageTransitions.createRoute(
-          page: const CgpaPage(),
+          page: const CampusPage(),
           transitionType: TransitionType.slideRightToLeft,
           settings: settings,
         );

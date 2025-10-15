@@ -6,8 +6,7 @@ class CardButton extends StatelessWidget {
   final IconData icon;
   final String title;
   final VoidCallback? onTap;
-  final double? width;
-  final double? height;
+
   final Color? backgroundColor;
   final Color? iconColor;
   final Color? textColor;
@@ -24,8 +23,7 @@ class CardButton extends StatelessWidget {
     required this.icon,
     required this.title,
     this.onTap,
-    this.width,
-    this.height,
+
     this.backgroundColor,
     this.iconColor,
     this.textColor,
@@ -45,8 +43,6 @@ class CardButton extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        height: height ?? AppDimensions.containerHeightSM,
-        width: width,
         padding: EdgeInsets.all(AppDimensions.space16),
         decoration: BoxDecoration(
           color: color.primary,
@@ -63,7 +59,7 @@ class CardButton extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Icon(icon, color: color.onPrimary, size: AppDimensions.size48),
+            Icon(icon, color: color.onPrimary, size: AppDimensions.size32),
             AppDimensions.h8,
             BuildText(
               text: title,
