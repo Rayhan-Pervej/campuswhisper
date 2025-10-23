@@ -1,4 +1,4 @@
-import 'package:campuswhisper/ui/pages/course_routine.dart/widgets/course_card.dart';
+import 'package:campuswhisper/ui/pages/course_routine/widgets/course_card.dart';
 import 'package:flutter/material.dart';
 
 

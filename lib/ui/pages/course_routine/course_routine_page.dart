@@ -1,5 +1,5 @@
-import 'package:campuswhisper/ui/pages/course_routine.dart/widgets/add_course_dialog.dart';
-import 'package:campuswhisper/ui/pages/course_routine.dart/widgets/semseter_card.dart';
+import 'package:campuswhisper/ui/pages/course_routine/widgets/add_course_dialog.dart';
+import 'package:campuswhisper/ui/pages/course_routine/widgets/semseter_card.dart';
 import 'package:campuswhisper/ui/widgets/app_dimensions.dart';
 import 'package:campuswhisper/ui/widgets/custom_file_input.dart';
 import 'package:campuswhisper/ui/widgets/custom_input.dart';

@@ -41,7 +41,7 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
       children: [
         AppBar(
           titleSpacing: 0,
-          backgroundColor: colorScheme.primaryContainer ,
+          backgroundColor: colorScheme.surface,
           title:
               titleWidget ??
               BuildText(text: title, fontSize: 16, fontWeight: FontWeight.bold),

@@ -29,7 +29,7 @@ class CampusPage extends StatelessWidget {
                         icon: Iconsax.calendar_1_outline,
                         title: 'Events',
                         onTap: () {
-                          Navigator.pushNamed(context, '/course_routine');
+                          Navigator.pushNamed(context, '/events_page');
                         },
                       ),
                     ),

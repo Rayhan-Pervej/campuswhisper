@@ -172,6 +172,7 @@ class _ThreadPageState extends State<ThreadPage> {
           },
 
           backgroundColor: colorScheme.primaryContainer,
+
           child: Icon(
             Iconsax.add_outline,
             color: colorScheme.primary,

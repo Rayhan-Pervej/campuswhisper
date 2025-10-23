@@ -8,7 +8,8 @@ import 'package:campuswhisper/ui/pages/Home/home_page.dart';
 import 'package:campuswhisper/ui/pages/auth/sign_up_page.dart';
 import 'package:campuswhisper/ui/pages/cgpa_calculator/cgpa_calculator_page.dart';
 import 'package:campuswhisper/ui/pages/course_roadmap/course_roadmap_page.dart';
-import 'package:campuswhisper/ui/pages/course_routine.dart/course_routine_page.dart';
+import 'package:campuswhisper/ui/pages/course_routine/course_routine_page.dart';
+import 'package:campuswhisper/ui/pages/events/events_page.dart';
 import 'package:campuswhisper/ui/pages/scholarship/scholarship_page.dart';
 import 'package:flutter/material.dart';
 import 'package:campuswhisper/ui/pages/auth/login_page.dart';
@@ -27,10 +28,19 @@ class AppRoutes {
   static const String scholarship = '/scholarship';
   static const String coursePlan = '/course_plan';
   static const String courseRoutine = '/course_routine';
+  static const String eventsPage = '/events_page';
 
   // Route generator
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case eventsPage:
+        return MaterialPageRoute(
+          builder: (_) => ChangeNotifierProvider(
+            create: (_) => CourseRoadmapProvider(),
+            child: const EventsPage(),
+          ),
+          settings: settings,
+        );
       case courseRoutine:
         return MaterialPageRoute(
           builder: (_) => ChangeNotifierProvider(

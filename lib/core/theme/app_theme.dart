@@ -9,7 +9,7 @@ class AppTheme {
       onSecondary: Colors.white, // Text/icons on secondary
       primaryContainer: Color(0xFFF3F4F6), // Light off-white background
       secondaryContainer: Color(0xFFFF6F61),
-      surface: Color(0xFFEDEDED), // Slightly darker surface
+      surface: Colors.white, // Slightly darker surface
       onSurface: Color(0xFF2C2C2C), // Dark grey text
       error: Color(0xFFD32F2F), // Strong red
       onError: Colors.white,
@@ -17,6 +17,10 @@ class AppTheme {
     textTheme: ThemeData.light().textTheme.apply(
       bodyColor: Color(0xFF2C2C2C), // Consistent dark text
       displayColor: Color(0xFF2C2C2C),
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      // Light blue shadow for dark theme
+      elevation: 0,
     ),
   );
 
@@ -28,7 +32,7 @@ class AppTheme {
       onSecondary: Colors.black, // For contrast on lighter coral
       primaryContainer: Color(0xFF1E1E1E), // Dark background container
       secondaryContainer: Color(0xFFFF6F61),
-      surface: Color(0xFF2C2C2C), // Slightly lighter surface (cards, sheets)
+      surface: Color(0xFF121212), // Slightly lighter surface (cards, sheets)
       onSurface: Color(0xFFE0E0E0), // Light grey text
       error: Color(0xFFEF5350), // Softer red for dark mode
       onError: Colors.black,
@@ -36,6 +40,10 @@ class AppTheme {
     textTheme: ThemeData.dark().textTheme.apply(
       bodyColor: Color(0xFFE0E0E0), // Light text for dark background
       displayColor: Color(0xFFE0E0E0),
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      // Light blue shadow for dark theme
+      elevation: 0,
     ),
   );
 }
