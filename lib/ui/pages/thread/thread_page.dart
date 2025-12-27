@@ -121,7 +121,6 @@ class _ThreadPageState extends State<ThreadPage> {
                 },
               ),
             ),
-            AppDimensions.h16,
 
             ..._filteredThreads.map((thread) {
               return ThreadCard(
@@ -145,41 +144,41 @@ class _ThreadPageState extends State<ThreadPage> {
                 },
               );
             }),
-            AppDimensions.h16,
+            AppDimensions.h12,
           ],
         ),
       ),
-      floatingActionButton: SizedBox(
-        height: AppDimensions.space40 * 1.5,
-        width: AppDimensions.space40 * 1.5,
-        child: FloatingActionButton(
-          onPressed: () {
-            CustomBottomDialog.show(
-              context: context,
-              title: 'Create New Post',
-              child: AddPost(
-                tags: _tags,
-                onPostCreated: (newPost) {
-                  setState(() {
-                    _allThreads.insert(0, newPost);
-                  });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Post created successfully!')),
-                  );
-                },
-              ),
-            );
-          },
+      // floatingActionButton: SizedBox(
+      //   height: AppDimensions.space40 * 1.5,
+      //   width: AppDimensions.space40 * 1.5,
+      //   child: FloatingActionButton(
+      //     onPressed: () {
+      //       CustomBottomDialog.show(
+      //         context: context,
+      //         title: 'Create New Post',
+      //         child: AddPost(
+      //           tags: _tags,
+      //           onPostCreated: (newPost) {
+      //             setState(() {
+      //               _allThreads.insert(0, newPost);
+      //             });
+      //             ScaffoldMessenger.of(context).showSnackBar(
+      //               const SnackBar(content: Text('Post created successfully!')),
+      //             );
+      //           },
+      //         ),
+      //       );
+      //     },
 
-          backgroundColor: colorScheme.primaryContainer,
+      //     backgroundColor: colorScheme.primaryContainer,
 
-          child: Icon(
-            Iconsax.add_outline,
-            color: colorScheme.primary,
-            size: AppDimensions.space40,
-          ),
-        ),
-      ),
+      //     child: Icon(
+      //       Iconsax.add_outline,
+      //       color: colorScheme.primary,
+      //       size: AppDimensions.space40,
+      //     ),
+      //   ),
+      // ),
     );
   }
 }

@@ -49,10 +49,7 @@ class ThreadCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Card(
-      margin: EdgeInsets.symmetric(
-        horizontal: AppDimensions.horizontalPadding,
-        vertical: AppDimensions.space8,
-      ),
+      margin: EdgeInsets.symmetric(vertical: AppDimensions.space2),
       elevation: AppDimensions.elevation1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppDimensions.radius12),

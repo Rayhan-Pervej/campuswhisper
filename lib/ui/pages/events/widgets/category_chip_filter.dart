@@ -1,33 +1,33 @@
 import 'package:flutter/material.dart';
 import '../../../widgets/app_dimensions.dart';
 
-class TagChipFilter extends StatefulWidget {
-  final List<String> tags;
-  final String? selectedTag;
-  final Function(String?) onTagSelected;
+class CategoryChipFilter extends StatefulWidget {
+  final List<String> categories;
+  final String? selectedCategory;
+  final Function(String?) onCategorySelected;
 
-  const TagChipFilter({
+  const CategoryChipFilter({
     super.key,
-    required this.tags,
-    this.selectedTag,
-    required this.onTagSelected,
+    required this.categories,
+    this.selectedCategory,
+    required this.onCategorySelected,
   });
 
   @override
-  State<TagChipFilter> createState() => _TagChipFilterState();
+  State<CategoryChipFilter> createState() => _CategoryChipFilterState();
 }
 
-class _TagChipFilterState extends State<TagChipFilter> {
+class _CategoryChipFilterState extends State<CategoryChipFilter> {
   final ScrollController _scrollController = ScrollController();
   final Map<String, GlobalKey> _chipKeys = {};
 
   @override
   void initState() {
     super.initState();
-    // Create keys for each tag including "All"
+    // Create keys for each category including "All"
     _chipKeys['All'] = GlobalKey();
-    for (var tag in widget.tags) {
-      _chipKeys[tag] = GlobalKey();
+    for (var category in widget.categories) {
+      _chipKeys[category] = GlobalKey();
     }
   }
 
@@ -37,8 +37,8 @@ class _TagChipFilterState extends State<TagChipFilter> {
     super.dispose();
   }
 
-  void _scrollToChip(String tag) {
-    final key = _chipKeys[tag];
+  void _scrollToChip(String category) {
+    final key = _chipKeys[category];
     if (key?.currentContext != null) {
       final RenderBox renderBox =
           key!.currentContext!.findRenderObject() as RenderBox;
@@ -92,10 +92,10 @@ class _TagChipFilterState extends State<TagChipFilter> {
             // "All" chip
             _FilterChip(
               key: _chipKeys['All'],
-              label: 'All',
-              isSelected: widget.selectedTag == null,
+              label: 'All Events',
+              isSelected: widget.selectedCategory == null,
               onTap: () {
-                widget.onTagSelected(null);
+                widget.onCategorySelected(null);
                 Future.delayed(const Duration(milliseconds: 50), () {
                   _scrollToChip('All');
                 });
@@ -103,19 +103,19 @@ class _TagChipFilterState extends State<TagChipFilter> {
             ),
             SizedBox(width: AppDimensions.space8),
 
-            // Tag chips
-            ...widget.tags.map((tag) {
-              final isSelected = widget.selectedTag == tag;
+            // Category chips
+            ...widget.categories.map((category) {
+              final isSelected = widget.selectedCategory == category;
               return Padding(
                 padding: EdgeInsets.only(right: AppDimensions.space8),
                 child: _FilterChip(
-                  key: _chipKeys[tag],
-                  label: tag,
+                  key: _chipKeys[category],
+                  label: category,
                   isSelected: isSelected,
                   onTap: () {
-                    widget.onTagSelected(tag);
+                    widget.onCategorySelected(category);
                     Future.delayed(const Duration(milliseconds: 50), () {
-                      _scrollToChip(tag);
+                      _scrollToChip(category);
                     });
                   },
                 ),
