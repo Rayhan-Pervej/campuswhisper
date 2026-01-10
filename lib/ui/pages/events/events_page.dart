@@ -1,4 +1,4 @@
-import 'package:campuswhisper/ui/widgets/app_dimensions.dart';
+import 'package:campuswhisper/core/theme/app_dimensions.dart';
 import 'package:campuswhisper/ui/widgets/default_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';

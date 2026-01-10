@@ -1,33 +1,33 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_dimensions.dart';
 
-class CategoryChipFilter extends StatefulWidget {
-  final List<String> categories;
-  final String? selectedCategory;
-  final Function(String?) onCategorySelected;
+class StatusChipFilter extends StatefulWidget {
+  final List<String> statuses;
+  final String? selectedStatus;
+  final Function(String?) onStatusSelected;
 
-  const CategoryChipFilter({
+  const StatusChipFilter({
     super.key,
-    required this.categories,
-    this.selectedCategory,
-    required this.onCategorySelected,
+    required this.statuses,
+    this.selectedStatus,
+    required this.onStatusSelected,
   });
 
   @override
-  State<CategoryChipFilter> createState() => _CategoryChipFilterState();
+  State<StatusChipFilter> createState() => _StatusChipFilterState();
 }
 
-class _CategoryChipFilterState extends State<CategoryChipFilter> {
+class _StatusChipFilterState extends State<StatusChipFilter> {
   final ScrollController _scrollController = ScrollController();
   final Map<String, GlobalKey> _chipKeys = {};
 
   @override
   void initState() {
     super.initState();
-    // Create keys for each category including "All"
+    // Create keys for each status including "All"
     _chipKeys['All'] = GlobalKey();
-    for (var category in widget.categories) {
-      _chipKeys[category] = GlobalKey();
+    for (var status in widget.statuses) {
+      _chipKeys[status] = GlobalKey();
     }
   }
 
@@ -37,8 +37,8 @@ class _CategoryChipFilterState extends State<CategoryChipFilter> {
     super.dispose();
   }
 
-  void _scrollToChip(String category) {
-    final key = _chipKeys[category];
+  void _scrollToChip(String status) {
+    final key = _chipKeys[status];
     if (key?.currentContext != null) {
       final RenderBox renderBox =
           key!.currentContext!.findRenderObject() as RenderBox;
@@ -53,17 +53,17 @@ class _CategoryChipFilterState extends State<CategoryChipFilter> {
       final chipLeftEdge = position.dx;
       final chipRightEdge = chipLeftEdge + chipWidth;
 
-      // Calculate target scroll position with more aggressive scrolling
+      // Calculate target scroll position
       double? targetScroll;
 
       if (chipRightEdge > scrollViewWidth) {
-        // Chip is cut off on the right, scroll right more aggressively
+        // Chip is cut off on the right
         targetScroll =
             currentScroll +
             (chipRightEdge - scrollViewWidth) +
             AppDimensions.space40 * 2;
       } else if (chipLeftEdge < 0) {
-        // Chip is cut off on the left, scroll left more aggressively
+        // Chip is cut off on the left
         targetScroll = currentScroll + chipLeftEdge - AppDimensions.space40 * 2;
       }
 
@@ -92,10 +92,10 @@ class _CategoryChipFilterState extends State<CategoryChipFilter> {
             // "All" chip
             _FilterChip(
               key: _chipKeys['All'],
-              label: 'All Events',
-              isSelected: widget.selectedCategory == null,
+              label: 'All Items',
+              isSelected: widget.selectedStatus == null,
               onTap: () {
-                widget.onCategorySelected(null);
+                widget.onStatusSelected(null);
                 Future.delayed(const Duration(milliseconds: 50), () {
                   _scrollToChip('All');
                 });
@@ -103,19 +103,19 @@ class _CategoryChipFilterState extends State<CategoryChipFilter> {
             ),
             SizedBox(width: AppDimensions.space8),
 
-            // Category chips
-            ...widget.categories.map((category) {
-              final isSelected = widget.selectedCategory == category;
+            // Status chips
+            ...widget.statuses.map((status) {
+              final isSelected = widget.selectedStatus == status;
               return Padding(
                 padding: EdgeInsets.only(right: AppDimensions.space8),
                 child: _FilterChip(
-                  key: _chipKeys[category],
-                  label: category,
+                  key: _chipKeys[status],
+                  label: status,
                   isSelected: isSelected,
                   onTap: () {
-                    widget.onCategorySelected(category);
+                    widget.onStatusSelected(status);
                     Future.delayed(const Duration(milliseconds: 50), () {
-                      _scrollToChip(category);
+                      _scrollToChip(status);
                     });
                   },
                 ),
@@ -145,6 +145,16 @@ class _FilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isLost = label == 'Lost';
+    final isFound = label == 'Found';
+
+    // Set color based on status
+    Color chipColor = colorScheme.primary;
+    if (isLost) {
+      chipColor = colorScheme.error;
+    } else if (isFound) {
+      chipColor = colorScheme.primary;
+    }
 
     return GestureDetector(
       onTap: onTap,
@@ -155,18 +165,18 @@ class _FilterChip extends StatelessWidget {
           vertical: AppDimensions.space8,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primary : colorScheme.surface,
+          color: isSelected ? chipColor : colorScheme.surface,
           borderRadius: BorderRadius.circular(AppDimensions.radius16),
           border: Border.all(
             color: isSelected
-                ? colorScheme.primary
-                : colorScheme.onSurface.withOpacity(0.3),
+                ? chipColor
+                : colorScheme.onSurface.withValues(alpha: 0.3),
             width: 1.5,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: colorScheme.primary.withOpacity(0.3),
+                    color: chipColor.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),

@@ -1,5 +1,5 @@
 import 'package:campuswhisper/core/constants/build_text.dart';
-import 'package:campuswhisper/ui/widgets/app_dimensions.dart';
+import 'package:campuswhisper/core/theme/app_dimensions.dart';
 import 'package:flutter/material.dart';
 
 class CardButton extends StatelessWidget {

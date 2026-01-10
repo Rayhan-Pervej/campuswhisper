@@ -7,9 +7,11 @@ import 'package:campuswhisper/routing/custom_transitions.dart';
 import 'package:campuswhisper/ui/pages/Home/home_page.dart';
 import 'package:campuswhisper/ui/pages/auth/sign_up_page.dart';
 import 'package:campuswhisper/ui/pages/cgpa_calculator/cgpa_calculator_page.dart';
+import 'package:campuswhisper/ui/pages/competitions/competitions_page.dart';
 import 'package:campuswhisper/ui/pages/course_roadmap/course_roadmap_page.dart';
 import 'package:campuswhisper/ui/pages/course_routine/course_routine_page.dart';
 import 'package:campuswhisper/ui/pages/events/events_page.dart';
+import 'package:campuswhisper/ui/pages/lost_and_found/lost_and_found_page.dart';
 import 'package:campuswhisper/ui/pages/scholarship/scholarship_page.dart';
 import 'package:flutter/material.dart';
 import 'package:campuswhisper/ui/pages/auth/login_page.dart';
@@ -29,10 +31,27 @@ class AppRoutes {
   static const String coursePlan = '/course_plan';
   static const String courseRoutine = '/course_routine';
   static const String eventsPage = '/events_page';
+  static const String lostAndFoundPage = '/lost_and_found_page';
+  static const String competitionsPage = '/competitions_page';
 
   // Route generator
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case competitionsPage:
+        return MaterialPageRoute(
+          builder: (_) => const CompetitionsPage(),
+          settings: settings,
+        );
+
+      case lostAndFoundPage:
+        return MaterialPageRoute(
+          builder: (_) => ChangeNotifierProvider(
+            create: (_) => CourseRoadmapProvider(),
+            child: const LostAndFoundPage(),
+          ),
+          settings: settings,
+        );
+
       case eventsPage:
         return MaterialPageRoute(
           builder: (_) => ChangeNotifierProvider(

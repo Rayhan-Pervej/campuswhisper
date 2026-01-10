@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:campuswhisper/core/constants/build_text.dart';
 import 'package:campuswhisper/models/course_input_model.dart';
 import 'package:campuswhisper/providers/cgpa_calculator_provider.dart';
-import 'package:campuswhisper/ui/widgets/app_dimensions.dart';
+import 'package:campuswhisper/core/theme/app_dimensions.dart';
 import 'package:campuswhisper/ui/widgets/custom_dropdown.dart';
 import 'package:campuswhisper/ui/widgets/custom_file_input.dart';
 import 'package:campuswhisper/ui/widgets/custom_input.dart';

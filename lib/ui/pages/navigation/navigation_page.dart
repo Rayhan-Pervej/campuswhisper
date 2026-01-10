@@ -1,7 +1,7 @@
 import 'package:campuswhisper/ui/pages/campus/campus_page.dart';
 import 'package:campuswhisper/ui/pages/study/study_page.dart';
 import 'package:campuswhisper/ui/pages/thread/thread_page.dart';
-import 'package:campuswhisper/ui/widgets/app_dimensions.dart';
+import 'package:campuswhisper/core/theme/app_dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 

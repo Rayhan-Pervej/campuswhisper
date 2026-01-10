@@ -1,4 +1,4 @@
-import 'package:campuswhisper/ui/widgets/app_dimensions.dart';
+import 'package:campuswhisper/core/theme/app_dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
@@ -39,7 +39,7 @@ class CampusPage extends StatelessWidget {
                         icon: Iconsax.box_search_outline,
                         title: 'Lost & Found',
                         onTap: () {
-                          Navigator.pushNamed(context, '/course_plan');
+                          Navigator.pushNamed(context, '/lost_and_found_page');
                         },
                       ),
                     ),
@@ -63,7 +63,7 @@ class CampusPage extends StatelessWidget {
                         icon: Iconsax.cup_outline,
                         title: 'Competitions',
                         onTap: () {
-                          Navigator.pushNamed(context, '/course_plan');
+                          Navigator.pushNamed(context, '/competitions_page');
                         },
                       ),
                     ),

@@ -1,0 +1,360 @@
+================================================================================
+CAMPUSWHISPER - DEVELOPMENT INSTRUCTIONS & GUIDELINES
+================================================================================
+
+PROJECT OVERVIEW:
+A Flutter-based campus social application with features like Lost & Found,
+Events, Course Routine, and Campus pages.
+
+================================================================================
+THEME & STYLING GUIDELINES
+================================================================================
+
+1. COLOR SCHEME (lib/core/theme/app_theme.dart):
+   - Primary: Color(0xFF3F51B5) - Vibrant Indigo
+   - Secondary: Color(0xFFFF6F61) - Coral/Salmon
+   - Error: Color(0xFFD32F2F) - Strong red (light theme)
+   - Surface: Colors.white (light theme)
+   - On Surface: Color(0xFF2C2C2C) - Dark grey text
+
+   Always use: Theme.of(context).colorScheme.primary (etc.)
+   Never hardcode colors!
+
+2. DIMENSIONS (lib/core/theme/app_dimensions.dart):
+   - This is a RESPONSIVE system - values scale with screen size
+   - ALWAYS use AppDimensions for ALL spacing, sizing, and dimensions
+
+   Common usages:
+   - Spacing: AppDimensions.space4, space8, space12, space16, space24, space32
+   - Heights: AppDimensions.h4, h8, h12, h16, h24, h32
+   - Widths: AppDimensions.w4, w8, w12, w16, w24, w32
+   - Padding: AppDimensions.horizontalPadding, verticalPadding
+   - Font sizes: AppDimensions.titleFontSize, bodyFontSize, captionFontSize
+   - Icon sizes: AppDimensions.smallIconSize, mediumIconSize, largeIconSize
+   - Radius: AppDimensions.radius4, radius8, radius12, radius16
+   - Elevation: AppDimensions.elevation1, elevation2, elevation4
+
+   NEVER use hardcoded values like:
+   - SizedBox(height: 16) ❌
+   - padding: EdgeInsets.all(12) ❌
+   - fontSize: 14 ❌
+
+   ALWAYS use:
+   - AppDimensions.h16 ✅
+   - padding: EdgeInsets.all(AppDimensions.space12) ✅
+   - fontSize: AppDimensions.bodyFontSize ✅
+
+3. OPACITY/ALPHA VALUES:
+   Use .withAlpha() instead of deprecated .withOpacity()
+
+   Standard alpha values:
+   - 60% opacity = withAlpha(153)
+   - 30% opacity = withAlpha(77)
+   - 20% opacity = withAlpha(51)
+   - 10% opacity = withAlpha(26)
+
+   Example:
+   - colorScheme.onSurface.withAlpha(153) // 60% opacity
+
+4. INPUT FIELD STYLING (Reference: lib/ui/widgets/custom_input.dart):
+   Clean, minimalist style for all input fields:
+
+   - Background: colorScheme.surface (NOT primaryContainer)
+   - Border: colorScheme.onSurface.withAlpha(60) - subtle gray
+   - Border width: 1.5
+   - Border radius: 12
+   - Focused border: colorScheme.primary with width 2
+   - Error border: colorScheme.error with width 1.5
+   - Hint text: colorScheme.onSurface.withAlpha(153) - 60% opacity
+   - Icons: colorScheme.onSurface.withAlpha(153)
+
+   This creates a clean white/surface background with subtle gray borders.
+
+================================================================================
+ARCHITECTURE & FILE STRUCTURE
+================================================================================
+
+1. FOLDER ORGANIZATION:
+   lib/
+   ├── core/
+   │   ├── theme/
+   │   │   ├── app_theme.dart         (Color schemes)
+   │   │   └── app_dimensions.dart    (Responsive sizing)
+   │   └── constants/
+   ├── models/                         (Data models)
+   ├── providers/                      (State management - NOT used for UI-only work)
+   ├── routing/                        (Navigation)
+   ├── ui/
+   │   ├── pages/
+   │   │   ├── events/
+   │   │   │   ├── events_page.dart
+   │   │   │   └── widgets/           (Page-specific widgets)
+   │   │   │       ├── event_card.dart
+   │   │   │       ├── category_chip_filter.dart
+   │   │   │       └── add_event.dart
+   │   │   ├── lost_and_found/
+   │   │   │   ├── lost_and_found_page.dart
+   │   │   │   └── widgets/
+   │   │   │       ├── lost_and_found_item_card.dart
+   │   │   │       ├── status_chip_filter.dart
+   │   │   │       └── add_lost_found_item.dart
+   │   │   └── course_routine/
+   │   │       └── widgets/           (Reusable core widgets)
+   │   └── widgets/                   (Global reusable widgets)
+   │       ├── default_appbar.dart
+   │       ├── search_appbar.dart     (Expanding search AppBar)
+   │       ├── custom_input.dart
+   │       ├── custom_dropdown.dart
+   │       ├── default_button.dart
+   │       └── custom_bottom_dialog.dart
+
+2. WIDGET PLACEMENT RULES:
+   - Page-specific widgets → lib/ui/pages/[page_name]/widgets/
+   - Widgets used in 2+ places → lib/ui/widgets/
+   - Keep related components together
+
+================================================================================
+CODING PATTERNS & BEST PRACTICES
+================================================================================
+
+1. PAGE STRUCTURE (Reference: events_page.dart, lost_and_found_page.dart):
+
+   class XPage extends StatefulWidget {
+     const XPage({super.key});
+
+     @override
+     State<XPage> createState() => _XPageState();
+   }
+
+   class _XPageState extends State<XPage> {
+     // State variables
+     String? _selectedFilter;
+     bool _isSearching = false;
+
+     // Sample data for UI demonstration
+     final List<Map<String, dynamic>> _allItems = [...];
+
+     // Filtered/computed data
+     List<Map<String, dynamic>> get _filteredItems {
+       // Filtering logic
+     }
+
+     @override
+     Widget build(BuildContext context) {
+       final theme = Theme.of(context);
+       final colorScheme = theme.colorScheme;
+
+       return Scaffold(
+         appBar: ...,
+         body: ...,
+         floatingActionButton: ...,
+       );
+     }
+   }
+
+2. CARD WIDGETS:
+   Always include:
+   - Elevation using AppDimensions.elevation1 or elevation2
+   - Border radius using AppDimensions.radius12
+   - Consistent padding using AppDimensions.space16
+   - Theme-aware colors from colorScheme
+
+   Example:
+   Card(
+     margin: EdgeInsets.symmetric(
+       vertical: AppDimensions.space8,
+       horizontal: AppDimensions.horizontalPadding,
+     ),
+     elevation: AppDimensions.elevation2,
+     shape: RoundedRectangleBorder(
+       borderRadius: BorderRadius.circular(AppDimensions.radius12),
+     ),
+     child: Padding(
+       padding: EdgeInsets.all(AppDimensions.space16),
+       child: ...,
+     ),
+   )
+
+3. FILTER CHIPS PATTERN:
+   Horizontal scrolling chips with auto-scroll to selection
+   Reference: lib/ui/pages/events/widgets/category_chip_filter.dart
+
+   Features:
+   - Horizontal SingleChildScrollView
+   - ScrollController for auto-scroll
+   - GlobalKey for each chip
+   - AnimatedContainer for smooth transitions
+   - Selected state styling
+
+4. SEARCH PATTERN (Modern 2025 UX):
+   Use SearchAppBar (lib/ui/widgets/search_appbar.dart)
+
+   Features:
+   - Expanding AppBar animation
+   - Title fades out, search field slides in
+   - Auto-focus on search activation
+   - Clear button when typing
+   - Clean minimal styling (matches custom_input.dart)
+
+   Implementation:
+   SearchAppBar(
+     title: 'Page Title',
+     isSearching: _isSearching,
+     searchQuery: _searchQuery,
+     onSearchToggle: () => setState(() => _isSearching = !_isSearching),
+     onSearchChanged: (query) => setState(() => _searchQuery = query),
+   )
+
+5. BOTTOM DIALOG PATTERN:
+   Use CustomBottomDialog.show() for forms
+
+   CustomBottomDialog.show(
+     context: context,
+     title: 'Dialog Title',
+     child: YourFormWidget(
+       onSubmit: (data) {
+         // Handle submission
+         Navigator.of(context).pop();
+       },
+     ),
+   );
+
+6. SAMPLE DATA STRUCTURE:
+   For UI development, use List<Map<String, dynamic>>:
+
+   final List<Map<String, dynamic>> _items = [
+     {
+       'itemName': 'Item Name',
+       'description': 'Description text',
+       'datePosted': DateTime.now(),
+       'category': 'Category',
+       'status': 'Status',
+       // ... other fields
+     },
+   ];
+
+================================================================================
+STATE MANAGEMENT
+================================================================================
+
+For UI-only work (current focus):
+- Use StatefulWidget with setState()
+- NO providers/state management needed yet
+- Keep state local to pages
+- Data flow happens later when integrating backend
+
+For future backend integration:
+- lib/providers/ folder is ready
+- Will implement proper state management then
+
+================================================================================
+ICONS
+================================================================================
+
+Using: icons_plus package (Iconsax icons)
+
+Common icons:
+- Search: Iconsax.search_normal_outline
+- Add: Iconsax.add_outline
+- Close: Iconsax.close_square_outline
+- Calendar: Iconsax.calendar_outline
+- Location: Iconsax.location_outline
+- Heart: Iconsax.heart_outline
+- Share: Iconsax.share_outline
+- Message: Iconsax.message_outline
+- Tick: Iconsax.tick_circle_outline
+- Clock: Iconsax.clock_outline
+- Trend: Iconsax.trend_up_outline
+
+Always use _outline variants for consistency.
+
+================================================================================
+COMPLETED FEATURES
+================================================================================
+
+1. LOST & FOUND PAGE:
+   ✅ Lost and Found item cards with:
+      - Status badges (Lost/Found)
+      - Poster information
+      - Item details (location, category)
+      - Contact and Mark Resolved buttons
+      - Resolved items section with reduced opacity
+   ✅ Status filter chips (Lost/Found/All)
+   ✅ Stats dashboard (Lost Items, Found Items, Resolved)
+   ✅ Expanding search in AppBar (modern UX pattern)
+   ✅ Category filters while searching
+   ✅ Real-time search filtering across name, description, location
+   ✅ Search results counter
+   ✅ Add new item dialog with category selection
+   ✅ Floating action button for adding items
+
+2. SEARCH FUNCTIONALITY:
+   ✅ Expanding AppBar search (SearchAppBar widget)
+   ✅ Clean minimal styling matching custom_input.dart
+   ✅ Auto-focus on activation
+   ✅ Clear button
+   ✅ Real-time filtering
+   ✅ Category-based refinement
+   ✅ Results counter with active filters display
+
+================================================================================
+REFERENCE PAGES
+================================================================================
+
+When creating new pages, reference these existing implementations:
+
+1. EVENTS PAGE (lib/ui/pages/events/events_page.dart):
+   - Category filtering
+   - Event cards with interaction buttons
+   - Add event dialog
+   - Stats display
+
+2. LOST & FOUND PAGE (lib/ui/pages/lost_and_found/lost_and_found_page.dart):
+   - Search integration
+   - Status filtering
+   - Multiple filter combinations
+   - Resolved/Active item separation
+
+3. CUSTOM INPUT (lib/ui/widgets/custom_input.dart):
+   - Clean input field styling
+   - Focus states
+   - Validation patterns
+
+================================================================================
+IMPORTANT REMINDERS
+================================================================================
+
+1. ALWAYS read existing files before modifying
+2. ALWAYS use AppDimensions for spacing/sizing
+3. ALWAYS use colorScheme for colors
+4. NEVER hardcode values
+5. Keep consistent with existing patterns
+6. Widgets should be reusable and well-organized
+7. Use descriptive variable names
+8. Follow the existing code style
+9. Test on different screen sizes (responsive design)
+10. Clean, minimal UI following custom_input.dart style
+
+================================================================================
+WORKFLOW
+================================================================================
+
+When starting new work:
+1. Read DEVELOPMENT_INSTRUCTIONS.txt (this file)
+2. Review relevant reference files
+3. Check theme files (app_theme.dart, app_dimensions.dart)
+4. Look at similar existing pages for patterns
+5. Plan widget structure before coding
+6. Use TodoWrite for tracking multi-step tasks
+7. Keep code organized in proper folders
+8. Test thoroughly before considering complete
+
+================================================================================
+CONTACT & NOTES
+================================================================================
+
+Project: CampusWhisper - Flutter Campus Social App
+Focus: UI Development (Backend integration comes later)
+Current Status: Lost & Found page complete with modern search UX
+
+Last Updated: 2025-12-30

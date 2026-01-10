@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
-import '../../../widgets/app_dimensions.dart';
+import '../../../../core/theme/app_dimensions.dart';
 
 class EventCard extends StatelessWidget {
   final String eventTitle;

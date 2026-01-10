@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'app_dimensions.dart';
+import '../../core/theme/app_dimensions.dart';
 
 /// Base shimmer wrapper with customizable colors
 class ShimmerWrapper extends StatelessWidget {

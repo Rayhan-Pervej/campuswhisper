@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../widgets/app_dimensions.dart';
+import '../../../../core/theme/app_dimensions.dart';
 
 class TagChipFilter extends StatefulWidget {
   final List<String> tags;

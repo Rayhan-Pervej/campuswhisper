@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../models/department_roadmap_model.dart';
 import '../../../providers/course_roadmap_provider.dart';
-import '../../widgets/app_dimensions.dart';
+import '../../../core/theme/app_dimensions.dart';
 import '../../widgets/custom_dropdown.dart';
 import '../../widgets/default_appbar.dart';
 

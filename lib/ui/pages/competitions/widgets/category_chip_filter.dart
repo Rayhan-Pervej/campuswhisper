@@ -24,7 +24,6 @@ class _CategoryChipFilterState extends State<CategoryChipFilter> {
   @override
   void initState() {
     super.initState();
-    // Create keys for each category including "All"
     _chipKeys['All'] = GlobalKey();
     for (var category in widget.categories) {
       _chipKeys[category] = GlobalKey();
@@ -45,25 +44,20 @@ class _CategoryChipFilterState extends State<CategoryChipFilter> {
       final position = renderBox.localToGlobal(Offset.zero);
       final chipWidth = renderBox.size.width;
 
-      // Get the scroll view's width
       final scrollViewWidth = _scrollController.position.viewportDimension;
       final currentScroll = _scrollController.offset;
 
-      // Calculate chip edges relative to viewport
       final chipLeftEdge = position.dx;
       final chipRightEdge = chipLeftEdge + chipWidth;
 
-      // Calculate target scroll position with more aggressive scrolling
       double? targetScroll;
 
       if (chipRightEdge > scrollViewWidth) {
-        // Chip is cut off on the right, scroll right more aggressively
         targetScroll =
             currentScroll +
             (chipRightEdge - scrollViewWidth) +
             AppDimensions.space40 * 2;
       } else if (chipLeftEdge < 0) {
-        // Chip is cut off on the left, scroll left more aggressively
         targetScroll = currentScroll + chipLeftEdge - AppDimensions.space40 * 2;
       }
 
@@ -92,7 +86,7 @@ class _CategoryChipFilterState extends State<CategoryChipFilter> {
             // "All" chip
             _FilterChip(
               key: _chipKeys['All'],
-              label: 'All Events',
+              label: 'All Categories',
               isSelected: widget.selectedCategory == null,
               onTap: () {
                 widget.onCategorySelected(null);
@@ -160,13 +154,13 @@ class _FilterChip extends StatelessWidget {
           border: Border.all(
             color: isSelected
                 ? colorScheme.primary
-                : colorScheme.onSurface.withOpacity(0.3),
+                : colorScheme.onSurface.withAlpha(77),
             width: 1.5,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: colorScheme.primary.withOpacity(0.3),
+                    color: colorScheme.primary.withAlpha(77),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),

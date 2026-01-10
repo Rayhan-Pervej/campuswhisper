@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:campuswhisper/ui/widgets/app_dimensions.dart';
+import 'package:campuswhisper/core/theme/app_dimensions.dart';
 
 import '../../../widgets/custom_dropdown.dart';
 import '../../../widgets/custom_input.dart';

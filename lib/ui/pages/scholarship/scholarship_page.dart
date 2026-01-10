@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/build_text.dart';
 import '../../../models/scholarship_result_model.dart';
 import '../../../providers/scholarship_provider.dart';
-import '../../widgets/app_dimensions.dart';
+import '../../../core/theme/app_dimensions.dart';
 import '../../widgets/custom_file_input.dart';
 
 class ScholarshipPage extends StatelessWidget {

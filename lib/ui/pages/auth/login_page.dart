@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/constants/build_text.dart';
 import '../../../providers/login_provider.dart';
-import '../../widgets/app_dimensions.dart';
+import '../../../core/theme/app_dimensions.dart';
 import '../../widgets/custom_input.dart';
 import '../../widgets/custom_password.dart';
 import '../../widgets/default_button.dart';
