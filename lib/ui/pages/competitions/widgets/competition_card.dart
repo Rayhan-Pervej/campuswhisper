@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 import '../../../../core/theme/app_dimensions.dart';
+import '../../../../routing/app_routes.dart';
 
 class CompetitionCard extends StatelessWidget {
   final String title;
@@ -147,22 +148,49 @@ class CompetitionCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final statusColor = getStatusColor(colorScheme);
 
-    return Card(
-      margin: EdgeInsets.symmetric(
-        vertical: AppDimensions.space8,
-        horizontal: AppDimensions.horizontalPadding,
-      ),
-      elevation: isFeatured ? AppDimensions.elevation2 : AppDimensions.elevation1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppDimensions.radius12),
-        side: isFeatured
-            ? BorderSide(
-                color: colorScheme.primary.withAlpha(128),
-                width: 2,
-              )
-            : BorderSide.none,
-      ),
-      child: Column(
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          AppRoutes.competitionDetail,
+          arguments: {
+            'competition': {
+              'title': title,
+              'organizer': organizer,
+              'description': description,
+              'registrationDeadline': registrationDeadline,
+              'eventDate': eventDate,
+              'duration': duration,
+              'location': location,
+              'category': category,
+              'status': status,
+              'prizePool': prizePool,
+              'participantCount': participantCount,
+              'teamSize': teamSize,
+              'imageUrl': imageUrl,
+              'organizerImageUrl': organizerImageUrl,
+              'isRegistered': isRegistered,
+            },
+          },
+        );
+      },
+      borderRadius: BorderRadius.circular(AppDimensions.radius12),
+      child: Card(
+        margin: EdgeInsets.symmetric(
+          vertical: AppDimensions.space8,
+          horizontal: AppDimensions.horizontalPadding,
+        ),
+        elevation: isFeatured ? AppDimensions.elevation2 : AppDimensions.elevation1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radius12),
+          side: isFeatured
+              ? BorderSide(
+                  color: colorScheme.primary.withAlpha(128),
+                  width: 2,
+                )
+              : BorderSide.none,
+        ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Featured badge
@@ -641,6 +669,7 @@ class CompetitionCard extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

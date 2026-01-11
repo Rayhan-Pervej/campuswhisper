@@ -143,16 +143,19 @@ class SemesterCard extends StatelessWidget {
                 ] else ...[
                   const SizedBox(height: 16),
                   ...courses.map((course) {
-                    final days = (course['days'] as List<dynamic>).join('-');
+                    final daysList = (course['days'] as List<dynamic>?) ?? [];
+                    final days = daysList.isNotEmpty ? daysList.join('-') : 'N/A';
                     return CourseCard(
-                      courseId: course['courseId'],
-                      section: course['section'],
-                      room: course['room'],
+                      courseId: course['courseId'] ?? course['courseCode'] ?? 'N/A',
+                      section: course['section'] ?? 'N/A',
+                      room: course['room'] ?? 'N/A',
                       days: days,
-                      time: '${course['startTime']} to ${course['endTime']}',
+                      time: '${course['startTime'] ?? 'N/A'} to ${course['endTime'] ?? 'N/A'}',
                       showDeleteIcon: isDeleteMode,
                       onDelete: () => onDeleteCourse(course['id']),
                       onEdit: () => onEditCourse(course['id']),
+                      courseData: course,
+                      semesterName: semester,
                     );
                   }).toList(),
                 ],

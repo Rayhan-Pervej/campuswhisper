@@ -1,0 +1,824 @@
+================================================================================
+LIB/UI/WIDGETS - FOLDER INSTRUCTIONS (GLOBAL WIDGETS)
+================================================================================
+
+FOLDER PURPOSE:
+Reusable widgets used across multiple pages throughout the app. These are NOT
+page-specific widgets. If a widget is used in only one page, it belongs in
+lib/ui/pages/[page]/widgets/ instead.
+
+EXISTING COMPLETE WIDGETS (DO NOT MODIFY):
+✅ card_button.dart
+✅ custom_bottom_dialog.dart
+✅ custom_dropdown.dart
+✅ custom_file_input.dart
+✅ custom_input.dart
+✅ custom_password.dart
+✅ custom_time_input.dart
+✅ default_appbar.dart
+✅ default_button.dart
+✅ faq_tile.dart
+✅ search_appbar.dart
+✅ shimmer.dart
+✅ show_circular.dart
+
+FILES TO CREATE (complete in order):
+1. [ ] empty_state.dart ⭐ CRITICAL
+2. [ ] error_widget.dart ⭐ CRITICAL
+3. [ ] confirmation_dialog.dart ⭐ CRITICAL
+4. [ ] user_avatar.dart ⭐ CRITICAL
+5. [ ] cached_image.dart ⭐ CRITICAL
+
+⚠️ CRITICAL RULES FOR THIS FOLDER:
+- ONLY create widgets that are used in 2+ different pages
+- ALWAYS use AppDimensions for spacing, fonts, sizes
+- ALWAYS use Theme.of(context).colorScheme for colors
+- Keep widgets simple and reusable
+- DO NOT add page-specific logic
+- Widgets must be self-contained and well-documented
+
+================================================================================
+1. EMPTY_STATE.DART ⭐ CRITICAL
+================================================================================
+
+PURPOSE: Display when there's no data (empty lists, no search results, etc.)
+
+DEPENDENCIES:
+✅ lib/core/theme/app_dimensions.dart
+✅ icons_plus package
+
+EXACT CODE TEMPLATE:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:campuswhisper/core/theme/app_dimensions.dart';
+import 'package:icons_plus/icons_plus.dart';
+
+class EmptyState extends StatelessWidget {
+  final IconData? icon;
+  final String message;
+  final String? subtitle;
+  final Widget? action;
+
+  const EmptyState({
+    super.key,
+    this.icon,
+    required this.message,
+    this.subtitle,
+    this.action,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(AppDimensions.space32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon ?? Iconsax.box_outline,
+              size: AppDimensions.largeIconSize * 2,
+              color: colorScheme.onSurface.withAlpha(77),
+            ),
+            SizedBox(height: AppDimensions.h24),
+            Text(
+              message,
+              style: TextStyle(
+                fontSize: AppDimensions.titleFontSize,
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface.withAlpha(153),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (subtitle != null) ...[
+              SizedBox(height: AppDimensions.h8),
+              Text(
+                subtitle!,
+                style: TextStyle(
+                  fontSize: AppDimensions.bodyFontSize,
+                  color: colorScheme.onSurface.withAlpha(128),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            if (action != null) ...[
+              SizedBox(height: AppDimensions.h24),
+              action!,
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File created at lib/ui/widgets/empty_state.dart
+[ ] Uses AppDimensions for all spacing and sizes
+[ ] Uses colorScheme for all colors
+[ ] Icon is optional (defaults to box icon)
+[ ] Supports optional subtitle
+[ ] Supports optional action button
+[ ] No syntax errors
+
+USAGE EXAMPLES:
+
+```dart
+// Simple empty state
+EmptyState(
+  message: 'No events found',
+)
+
+// With subtitle
+EmptyState(
+  message: 'No events found',
+  subtitle: 'Try adjusting your filters',
+)
+
+// With custom icon
+EmptyState(
+  icon: Iconsax.search_normal_outline,
+  message: 'No search results',
+  subtitle: 'Try different keywords',
+)
+
+// With action button
+EmptyState(
+  message: 'No events yet',
+  subtitle: 'Be the first to create one!',
+  action: ElevatedButton(
+    onPressed: () => _showCreateDialog(),
+    child: Text('Create Event'),
+  ),
+)
+
+// In a list view
+ListView.builder(
+  itemCount: items.isEmpty ? 1 : items.length,
+  itemBuilder: (context, index) {
+    if (items.isEmpty) {
+      return EmptyState(message: 'No items');
+    }
+    return ItemCard(item: items[index]);
+  },
+)
+```
+
+================================================================================
+2. ERROR_WIDGET.DART ⭐ CRITICAL
+================================================================================
+
+PURPOSE: Display error states with retry action
+
+DEPENDENCIES:
+✅ lib/core/theme/app_dimensions.dart
+✅ lib/core/constants/error_messages.dart
+✅ icons_plus package
+
+EXACT CODE TEMPLATE:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:campuswhisper/core/theme/app_dimensions.dart';
+import 'package:campuswhisper/core/constants/error_messages.dart';
+import 'package:icons_plus/icons_plus.dart';
+
+class ErrorStateWidget extends StatelessWidget {
+  final String? message;
+  final VoidCallback? onRetry;
+
+  const ErrorStateWidget({
+    super.key,
+    this.message,
+    this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(AppDimensions.space32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Iconsax.info_circle_outline,
+              size: AppDimensions.largeIconSize * 2,
+              color: colorScheme.error,
+            ),
+            SizedBox(height: AppDimensions.h24),
+            Text(
+              'Oops!',
+              style: TextStyle(
+                fontSize: AppDimensions.titleFontSize + 4,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            SizedBox(height: AppDimensions.h8),
+            Text(
+              message ?? ErrorMessages.somethingWentWrong,
+              style: TextStyle(
+                fontSize: AppDimensions.bodyFontSize,
+                color: colorScheme.onSurface.withAlpha(153),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (onRetry != null) ...[
+              SizedBox(height: AppDimensions.h24),
+              ElevatedButton.icon(
+                onPressed: onRetry,
+                icon: Icon(
+                  Iconsax.refresh_outline,
+                  size: AppDimensions.mediumIconSize,
+                ),
+                label: Text('Try Again'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppDimensions.space24,
+                    vertical: AppDimensions.space12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppDimensions.radius12),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File created at lib/ui/widgets/error_widget.dart
+[ ] Uses AppDimensions for all spacing and sizes
+[ ] Uses colorScheme for colors
+[ ] Uses ErrorMessages constants
+[ ] Supports optional retry callback
+[ ] No syntax errors
+[ ] Imports correct
+
+USAGE EXAMPLES:
+
+```dart
+// Simple error
+ErrorStateWidget()
+
+// With custom message
+ErrorStateWidget(
+  message: ErrorMessages.networkError,
+)
+
+// With retry action
+ErrorStateWidget(
+  message: ErrorMessages.loadFailed,
+  onRetry: () => _loadData(),
+)
+
+// In FutureBuilder
+FutureBuilder<List<Event>>(
+  future: _eventsFuture,
+  builder: (context, snapshot) {
+    if (snapshot.hasError) {
+      return ErrorStateWidget(
+        message: ErrorMessages.loadFailed,
+        onRetry: () => setState(() => _eventsFuture = loadEvents()),
+      );
+    }
+    if (!snapshot.hasData) {
+      return Center(child: CircularProgressIndicator());
+    }
+    return ListView(...);
+  },
+)
+```
+
+================================================================================
+3. CONFIRMATION_DIALOG.DART ⭐ CRITICAL
+================================================================================
+
+PURPOSE: Reusable confirmation dialog widget (alternative to DialogHelper)
+
+NOTE: This is optional since we already have DialogHelper.showConfirmation().
+However, having a widget version can be useful for custom styling.
+
+DEPENDENCIES:
+✅ lib/core/theme/app_dimensions.dart
+
+EXACT CODE TEMPLATE:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:campuswhisper/core/theme/app_dimensions.dart';
+
+class ConfirmationDialog extends StatelessWidget {
+  final String title;
+  final String message;
+  final String confirmText;
+  final String cancelText;
+  final VoidCallback onConfirm;
+  final VoidCallback? onCancel;
+  final Color? confirmColor;
+  final IconData? icon;
+
+  const ConfirmationDialog({
+    super.key,
+    required this.title,
+    required this.message,
+    this.confirmText = 'Confirm',
+    this.cancelText = 'Cancel',
+    required this.onConfirm,
+    this.onCancel,
+    this.confirmColor,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppDimensions.radius16),
+      ),
+      title: Row(
+        children: [
+          if (icon != null) ...[
+            Icon(
+              icon,
+              color: confirmColor ?? colorScheme.primary,
+              size: AppDimensions.mediumIconSize,
+            ),
+            SizedBox(width: AppDimensions.w12),
+          ],
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: AppDimensions.titleFontSize,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+      content: Text(
+        message,
+        style: TextStyle(
+          fontSize: AppDimensions.bodyFontSize,
+          color: colorScheme.onSurface.withAlpha(179),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            onCancel?.call();
+          },
+          child: Text(
+            cancelText,
+            style: TextStyle(
+              color: colorScheme.onSurface.withAlpha(153),
+            ),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context);
+            onConfirm();
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: confirmColor ?? colorScheme.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppDimensions.radius8),
+            ),
+          ),
+          child: Text(
+            confirmText,
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Helper static method to show dialog
+  static Future<void> show(
+    BuildContext context, {
+    required String title,
+    required String message,
+    required VoidCallback onConfirm,
+    String confirmText = 'Confirm',
+    String cancelText = 'Cancel',
+    Color? confirmColor,
+    IconData? icon,
+  }) {
+    return showDialog(
+      context: context,
+      builder: (context) => ConfirmationDialog(
+        title: title,
+        message: message,
+        onConfirm: onConfirm,
+        confirmText: confirmText,
+        cancelText: cancelText,
+        confirmColor: confirmColor,
+        icon: icon,
+      ),
+    );
+  }
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File created at lib/ui/widgets/confirmation_dialog.dart
+[ ] Uses AppDimensions
+[ ] Uses colorScheme
+[ ] Static show() helper method included
+[ ] No syntax errors
+
+USAGE:
+
+```dart
+// Using static method
+await ConfirmationDialog.show(
+  context,
+  title: 'Delete Event',
+  message: 'Are you sure you want to delete this event?',
+  confirmText: 'Delete',
+  cancelText: 'Cancel',
+  confirmColor: colorScheme.error,
+  icon: Icons.delete,
+  onConfirm: () {
+    // Delete event
+  },
+);
+
+// Using widget directly
+showDialog(
+  context: context,
+  builder: (context) => ConfirmationDialog(
+    title: 'Submit Form',
+    message: 'Are you sure?',
+    onConfirm: () => _submitForm(),
+  ),
+);
+```
+
+================================================================================
+4. USER_AVATAR.DART ⭐ CRITICAL
+================================================================================
+
+PURPOSE: Display user profile pictures with fallback
+
+DEPENDENCIES:
+✅ lib/core/theme/app_dimensions.dart
+✅ lib/core/constants/app_constants.dart
+
+EXACT CODE TEMPLATE:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:campuswhisper/core/theme/app_dimensions.dart';
+import 'package:campuswhisper/core/constants/app_constants.dart';
+
+class UserAvatar extends StatelessWidget {
+  final String? imageUrl;
+  final String? name;
+  final double? size;
+  final VoidCallback? onTap;
+
+  const UserAvatar({
+    super.key,
+    this.imageUrl,
+    this.name,
+    this.size,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final avatarSize = size ?? AppDimensions.largeIconSize;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: avatarSize,
+        height: avatarSize,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: colorScheme.primary.withAlpha(51),
+          border: Border.all(
+            color: colorScheme.primary.withAlpha(77),
+            width: 2,
+          ),
+        ),
+        child: ClipOval(
+          child: imageUrl != null && imageUrl!.isNotEmpty
+              ? Image.network(
+                  imageUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return _buildFallback(context, colorScheme, avatarSize);
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(colorScheme.primary),
+                      ),
+                    );
+                  },
+                )
+              : _buildFallback(context, colorScheme, avatarSize),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFallback(BuildContext context, ColorScheme colorScheme, double size) {
+    if (name != null && name!.isNotEmpty) {
+      final initials = _getInitials(name!);
+      return Container(
+        color: colorScheme.primary,
+        child: Center(
+          child: Text(
+            initials,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: size * 0.4,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Icon(
+      Icons.person,
+      size: size * 0.6,
+      color: colorScheme.primary,
+    );
+  }
+
+  String _getInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) {
+      return parts[0].substring(0, 1).toUpperCase();
+    }
+    return (parts[0].substring(0, 1) + parts[1].substring(0, 1)).toUpperCase();
+  }
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File created at lib/ui/widgets/user_avatar.dart
+[ ] Uses AppDimensions
+[ ] Uses colorScheme
+[ ] Shows initials if no image
+[ ] Shows icon if no name
+[ ] Loading indicator while image loads
+[ ] Error handling for failed images
+[ ] Optional onTap callback
+[ ] No syntax errors
+
+USAGE EXAMPLES:
+
+```dart
+// With image URL
+UserAvatar(
+  imageUrl: user.avatarUrl,
+  name: user.name,
+  size: 40,
+)
+
+// Without image (shows initials)
+UserAvatar(
+  name: 'John Doe',  // Shows "JD"
+  size: 50,
+)
+
+// With tap action
+UserAvatar(
+  imageUrl: user.avatarUrl,
+  name: user.name,
+  onTap: () => Navigator.pushNamed(context, '/profile'),
+)
+
+// In ListTile
+ListTile(
+  leading: UserAvatar(
+    imageUrl: user.avatarUrl,
+    name: user.name,
+  ),
+  title: Text(user.name),
+)
+
+// Custom size
+UserAvatar(
+  imageUrl: user.avatarUrl,
+  name: user.name,
+  size: 80,  // Large avatar
+)
+```
+
+================================================================================
+5. CACHED_IMAGE.DART ⭐ CRITICAL
+================================================================================
+
+PURPOSE: Display network images with caching and loading states
+
+DEPENDENCIES:
+✅ lib/core/theme/app_dimensions.dart
+✅ cached_network_image package (add to pubspec.yaml)
+
+EXACT CODE TEMPLATE:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:campuswhisper/core/theme/app_dimensions.dart';
+
+class CachedImage extends StatelessWidget {
+  final String imageUrl;
+  final double? width;
+  final double? height;
+  final BoxFit fit;
+  final BorderRadius? borderRadius;
+  final Widget? placeholder;
+  final Widget? errorWidget;
+
+  const CachedImage({
+    super.key,
+    required this.imageUrl,
+    this.width,
+    this.height,
+    this.fit = BoxFit.cover,
+    this.borderRadius,
+    this.placeholder,
+    this.errorWidget,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    Widget image = CachedNetworkImage(
+      imageUrl: imageUrl,
+      width: width,
+      height: height,
+      fit: fit,
+      placeholder: (context, url) => placeholder ?? _buildPlaceholder(colorScheme),
+      errorWidget: (context, url, error) => errorWidget ?? _buildError(colorScheme),
+    );
+
+    if (borderRadius != null) {
+      image = ClipRRect(
+        borderRadius: borderRadius!,
+        child: image,
+      );
+    }
+
+    return image;
+  }
+
+  Widget _buildPlaceholder(ColorScheme colorScheme) {
+    return Container(
+      width: width,
+      height: height,
+      color: colorScheme.surface,
+      child: Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation(colorScheme.primary),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildError(ColorScheme colorScheme) {
+    return Container(
+      width: width,
+      height: height,
+      color: colorScheme.surface,
+      child: Center(
+        child: Icon(
+          Icons.broken_image_outlined,
+          size: AppDimensions.largeIconSize,
+          color: colorScheme.onSurface.withAlpha(77),
+        ),
+      ),
+    );
+  }
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File created at lib/ui/widgets/cached_image.dart
+[ ] Uses cached_network_image package
+[ ] Shows loading indicator
+[ ] Shows error icon on failure
+[ ] Supports custom placeholder and error widgets
+[ ] Supports border radius
+[ ] No syntax errors
+
+NOTE: Add to pubspec.yaml:
+```yaml
+dependencies:
+  cached_network_image: ^3.3.0
+```
+
+USAGE EXAMPLES:
+
+```dart
+// Simple usage
+CachedImage(
+  imageUrl: event.imageUrl,
+  width: 300,
+  height: 200,
+)
+
+// With border radius
+CachedImage(
+  imageUrl: event.imageUrl,
+  width: double.infinity,
+  height: 250,
+  borderRadius: BorderRadius.circular(12),
+)
+
+// In event card
+Card(
+  child: Column(
+    children: [
+      CachedImage(
+        imageUrl: event.imageUrl,
+        width: double.infinity,
+        height: 200,
+        fit: BoxFit.cover,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(12),
+        ),
+      ),
+      Padding(
+        padding: EdgeInsets.all(16),
+        child: Text(event.title),
+      ),
+    ],
+  ),
+)
+
+// Custom placeholder
+CachedImage(
+  imageUrl: url,
+  width: 100,
+  height: 100,
+  placeholder: Shimmer(...),  // Custom shimmer effect
+)
+```
+
+================================================================================
+FOLDER COMPLETION CHECKLIST
+================================================================================
+
+Before marking this folder as complete:
+
+[ ] All 5 files created
+[ ] All files use AppDimensions and colorScheme
+[ ] EmptyState works for all empty list scenarios
+[ ] ErrorStateWidget works for all error scenarios
+[ ] UserAvatar handles all cases (image, initials, icon)
+[ ] CachedImage package added to pubspec.yaml
+[ ] No syntax errors in any file
+[ ] All imports correct
+
+When folder complete, update DEVELOPMENT_INSTRUCTIONS.txt:
+- Change: [ ] lib/ui/widgets/
+- To: [✅] lib/ui/widgets/ (Phase 0 widgets complete)
+
+================================================================================
+PRIORITY FOR PHASE 0
+================================================================================
+
+ALL 5 FILES ARE CRITICAL FOR PHASE 0:
+1. ✅ empty_state.dart (used everywhere for empty lists)
+2. ✅ error_widget.dart (used everywhere for errors)
+3. ✅ confirmation_dialog.dart (used for all confirmations)
+4. ✅ user_avatar.dart (used in comments, posts, profiles)
+5. ✅ cached_image.dart (used for all network images)
+
+These widgets are foundational and will be used throughout the app.
+
+================================================================================

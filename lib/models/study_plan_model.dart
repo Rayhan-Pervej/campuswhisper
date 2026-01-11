@@ -11,21 +11,28 @@ class StudyPlanModel {
     required this.courses,
   });
 
-  factory StudyPlanModel.fromMap(Map<String, dynamic> map) {
+  factory StudyPlanModel.fromJson(Map<String, dynamic> json) {
     return StudyPlanModel(
-      id: map['id'],
-      year: map['year'],
-      semester: map['semester'],
-      courses: List<String>.from(map['courses'] ?? []),
+      id: json['id'] as String,
+      year: json['year'] as int,
+      semester: json['semester'] as int,
+      courses: List<String>.from(json['courses'] ?? []),
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'year': year,
       'semester': semester,
       'courses': courses,
     };
+  }
+
+  bool validate() {
+    return id.isNotEmpty &&
+           year > 0 &&
+           semester > 0 &&
+           courses.isNotEmpty;
   }
 }

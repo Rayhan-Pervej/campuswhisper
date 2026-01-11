@@ -1,0 +1,1102 @@
+================================================================================
+LIB/MODELS - FOLDER INSTRUCTIONS
+================================================================================
+
+FOLDER PURPOSE:
+Data models representing all entities in the app. Used for type-safe data
+handling, JSON serialization, and Firebase integration.
+
+EXISTING COMPLETE MODELS (DO NOT MODIFY):
+✅ user_model.dart
+✅ posts_model.dart
+✅ vote_model.dart
+✅ scholarship_result_model.dart
+✅ transcript_model.dart
+✅ course_input_model.dart
+✅ course_mode.dart
+✅ study_plan_model.dart
+✅ department_roadmap_model.dart
+✅ hack_model.dart
+✅ faq_model.dart
+✅ badges_history_model.dart
+✅ xp_history_model.dart
+
+FILES TO CREATE (complete in order):
+1. [ ] event_model.dart ⭐ CRITICAL
+2. [ ] competition_model.dart ⭐ CRITICAL
+3. [ ] lost_found_item_model.dart ⭐ CRITICAL
+4. [ ] club_model.dart ⭐ CRITICAL
+5. [ ] comment_model.dart ⭐ CRITICAL
+6. [ ] notification_model.dart
+
+⚠️ CRITICAL RULES FOR THIS FOLDER:
+- ALL models MUST include: fromJson, toJson, copyWith, ==, hashCode
+- Use proper Dart types (String, int, double, bool, DateTime, List, Map)
+- DateTime fields must be stored as Timestamp in Firestore
+- Optional fields use nullable types (String?)
+- All models must be immutable (final fields)
+- DO NOT add business logic in models (keep them simple data containers)
+
+MODEL TEMPLATE STRUCTURE:
+```dart
+class ModelName {
+  final String id;
+  final String field1;
+  final int? field2;
+  final DateTime createdAt;
+
+  const ModelName({
+    required this.id,
+    required this.field1,
+    this.field2,
+    required this.createdAt,
+  });
+
+  // fromJson
+  factory ModelName.fromJson(Map<String, dynamic> json) {
+    return ModelName(
+      id: json['id'] as String,
+      field1: json['field1'] as String,
+      field2: json['field2'] as int?,
+      createdAt: (json['createdAt'] as Timestamp).toDate(),
+    );
+  }
+
+  // toJson
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'field1': field1,
+      'field2': field2,
+      'createdAt': Timestamp.fromDate(createdAt),
+    };
+  }
+
+  // copyWith
+  ModelName copyWith({
+    String? id,
+    String? field1,
+    int? field2,
+    DateTime? createdAt,
+  }) {
+    return ModelName(
+      id: id ?? this.id,
+      field1: field1 ?? this.field1,
+      field2: field2 ?? this.field2,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  // ==
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ModelName &&
+           other.id == id &&
+           other.field1 == field1;
+  }
+
+  // hashCode
+  @override
+  int get hashCode => id.hashCode ^ field1.hashCode;
+}
+```
+
+================================================================================
+1. EVENT_MODEL.DART ⭐ CRITICAL
+================================================================================
+
+PURPOSE: Represents campus events
+
+DEPENDENCIES:
+✅ cloud_firestore package (for Timestamp)
+
+EXACT CODE TEMPLATE:
+
+```dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class EventModel {
+  final String id;
+  final String title;
+  final String description;
+  final String category;
+  final String location;
+  final DateTime eventDate;
+  final DateTime? eventEndDate;  // For multi-day events
+  final String? imageUrl;
+  final String organizerId;
+  final String organizerName;
+  final List<String> attendeeIds;
+  final int maxAttendees;
+  final bool isActive;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  final Map<String, dynamic>? additionalInfo;  // Flexible field for extra data
+
+  const EventModel({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.category,
+    required this.location,
+    required this.eventDate,
+    this.eventEndDate,
+    this.imageUrl,
+    required this.organizerId,
+    required this.organizerName,
+    this.attendeeIds = const [],
+    this.maxAttendees = 100,
+    this.isActive = true,
+    required this.createdAt,
+    this.updatedAt,
+    this.additionalInfo,
+  });
+
+  // fromJson
+  factory EventModel.fromJson(Map<String, dynamic> json) {
+    return EventModel(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String,
+      category: json['category'] as String,
+      location: json['location'] as String,
+      eventDate: (json['eventDate'] as Timestamp).toDate(),
+      eventEndDate: json['eventEndDate'] != null
+          ? (json['eventEndDate'] as Timestamp).toDate()
+          : null,
+      imageUrl: json['imageUrl'] as String?,
+      organizerId: json['organizerId'] as String,
+      organizerName: json['organizerName'] as String,
+      attendeeIds: List<String>.from(json['attendeeIds'] ?? []),
+      maxAttendees: json['maxAttendees'] as int? ?? 100,
+      isActive: json['isActive'] as bool? ?? true,
+      createdAt: (json['createdAt'] as Timestamp).toDate(),
+      updatedAt: json['updatedAt'] != null
+          ? (json['updatedAt'] as Timestamp).toDate()
+          : null,
+      additionalInfo: json['additionalInfo'] as Map<String, dynamic>?,
+    );
+  }
+
+  // toJson
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'category': category,
+      'location': location,
+      'eventDate': Timestamp.fromDate(eventDate),
+      'eventEndDate': eventEndDate != null ? Timestamp.fromDate(eventEndDate!) : null,
+      'imageUrl': imageUrl,
+      'organizerId': organizerId,
+      'organizerName': organizerName,
+      'attendeeIds': attendeeIds,
+      'maxAttendees': maxAttendees,
+      'isActive': isActive,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
+      'additionalInfo': additionalInfo,
+    };
+  }
+
+  // copyWith
+  EventModel copyWith({
+    String? id,
+    String? title,
+    String? description,
+    String? category,
+    String? location,
+    DateTime? eventDate,
+    DateTime? eventEndDate,
+    String? imageUrl,
+    String? organizerId,
+    String? organizerName,
+    List<String>? attendeeIds,
+    int? maxAttendees,
+    bool? isActive,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Map<String, dynamic>? additionalInfo,
+  }) {
+    return EventModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      location: location ?? this.location,
+      eventDate: eventDate ?? this.eventDate,
+      eventEndDate: eventEndDate ?? this.eventEndDate,
+      imageUrl: imageUrl ?? this.imageUrl,
+      organizerId: organizerId ?? this.organizerId,
+      organizerName: organizerName ?? this.organizerName,
+      attendeeIds: attendeeIds ?? this.attendeeIds,
+      maxAttendees: maxAttendees ?? this.maxAttendees,
+      isActive: isActive ?? this.isActive,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      additionalInfo: additionalInfo ?? this.additionalInfo,
+    );
+  }
+
+  // Equality
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is EventModel && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
+
+  // Helper getters
+  bool get isFull => attendeeIds.length >= maxAttendees;
+  bool get isPast => eventDate.isBefore(DateTime.now());
+  bool get isUpcoming => eventDate.isAfter(DateTime.now());
+  int get attendeeCount => attendeeIds.length;
+  int get spotsLeft => maxAttendees - attendeeIds.length;
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File created at lib/models/event_model.dart
+[ ] Contains ALL required fields
+[ ] fromJson, toJson, copyWith, ==, hashCode implemented
+[ ] Uses Timestamp for DateTime fields
+[ ] Helper getters included (isFull, isPast, etc.)
+[ ] No syntax errors
+[ ] Imports cloud_firestore
+
+SELF-CHECK:
+```bash
+grep -c "factory EventModel" lib/models/event_model.dart  # Should be 1
+grep -c "Map<String, dynamic> toJson" lib/models/event_model.dart  # Should be 1
+grep -c "copyWith" lib/models/event_model.dart  # Should be 1
+```
+
+================================================================================
+2. COMPETITION_MODEL.DART ⭐ CRITICAL
+================================================================================
+
+PURPOSE: Represents competitions
+
+EXACT CODE TEMPLATE:
+
+```dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class CompetitionModel {
+  final String id;
+  final String title;
+  final String description;
+  final String category;
+  final String? imageUrl;
+  final String organizerId;
+  final String organizerName;
+  final DateTime registrationDeadline;
+  final DateTime competitionDate;
+  final DateTime? competitionEndDate;
+  final String location;
+  final String? rules;
+  final String? prizes;
+  final List<String> participantIds;
+  final int maxParticipants;
+  final String status;  // 'Upcoming', 'Active', 'Ended'
+  final bool isTeamBased;
+  final int? teamSize;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+
+  const CompetitionModel({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.category,
+    this.imageUrl,
+    required this.organizerId,
+    required this.organizerName,
+    required this.registrationDeadline,
+    required this.competitionDate,
+    this.competitionEndDate,
+    required this.location,
+    this.rules,
+    this.prizes,
+    this.participantIds = const [],
+    this.maxParticipants = 50,
+    this.status = 'Upcoming',
+    this.isTeamBased = false,
+    this.teamSize,
+    required this.createdAt,
+    this.updatedAt,
+  });
+
+  factory CompetitionModel.fromJson(Map<String, dynamic> json) {
+    return CompetitionModel(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String,
+      category: json['category'] as String,
+      imageUrl: json['imageUrl'] as String?,
+      organizerId: json['organizerId'] as String,
+      organizerName: json['organizerName'] as String,
+      registrationDeadline: (json['registrationDeadline'] as Timestamp).toDate(),
+      competitionDate: (json['competitionDate'] as Timestamp).toDate(),
+      competitionEndDate: json['competitionEndDate'] != null
+          ? (json['competitionEndDate'] as Timestamp).toDate()
+          : null,
+      location: json['location'] as String,
+      rules: json['rules'] as String?,
+      prizes: json['prizes'] as String?,
+      participantIds: List<String>.from(json['participantIds'] ?? []),
+      maxParticipants: json['maxParticipants'] as int? ?? 50,
+      status: json['status'] as String? ?? 'Upcoming',
+      isTeamBased: json['isTeamBased'] as bool? ?? false,
+      teamSize: json['teamSize'] as int?,
+      createdAt: (json['createdAt'] as Timestamp).toDate(),
+      updatedAt: json['updatedAt'] != null
+          ? (json['updatedAt'] as Timestamp).toDate()
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'category': category,
+      'imageUrl': imageUrl,
+      'organizerId': organizerId,
+      'organizerName': organizerName,
+      'registrationDeadline': Timestamp.fromDate(registrationDeadline),
+      'competitionDate': Timestamp.fromDate(competitionDate),
+      'competitionEndDate': competitionEndDate != null
+          ? Timestamp.fromDate(competitionEndDate!)
+          : null,
+      'location': location,
+      'rules': rules,
+      'prizes': prizes,
+      'participantIds': participantIds,
+      'maxParticipants': maxParticipants,
+      'status': status,
+      'isTeamBased': isTeamBased,
+      'teamSize': teamSize,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
+    };
+  }
+
+  CompetitionModel copyWith({
+    String? id,
+    String? title,
+    String? description,
+    String? category,
+    String? imageUrl,
+    String? organizerId,
+    String? organizerName,
+    DateTime? registrationDeadline,
+    DateTime? competitionDate,
+    DateTime? competitionEndDate,
+    String? location,
+    String? rules,
+    String? prizes,
+    List<String>? participantIds,
+    int? maxParticipants,
+    String? status,
+    bool? isTeamBased,
+    int? teamSize,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return CompetitionModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      imageUrl: imageUrl ?? this.imageUrl,
+      organizerId: organizerId ?? this.organizerId,
+      organizerName: organizerName ?? this.organizerName,
+      registrationDeadline: registrationDeadline ?? this.registrationDeadline,
+      competitionDate: competitionDate ?? this.competitionDate,
+      competitionEndDate: competitionEndDate ?? this.competitionEndDate,
+      location: location ?? this.location,
+      rules: rules ?? this.rules,
+      prizes: prizes ?? this.prizes,
+      participantIds: participantIds ?? this.participantIds,
+      maxParticipants: maxParticipants ?? this.maxParticipants,
+      status: status ?? this.status,
+      isTeamBased: isTeamBased ?? this.isTeamBased,
+      teamSize: teamSize ?? this.teamSize,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is CompetitionModel && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
+
+  // Helper getters
+  bool get isFull => participantIds.length >= maxParticipants;
+  bool get isRegistrationOpen => DateTime.now().isBefore(registrationDeadline);
+  bool get isUpcoming => status == 'Upcoming';
+  bool get isActive => status == 'Active';
+  bool get isEnded => status == 'Ended';
+  int get participantCount => participantIds.length;
+  int get spotsLeft => maxParticipants - participantIds.length;
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File at lib/models/competition_model.dart
+[ ] All methods implemented
+[ ] Helper getters included
+[ ] No syntax errors
+
+================================================================================
+3. LOST_FOUND_ITEM_MODEL.DART ⭐ CRITICAL
+================================================================================
+
+EXACT CODE TEMPLATE:
+
+```dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class LostFoundItemModel {
+  final String id;
+  final String itemName;
+  final String description;
+  final String type;  // 'Lost' or 'Found'
+  final String category;  // 'Electronics', 'Documents', 'Accessories', etc.
+  final String location;  // Where it was lost/found
+  final DateTime date;  // When it was lost/found
+  final List<String> imageUrls;
+  final String posterId;
+  final String posterName;
+  final String contactInfo;
+  final String status;  // 'Active' or 'Resolved'
+  final String? resolvedBy;
+  final DateTime? resolvedAt;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  final Map<String, dynamic>? additionalInfo;
+
+  const LostFoundItemModel({
+    required this.id,
+    required this.itemName,
+    required this.description,
+    required this.type,
+    required this.category,
+    required this.location,
+    required this.date,
+    this.imageUrls = const [],
+    required this.posterId,
+    required this.posterName,
+    required this.contactInfo,
+    this.status = 'Active',
+    this.resolvedBy,
+    this.resolvedAt,
+    required this.createdAt,
+    this.updatedAt,
+    this.additionalInfo,
+  });
+
+  factory LostFoundItemModel.fromJson(Map<String, dynamic> json) {
+    return LostFoundItemModel(
+      id: json['id'] as String,
+      itemName: json['itemName'] as String,
+      description: json['description'] as String,
+      type: json['type'] as String,
+      category: json['category'] as String,
+      location: json['location'] as String,
+      date: (json['date'] as Timestamp).toDate(),
+      imageUrls: List<String>.from(json['imageUrls'] ?? []),
+      posterId: json['posterId'] as String,
+      posterName: json['posterName'] as String,
+      contactInfo: json['contactInfo'] as String,
+      status: json['status'] as String? ?? 'Active',
+      resolvedBy: json['resolvedBy'] as String?,
+      resolvedAt: json['resolvedAt'] != null
+          ? (json['resolvedAt'] as Timestamp).toDate()
+          : null,
+      createdAt: (json['createdAt'] as Timestamp).toDate(),
+      updatedAt: json['updatedAt'] != null
+          ? (json['updatedAt'] as Timestamp).toDate()
+          : null,
+      additionalInfo: json['additionalInfo'] as Map<String, dynamic>?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'itemName': itemName,
+      'description': description,
+      'type': type,
+      'category': category,
+      'location': location,
+      'date': Timestamp.fromDate(date),
+      'imageUrls': imageUrls,
+      'posterId': posterId,
+      'posterName': posterName,
+      'contactInfo': contactInfo,
+      'status': status,
+      'resolvedBy': resolvedBy,
+      'resolvedAt': resolvedAt != null ? Timestamp.fromDate(resolvedAt!) : null,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
+      'additionalInfo': additionalInfo,
+    };
+  }
+
+  LostFoundItemModel copyWith({
+    String? id,
+    String? itemName,
+    String? description,
+    String? type,
+    String? category,
+    String? location,
+    DateTime? date,
+    List<String>? imageUrls,
+    String? posterId,
+    String? posterName,
+    String? contactInfo,
+    String? status,
+    String? resolvedBy,
+    DateTime? resolvedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Map<String, dynamic>? additionalInfo,
+  }) {
+    return LostFoundItemModel(
+      id: id ?? this.id,
+      itemName: itemName ?? this.itemName,
+      description: description ?? this.description,
+      type: type ?? this.type,
+      category: category ?? this.category,
+      location: location ?? this.location,
+      date: date ?? this.date,
+      imageUrls: imageUrls ?? this.imageUrls,
+      posterId: posterId ?? this.posterId,
+      posterName: posterName ?? this.posterName,
+      contactInfo: contactInfo ?? this.contactInfo,
+      status: status ?? this.status,
+      resolvedBy: resolvedBy ?? this.resolvedBy,
+      resolvedAt: resolvedAt ?? this.resolvedAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      additionalInfo: additionalInfo ?? this.additionalInfo,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is LostFoundItemModel && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
+
+  // Helper getters
+  bool get isLost => type == 'Lost';
+  bool get isFound => type == 'Found';
+  bool get isResolved => status == 'Resolved';
+  bool get isActive => status == 'Active';
+  bool get hasImages => imageUrls.isNotEmpty;
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File at lib/models/lost_found_item_model.dart
+[ ] All methods implemented
+[ ] Helper getters included
+
+================================================================================
+4. CLUB_MODEL.DART ⭐ CRITICAL
+================================================================================
+
+EXACT CODE TEMPLATE:
+
+```dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class ClubModel {
+  final String id;
+  final String name;
+  final String description;
+  final String category;  // 'Academic', 'Cultural', 'Sports', 'Social', etc.
+  final String? logoUrl;
+  final String? coverImageUrl;
+  final String presidentId;
+  final String presidentName;
+  final List<String> memberIds;
+  final List<String> adminIds;
+  final String contactEmail;
+  final String? contactPhone;
+  final String? facebookUrl;
+  final String? instagramUrl;
+  final String? websiteUrl;
+  final bool isActive;
+  final DateTime? establishedDate;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  final Map<String, dynamic>? additionalInfo;
+
+  const ClubModel({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.category,
+    this.logoUrl,
+    this.coverImageUrl,
+    required this.presidentId,
+    required this.presidentName,
+    this.memberIds = const [],
+    this.adminIds = const [],
+    required this.contactEmail,
+    this.contactPhone,
+    this.facebookUrl,
+    this.instagramUrl,
+    this.websiteUrl,
+    this.isActive = true,
+    this.establishedDate,
+    required this.createdAt,
+    this.updatedAt,
+    this.additionalInfo,
+  });
+
+  factory ClubModel.fromJson(Map<String, dynamic> json) {
+    return ClubModel(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String,
+      category: json['category'] as String,
+      logoUrl: json['logoUrl'] as String?,
+      coverImageUrl: json['coverImageUrl'] as String?,
+      presidentId: json['presidentId'] as String,
+      presidentName: json['presidentName'] as String,
+      memberIds: List<String>.from(json['memberIds'] ?? []),
+      adminIds: List<String>.from(json['adminIds'] ?? []),
+      contactEmail: json['contactEmail'] as String,
+      contactPhone: json['contactPhone'] as String?,
+      facebookUrl: json['facebookUrl'] as String?,
+      instagramUrl: json['instagramUrl'] as String?,
+      websiteUrl: json['websiteUrl'] as String?,
+      isActive: json['isActive'] as bool? ?? true,
+      establishedDate: json['establishedDate'] != null
+          ? (json['establishedDate'] as Timestamp).toDate()
+          : null,
+      createdAt: (json['createdAt'] as Timestamp).toDate(),
+      updatedAt: json['updatedAt'] != null
+          ? (json['updatedAt'] as Timestamp).toDate()
+          : null,
+      additionalInfo: json['additionalInfo'] as Map<String, dynamic>?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'category': category,
+      'logoUrl': logoUrl,
+      'coverImageUrl': coverImageUrl,
+      'presidentId': presidentId,
+      'presidentName': presidentName,
+      'memberIds': memberIds,
+      'adminIds': adminIds,
+      'contactEmail': contactEmail,
+      'contactPhone': contactPhone,
+      'facebookUrl': facebookUrl,
+      'instagramUrl': instagramUrl,
+      'websiteUrl': websiteUrl,
+      'isActive': isActive,
+      'establishedDate': establishedDate != null
+          ? Timestamp.fromDate(establishedDate!)
+          : null,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
+      'additionalInfo': additionalInfo,
+    };
+  }
+
+  ClubModel copyWith({
+    String? id,
+    String? name,
+    String? description,
+    String? category,
+    String? logoUrl,
+    String? coverImageUrl,
+    String? presidentId,
+    String? presidentName,
+    List<String>? memberIds,
+    List<String>? adminIds,
+    String? contactEmail,
+    String? contactPhone,
+    String? facebookUrl,
+    String? instagramUrl,
+    String? websiteUrl,
+    bool? isActive,
+    DateTime? establishedDate,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Map<String, dynamic>? additionalInfo,
+  }) {
+    return ClubModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      logoUrl: logoUrl ?? this.logoUrl,
+      coverImageUrl: coverImageUrl ?? this.coverImageUrl,
+      presidentId: presidentId ?? this.presidentId,
+      presidentName: presidentName ?? this.presidentName,
+      memberIds: memberIds ?? this.memberIds,
+      adminIds: adminIds ?? this.adminIds,
+      contactEmail: contactEmail ?? this.contactEmail,
+      contactPhone: contactPhone ?? this.contactPhone,
+      facebookUrl: facebookUrl ?? this.facebookUrl,
+      instagramUrl: instagramUrl ?? this.instagramUrl,
+      websiteUrl: websiteUrl ?? this.websiteUrl,
+      isActive: isActive ?? this.isActive,
+      establishedDate: establishedDate ?? this.establishedDate,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      additionalInfo: additionalInfo ?? this.additionalInfo,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ClubModel && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
+
+  // Helper getters
+  int get memberCount => memberIds.length;
+  int get adminCount => adminIds.length;
+  bool get hasSocialLinks => facebookUrl != null || instagramUrl != null || websiteUrl != null;
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File at lib/models/club_model.dart
+[ ] All methods implemented
+[ ] Social media fields included
+
+================================================================================
+5. COMMENT_MODEL.DART ⭐ CRITICAL
+================================================================================
+
+PURPOSE: Universal comment model for threads, events, competitions, etc.
+
+EXACT CODE TEMPLATE:
+
+```dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class CommentModel {
+  final String id;
+  final String parentId;  // ID of post/event/competition
+  final String parentType;  // 'post', 'event', 'competition', etc.
+  final String content;
+  final String authorId;
+  final String authorName;
+  final String? authorAvatarUrl;
+  final String? replyToId;  // For nested replies
+  final String? replyToAuthor;
+  final int upvotes;
+  final int downvotes;
+  final List<String> upvotedBy;
+  final List<String> downvotedBy;
+  final bool isEdited;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  final bool isDeleted;
+
+  const CommentModel({
+    required this.id,
+    required this.parentId,
+    required this.parentType,
+    required this.content,
+    required this.authorId,
+    required this.authorName,
+    this.authorAvatarUrl,
+    this.replyToId,
+    this.replyToAuthor,
+    this.upvotes = 0,
+    this.downvotes = 0,
+    this.upvotedBy = const [],
+    this.downvotedBy = const [],
+    this.isEdited = false,
+    required this.createdAt,
+    this.updatedAt,
+    this.isDeleted = false,
+  });
+
+  factory CommentModel.fromJson(Map<String, dynamic> json) {
+    return CommentModel(
+      id: json['id'] as String,
+      parentId: json['parentId'] as String,
+      parentType: json['parentType'] as String,
+      content: json['content'] as String,
+      authorId: json['authorId'] as String,
+      authorName: json['authorName'] as String,
+      authorAvatarUrl: json['authorAvatarUrl'] as String?,
+      replyToId: json['replyToId'] as String?,
+      replyToAuthor: json['replyToAuthor'] as String?,
+      upvotes: json['upvotes'] as int? ?? 0,
+      downvotes: json['downvotes'] as int? ?? 0,
+      upvotedBy: List<String>.from(json['upvotedBy'] ?? []),
+      downvotedBy: List<String>.from(json['downvotedBy'] ?? []),
+      isEdited: json['isEdited'] as bool? ?? false,
+      createdAt: (json['createdAt'] as Timestamp).toDate(),
+      updatedAt: json['updatedAt'] != null
+          ? (json['updatedAt'] as Timestamp).toDate()
+          : null,
+      isDeleted: json['isDeleted'] as bool? ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'parentId': parentId,
+      'parentType': parentType,
+      'content': content,
+      'authorId': authorId,
+      'authorName': authorName,
+      'authorAvatarUrl': authorAvatarUrl,
+      'replyToId': replyToId,
+      'replyToAuthor': replyToAuthor,
+      'upvotes': upvotes,
+      'downvotes': downvotes,
+      'upvotedBy': upvotedBy,
+      'downvotedBy': downvotedBy,
+      'isEdited': isEdited,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
+      'isDeleted': isDeleted,
+    };
+  }
+
+  CommentModel copyWith({
+    String? id,
+    String? parentId,
+    String? parentType,
+    String? content,
+    String? authorId,
+    String? authorName,
+    String? authorAvatarUrl,
+    String? replyToId,
+    String? replyToAuthor,
+    int? upvotes,
+    int? downvotes,
+    List<String>? upvotedBy,
+    List<String>? downvotedBy,
+    bool? isEdited,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isDeleted,
+  }) {
+    return CommentModel(
+      id: id ?? this.id,
+      parentId: parentId ?? this.parentId,
+      parentType: parentType ?? this.parentType,
+      content: content ?? this.content,
+      authorId: authorId ?? this.authorId,
+      authorName: authorName ?? this.authorName,
+      authorAvatarUrl: authorAvatarUrl ?? this.authorAvatarUrl,
+      replyToId: replyToId ?? this.replyToId,
+      replyToAuthor: replyToAuthor ?? this.replyToAuthor,
+      upvotes: upvotes ?? this.upvotes,
+      downvotes: downvotes ?? this.downvotes,
+      upvotedBy: upvotedBy ?? this.upvotedBy,
+      downvotedBy: downvotedBy ?? this.downvotedBy,
+      isEdited: isEdited ?? this.isEdited,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is CommentModel && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
+
+  // Helper getters
+  int get score => upvotes - downvotes;
+  bool get isReply => replyToId != null;
+  bool get isTopLevel => replyToId == null;
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File at lib/models/comment_model.dart
+[ ] All methods implemented
+[ ] Supports nested replies
+[ ] Upvote/downvote support
+
+================================================================================
+6. NOTIFICATION_MODEL.DART
+================================================================================
+
+EXACT CODE TEMPLATE:
+
+```dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class NotificationModel {
+  final String id;
+  final String userId;  // Who receives this notification
+  final String type;  // 'comment', 'upvote', 'event', 'competition', etc.
+  final String title;
+  final String message;
+  final String? actionUrl;  // Where to navigate when tapped
+  final String? relatedId;  // ID of post/event/etc.
+  final String? senderId;  // Who triggered this notification
+  final String? senderName;
+  final String? senderAvatarUrl;
+  final bool isRead;
+  final DateTime createdAt;
+
+  const NotificationModel({
+    required this.id,
+    required this.userId,
+    required this.type,
+    required this.title,
+    required this.message,
+    this.actionUrl,
+    this.relatedId,
+    this.senderId,
+    this.senderName,
+    this.senderAvatarUrl,
+    this.isRead = false,
+    required this.createdAt,
+  });
+
+  factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    return NotificationModel(
+      id: json['id'] as String,
+      userId: json['userId'] as String,
+      type: json['type'] as String,
+      title: json['title'] as String,
+      message: json['message'] as String,
+      actionUrl: json['actionUrl'] as String?,
+      relatedId: json['relatedId'] as String?,
+      senderId: json['senderId'] as String?,
+      senderName: json['senderName'] as String?,
+      senderAvatarUrl: json['senderAvatarUrl'] as String?,
+      isRead: json['isRead'] as bool? ?? false,
+      createdAt: (json['createdAt'] as Timestamp).toDate(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'type': type,
+      'title': title,
+      'message': message,
+      'actionUrl': actionUrl,
+      'relatedId': relatedId,
+      'senderId': senderId,
+      'senderName': senderName,
+      'senderAvatarUrl': senderAvatarUrl,
+      'isRead': isRead,
+      'createdAt': Timestamp.fromDate(createdAt),
+    };
+  }
+
+  NotificationModel copyWith({
+    String? id,
+    String? userId,
+    String? type,
+    String? title,
+    String? message,
+    String? actionUrl,
+    String? relatedId,
+    String? senderId,
+    String? senderName,
+    String? senderAvatarUrl,
+    bool? isRead,
+    DateTime? createdAt,
+  }) {
+    return NotificationModel(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      type: type ?? this.type,
+      title: title ?? this.title,
+      message: message ?? this.message,
+      actionUrl: actionUrl ?? this.actionUrl,
+      relatedId: relatedId ?? this.relatedId,
+      senderId: senderId ?? this.senderId,
+      senderName: senderName ?? this.senderName,
+      senderAvatarUrl: senderAvatarUrl ?? this.senderAvatarUrl,
+      isRead: isRead ?? this.isRead,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is NotificationModel && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
+}
+```
+
+================================================================================
+FOLDER COMPLETION CHECKLIST
+================================================================================
+
+Before marking this folder as complete:
+
+[ ] All 6 files created
+[ ] Files 1-5 are CRITICAL for Phase 0
+[ ] File 6 (notification_model) can be created later
+[ ] All models have: fromJson, toJson, copyWith, ==, hashCode
+[ ] All DateTime fields use Timestamp
+[ ] No syntax errors
+[ ] All imports correct
+
+When folder complete, update DEVELOPMENT_INSTRUCTIONS.txt:
+- Change: [ ] lib/models/
+- To: [✅] lib/models/
+- Move to next folder: lib/ui/widgets/
+
+================================================================================
+PRIORITY FOR PHASE 0
+================================================================================
+
+MUST CREATE NOW:
+1. ✅ event_model.dart
+2. ✅ competition_model.dart
+3. ✅ lost_found_item_model.dart
+4. ✅ club_model.dart
+5. ✅ comment_model.dart
+
+CAN CREATE LATER:
+6. ⏳ notification_model.dart (when implementing notifications feature)
+
+================================================================================

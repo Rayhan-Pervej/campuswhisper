@@ -1,134 +1,76 @@
+import 'package:campuswhisper/core/repositories/base_repository.dart';
 import 'package:campuswhisper/models/posts_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:campuswhisper/core/database/query_builder.dart';
+import 'package:campuswhisper/core/database/paginated_result.dart';
 
+class PostRepository extends BaseRepository<PostModel> {
+  @override
+  String get collectionName => 'posts';
 
-class PostRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _collectionName = 'posts';
+  @override
+  PostModel fromJson(Map<String, dynamic> json) => PostModel.fromJson(json);
 
-  // POST: Create a new post
-  Future<String> createPost(PostModel post) async {
-    try {
-      // Generate a new document ID first
-      DocumentReference docRef = _firestore.collection(_collectionName).doc();
-      String generatedId = docRef.id;
+  @override
+  Map<String, dynamic> toJson(PostModel model) => model.toJson();
 
-      // Create new post with the generated ID
-      PostModel postWithId = PostModel(
-        postId: generatedId,
-        type: post.type,
-        createdBy: post.createdBy,
-        content: post.content,
-        createdAt: post.createdAt,
-        courseId: post.courseId,
-        title: post.title,
-        upvoteCount: post.upvoteCount,
-        downvoteCount: post.downvoteCount,
-        updatedAt: post.updatedAt,
-      );
+  @override
+  String getId(PostModel model) => model.postId;
 
-      // Store data in the document with the generated ID
-      await docRef.set(postWithId.toMap());
+  // ═══════════════════════════════════════════════════════════════
+  // SPECIALIZED QUERIES (beyond base CRUD)
+  // ═══════════════════════════════════════════════════════════════
 
-      return generatedId;
-    } catch (e) {
-      throw Exception('Failed to create post: $e');
-    }
+  /// Get posts by type (with pagination)
+  Future<PaginatedResult<PostModel>> getByType(
+    String type, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [QueryFilter.equals('type', type)],
+      sorts: [QuerySort.descending('created_at')],
+      limit: limit,
+      startAfter: startAfter,
+    );
   }
 
-  // POST: Update existing post
-  Future<void> updatePost(PostModel post) async {
-    try {
-      await _firestore
-          .collection(_collectionName)
-          .doc(post.postId)
-          .update(post.toMap());
-    } catch (e) {
-      throw Exception('Failed to update post: $e');
-    }
+  /// Get posts by course (with pagination)
+  Future<PaginatedResult<PostModel>> getByCourse(
+    String courseId, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [QueryFilter.equals('course_id', courseId)],
+      sorts: [QuerySort.descending('created_at')],
+      limit: limit,
+      startAfter: startAfter,
+    );
   }
 
-  // FETCH: Get post by ID
-  Future<PostModel?> getPostById(String postId) async {
-    try {
-      DocumentSnapshot doc = await _firestore
-          .collection(_collectionName)
-          .doc(postId)
-          .get();
-
-      if (doc.exists) {
-        return PostModel.fromMap(doc.data() as Map<String, dynamic>);
-      }
-      return null;
-    } catch (e) {
-      throw Exception('Failed to get post by ID: $e');
-    }
+  /// Get posts by user (with pagination)
+  Future<PaginatedResult<PostModel>> getByUser(
+    String userId, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [QueryFilter.equals('created_by', userId)],
+      sorts: [QuerySort.descending('created_at')],
+      limit: limit,
+      startAfter: startAfter,
+    );
   }
 
-  // FETCH: Get all posts
-  Future<List<PostModel>> getAllPosts() async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection(_collectionName)
-          .orderBy('created_at', descending: true)
-          .get();
-
-      return querySnapshot.docs
-          .map((doc) => PostModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to get all posts: $e');
-    }
-  }
-
-  // FETCH: Get posts by type (review, hack, faq)
-  Future<List<PostModel>> getPostsByType(String type) async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection(_collectionName)
-          .where('type', isEqualTo: type)
-          .orderBy('created_at', descending: true)
-          .get();
-
-      return querySnapshot.docs
-          .map((doc) => PostModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to get posts by type: $e');
-    }
-  }
-
-  // FETCH: Get posts by course
-  Future<List<PostModel>> getPostsByCourse(String courseId) async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection(_collectionName)
-          .where('course_id', isEqualTo: courseId)
-          .orderBy('created_at', descending: true)
-          .get();
-
-      return querySnapshot.docs
-          .map((doc) => PostModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to get posts by course: $e');
-    }
-  }
-
-  // FETCH: Get posts by user
-  Future<List<PostModel>> getPostsByUser(String userId) async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection(_collectionName)
-          .where('created_by', isEqualTo: userId)
-          .orderBy('created_at', descending: true)
-          .get();
-
-      return querySnapshot.docs
-          .map((doc) => PostModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to get posts by user: $e');
-    }
+  /// Get trending posts (high upvote count)
+  Future<PaginatedResult<PostModel>> getTrending({
+    int limit = 10,
+    dynamic startAfter,
+  }) async {
+    return query(
+      sorts: [QuerySort.descending('upvote_count')],
+      limit: limit,
+      startAfter: startAfter,
+    );
   }
 }

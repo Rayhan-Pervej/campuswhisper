@@ -6,7 +6,7 @@ class HackModel {
   final String tag;
   final String createdBy;
   final int upvoteCount;
-  final Timestamp? createdAt;
+  final DateTime createdAt;
 
   HackModel({
     required this.id,
@@ -14,28 +14,46 @@ class HackModel {
     required this.tag,
     required this.createdBy,
     required this.upvoteCount,
-    this.createdAt,
+    required this.createdAt,
   });
 
-  factory HackModel.fromMap(Map<String, dynamic> map) {
+  factory HackModel.fromJson(Map<String, dynamic> json) {
     return HackModel(
-      id: map['id'],
-      text: map['text'],
-      tag: map['tag'],
-      createdBy: map['created_by'],
-      upvoteCount: map['upvote_count'] ?? 0,
-      createdAt: map['created_at'],
+      id: json['id'] as String,
+      text: json['text'] as String,
+      tag: json['tag'] as String,
+      createdBy: json['created_by'] as String,
+      upvoteCount: json['upvote_count'] ?? 0,
+      createdAt: _parseDateTime(json['created_at']),
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'text': text,
       'tag': tag,
       'created_by': createdBy,
       'upvote_count': upvoteCount,
-      'created_at': createdAt ?? FieldValue.serverTimestamp(),
+      'created_at': Timestamp.fromDate(createdAt),
     };
+  }
+
+  bool validate() {
+    return id.isNotEmpty &&
+           text.isNotEmpty &&
+           tag.isNotEmpty &&
+           createdBy.isNotEmpty;
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    } else if (value is String) {
+      return DateTime.parse(value);
+    } else if (value is int) {
+      return DateTime.fromMillisecondsSinceEpoch(value);
+    }
+    return DateTime.now();
   }
 }

@@ -1,6 +1,10 @@
 import 'package:campuswhisper/core/theme/app_dimensions.dart';
+import 'package:campuswhisper/routing/app_routes.dart';
+import 'package:campuswhisper/providers/post_provider.dart';
+import 'package:campuswhisper/core/utils/date_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:provider/provider.dart';
 
 import '../../widgets/custom_bottom_dialog.dart';
 import 'widgets/add_post.dart';
@@ -29,76 +33,45 @@ class _ThreadPageState extends State<ThreadPage> {
     'Transportation',
   ];
 
-  final List<Map<String, dynamic>> _allThreads = [
-    {
-      'firstName': 'John',
-      'lastName': 'Doe',
-      'userName': 'John Doe',
-      'content':
-          'Just heard that the cafeteria is introducing new vegan options next week! Finally some good news for us plant-based eaters 🌱',
-      'tag': 'Food & Dining',
-      'time': '2d ago',
-      'upvoteCount': 24,
-      'downvoteCount': 2,
-      'commentCount': 8,
-    },
-    {
-      'firstName': 'Sarah',
-      'lastName': 'Smith',
-      'userName': 'Sarah Smith',
-      'content':
-          'Does anyone know when the library extends its hours during finals week? I can\'t find the info on the website.',
-      'tag': 'Academics',
-      'time': '5h ago',
-      'upvoteCount': 15,
-      'downvoteCount': 0,
-      'commentCount': 12,
-    },
-    {
-      'firstName': 'Mike',
-      'lastName': 'Johnson',
-      'userName': 'Mike Johnson',
-      'content':
-          'Pro tip: Professor Anderson\'s office hours are way more helpful than the TA sessions. He actually takes time to explain concepts thoroughly.',
-      'tag': 'Campus Life',
-      'time': '1d ago',
-      'upvoteCount': 45,
-      'downvoteCount': 3,
-      'commentCount': 23,
-    },
-    {
-      'firstName': 'Emily',
-      'lastName': 'Davis',
-      'userName': 'Emily Davis',
-      'content':
-          'The basketball game tonight is going to be amazing! Don\'t miss it!',
-      'tag': 'Sports',
-      'time': '3h ago',
-      'upvoteCount': 32,
-      'downvoteCount': 1,
-      'commentCount': 15,
-    },
-    {
-      'firstName': 'Alex',
-      'lastName': 'Brown',
-      'userName': 'Alex Brown',
-      'content':
-          'Anyone interested in forming a study group for the upcoming CS midterm?',
-      'tag': 'Academics',
-      'time': '6h ago',
-      'upvoteCount': 18,
-      'downvoteCount': 0,
-      'commentCount': 9,
-    },
-  ];
+  final ScrollController _scrollController = ScrollController();
 
-  List<Map<String, dynamic>> get _filteredThreads {
-    if (_selectedTag == null) {
-      return _allThreads;
+  @override
+  void initState() {
+    super.initState();
+    // Load initial posts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PostProvider>().loadInitial();
+    });
+
+    // Setup infinite scroll
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
+      context.read<PostProvider>().loadMore();
     }
-    return _allThreads
-        .where((thread) => thread['tag'] == _selectedTag)
-        .toList();
+  }
+
+  void _onTagSelected(String? tag) {
+    setState(() {
+      _selectedTag = tag;
+    });
+
+    final provider = context.read<PostProvider>();
+    if (tag == null) {
+      provider.clearFilters();
+    } else {
+      // Filter by type based on tag
+      // You can map tags to types if needed
+      provider.filterByType(tag);
+    }
   }
 
   @override
@@ -107,46 +80,170 @@ class _ThreadPageState extends State<ThreadPage> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SafeArea(
-              child: TagChipFilter(
-                tags: _tags,
-                selectedTag: _selectedTag,
-                onTagSelected: (tag) {
-                  setState(() {
-                    _selectedTag = tag;
-                  });
-                },
+      body: Consumer<PostProvider>(
+        builder: (context, provider, child) {
+          // Loading state (first load)
+          if (provider.isLoading && provider.items.isEmpty) {
+            return Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(colorScheme.primary),
+              ),
+            );
+          }
+
+          // Error state
+          if (provider.hasError && provider.items.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Iconsax.danger_outline,
+                    size: AppDimensions.largeIconSize * 2,
+                    color: colorScheme.error,
+                  ),
+                  AppDimensions.h16,
+                  Text(
+                    'Failed to load posts',
+                    style: TextStyle(
+                      fontSize: AppDimensions.subtitleFontSize,
+                      color: colorScheme.onSurface.withAlpha(153),
+                    ),
+                  ),
+                  AppDimensions.h8,
+                  Text(
+                    provider.errorMessage ?? 'Please try again',
+                    style: TextStyle(
+                      fontSize: AppDimensions.bodyFontSize,
+                      color: colorScheme.onSurface.withAlpha(102),
+                    ),
+                  ),
+                  AppDimensions.h16,
+                  ElevatedButton.icon(
+                    onPressed: () => provider.refresh(),
+                    icon: Icon(Iconsax.refresh_outline),
+                    label: Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // Empty state
+          if (provider.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Iconsax.message_text_outline,
+                    size: AppDimensions.largeIconSize * 2,
+                    color: colorScheme.onSurface.withAlpha(77),
+                  ),
+                  AppDimensions.h16,
+                  Text(
+                    'No posts yet',
+                    style: TextStyle(
+                      fontSize: AppDimensions.subtitleFontSize,
+                      color: colorScheme.onSurface.withAlpha(153),
+                    ),
+                  ),
+                  AppDimensions.h8,
+                  Text(
+                    'Be the first to create a post!',
+                    style: TextStyle(
+                      fontSize: AppDimensions.bodyFontSize,
+                      color: colorScheme.onSurface.withAlpha(102),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // Posts list
+          return RefreshIndicator(
+            onRefresh: () => provider.refresh(),
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  SafeArea(
+                    child: TagChipFilter(
+                      tags: _tags,
+                      selectedTag: _selectedTag,
+                      onTagSelected: _onTagSelected,
+                    ),
+                  ),
+
+                  // Posts
+                  ...provider.items.map((post) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.threadDetail,
+                          arguments: {'post': post},
+                        );
+                      },
+                      child: ThreadCard(
+                        firstName: '',
+                        lastName: '',
+                        userName: post.createdBy,
+                        content: post.content,
+                        tag: post.type,
+                        time: DateFormatter.timeAgo(post.createdAt),
+                        upvoteCount: post.upvoteCount,
+                        downvoteCount: post.downvoteCount,
+                        commentCount: 0, // TODO: Add comment count to PostModel
+                        onUpvote: () {
+                          // TODO: Implement upvote functionality
+                          print('Upvote clicked for ${post.postId}');
+                        },
+                        onDownvote: () {
+                          // TODO: Implement downvote functionality
+                          print('Downvote clicked for ${post.postId}');
+                        },
+                        onComment: () {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.threadDetail,
+                            arguments: {'post': post},
+                          );
+                        },
+                      ),
+                    );
+                  }),
+
+                  // Loading more indicator
+                  if (provider.isLoadingMore)
+                    Padding(
+                      padding: EdgeInsets.all(AppDimensions.space16),
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(colorScheme.primary),
+                      ),
+                    ),
+
+                  // End of list indicator
+                  if (!provider.hasMore && provider.items.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsets.all(AppDimensions.space16),
+                      child: Text(
+                        'No more posts',
+                        style: TextStyle(
+                          fontSize: AppDimensions.captionFontSize,
+                          color: colorScheme.onSurface.withAlpha(102),
+                        ),
+                      ),
+                    ),
+
+                  AppDimensions.h12,
+                ],
               ),
             ),
-
-            ..._filteredThreads.map((thread) {
-              return ThreadCard(
-                firstName: thread['firstName'],
-                lastName: thread['lastName'],
-                userName: thread['userName'],
-                content: thread['content'],
-                tag: thread['tag'],
-                time: thread['time'],
-                upvoteCount: thread['upvoteCount'],
-                downvoteCount: thread['downvoteCount'],
-                commentCount: thread['commentCount'],
-                onUpvote: () {
-                  print('Upvote clicked');
-                },
-                onDownvote: () {
-                  print('Downvote clicked');
-                },
-                onComment: () {
-                  print('Comment clicked');
-                },
-              );
-            }),
-            AppDimensions.h12,
-          ],
-        ),
+          );
+        },
       ),
       // floatingActionButton: SizedBox(
       //   height: AppDimensions.space40 * 1.5,
@@ -159,19 +256,15 @@ class _ThreadPageState extends State<ThreadPage> {
       //         child: AddPost(
       //           tags: _tags,
       //           onPostCreated: (newPost) {
-      //             setState(() {
-      //               _allThreads.insert(0, newPost);
-      //             });
-      //             ScaffoldMessenger.of(context).showSnackBar(
-      //               const SnackBar(content: Text('Post created successfully!')),
-      //             );
+      //             // Create post using provider
+      //             context.read<PostProvider>().createPost(context, newPost);
       //           },
       //         ),
       //       );
       //     },
-
+      //
       //     backgroundColor: colorScheme.primaryContainer,
-
+      //
       //     child: Icon(
       //       Iconsax.add_outline,
       //       color: colorScheme.primary,

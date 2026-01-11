@@ -9,6 +9,7 @@ class CustomTimeInput extends StatefulWidget {
   final bool? needTitle;
   final TextStyle? titleStyle;
   final VoidCallback? onTap;
+  final Function(String)? onChanged;
   final FormFieldValidator<String>? validatorClass;
 
   const CustomTimeInput({
@@ -21,6 +22,7 @@ class CustomTimeInput extends StatefulWidget {
     this.needTitle,
     this.titleStyle,
     this.onTap,
+    this.onChanged,
     this.validatorClass,
   });
 
@@ -74,6 +76,9 @@ class _CustomTimeInputState extends State<CustomTimeInput> {
     if (picked != null) {
       final formattedTime = picked.format(context);
       widget.controller.text = formattedTime;
+      if (widget.onChanged != null) {
+        widget.onChanged!(formattedTime);
+      }
       if (widget.onTap != null) {
         widget.onTap!();
       }

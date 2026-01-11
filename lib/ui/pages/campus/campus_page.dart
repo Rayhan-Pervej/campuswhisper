@@ -53,7 +53,7 @@ class CampusPage extends StatelessWidget {
                         icon: Iconsax.people_outline,
                         title: 'Clubs',
                         onTap: () {
-                          Navigator.pushNamed(context, '/course_routine');
+                          Navigator.pushNamed(context, '/clubs_page');
                         },
                       ),
                     ),

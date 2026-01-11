@@ -1,68 +1,136 @@
+import 'package:campuswhisper/core/repositories/base_repository.dart';
 import 'package:campuswhisper/models/user_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:campuswhisper/core/database/query_builder.dart';
+import 'package:campuswhisper/core/database/paginated_result.dart';
 
-class UserRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _collectionName = 'users';
+class UserRepository extends BaseRepository<UserModel> {
+  @override
+  String get collectionName => 'users';
 
-  // POST: Create a new user
-  Future<void> createUser(UserModel user) async {
-    try {
-      await _firestore.collection(_collectionName).doc(user.id).set(user.toMap());
-    } catch (e) {
-      throw Exception('Failed to create user: $e');
-    }
+  @override
+  UserModel fromJson(Map<String, dynamic> json) => UserModel.fromJson(json);
+
+  @override
+  Map<String, dynamic> toJson(UserModel model) => model.toJson();
+
+  @override
+  String getId(UserModel model) => model.id;
+
+  // ═══════════════════════════════════════════════════════════════
+  // SPECIALIZED QUERIES
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Get users by department (with pagination)
+  Future<PaginatedResult<UserModel>> getByDepartment(
+    String department, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [QueryFilter.equals('department', department)],
+      sorts: [QuerySort.ascending('first_name')],
+      limit: limit,
+      startAfter: startAfter,
+    );
   }
 
-  // POST: Update existing user
-  Future<void> updateUser(UserModel user) async {
-    try {
-      await _firestore.collection(_collectionName).doc(user.id).update(user.toMap());
-    } catch (e) {
-      throw Exception('Failed to update user: $e');
-    }
+  /// Get users by university (with pagination)
+  Future<PaginatedResult<UserModel>> getByUniversity(
+    String university, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [QueryFilter.equals('university', university)],
+      sorts: [QuerySort.ascending('first_name')],
+      limit: limit,
+      startAfter: startAfter,
+    );
   }
 
-  // FETCH: Get user by ID
-  Future<UserModel?> getUserById(String userId) async {
-    try {
-      DocumentSnapshot doc = await _firestore.collection(_collectionName).doc(userId).get();
-      
-      if (doc.exists) {
-        return UserModel.fromMap(doc.data() as Map<String, dynamic>);
-      }
-      return null;
-    } catch (e) {
-      throw Exception('Failed to get user by ID: $e');
-    }
+  /// Get users by role (with pagination)
+  Future<PaginatedResult<UserModel>> getByRole(
+    String role, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [QueryFilter.equals('role', role)],
+      sorts: [QuerySort.ascending('first_name')],
+      limit: limit,
+      startAfter: startAfter,
+    );
   }
 
-  // FETCH: Get all users
-  Future<List<UserModel>> getAllUsers() async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore.collection(_collectionName).get();
-      
-      return querySnapshot.docs
-          .map((doc) => UserModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to get all users: $e');
-    }
+  /// Get top contributors (sorted by XP)
+  Future<PaginatedResult<UserModel>> getTopContributors({
+    int limit = 10,
+    dynamic startAfter,
+  }) async {
+    return query(
+      sorts: [QuerySort.descending('xp')],
+      limit: limit,
+      startAfter: startAfter,
+    );
   }
 
-  // FETCH: Get users by department
-  Future<List<UserModel>> getUsersByDepartment(String department) async {
+  /// Get users by department and year
+  Future<PaginatedResult<UserModel>> getByDepartmentAndYear(
+    String department,
+    int year, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [
+        QueryFilter.equals('department', department),
+        QueryFilter.equals('year', year),
+      ],
+      sorts: [QuerySort.ascending('first_name')],
+      limit: limit,
+      startAfter: startAfter,
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // USER-SPECIFIC UPDATES
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Update last login timestamp for a user
+  Future<void> updateLastLogin(String userId) async {
     try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection(_collectionName)
-          .where('department', isEqualTo: department)
-          .get();
-      
-      return querySnapshot.docs
-          .map((doc) => UserModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
+      // Get the user first
+      final user = await getById(userId);
+      if (user == null) return;
+
+      // Create updated user with new lastLogin
+      final updatedUser = UserModel(
+        uid: user.uid,
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        university: user.university,
+        department: user.department,
+        batch: user.batch,
+        xp: user.xp,
+        contributions: user.contributions,
+        badges: user.badges,
+        favoriteCourses: user.favoriteCourses,
+        notifyMe: user.notifyMe,
+        theme: user.theme,
+        role: user.role,
+        createdAt: user.createdAt,
+        lastLogin: DateTime.now(), // Update this field
+      );
+
+      await update(updatedUser);
     } catch (e) {
-      throw Exception('Failed to get users by department: $e');
+      throw RepositoryException(
+        message: 'Failed to update last login',
+        code: 'UPDATE_LAST_LOGIN_FAILED',
+        originalError: e,
+      );
     }
   }
 }

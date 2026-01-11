@@ -1,4 +1,5 @@
 import 'package:campuswhisper/models/user_model.dart';
+import 'package:campuswhisper/routing/app_routes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,10 @@ class SignUpProvider extends ChangeNotifier {
       );
 
       final String uid = credential.user!.uid;
+
+      // Send email verification
+      await credential.user!.sendEmailVerification();
+
       final user = UserModel(
         uid: uid,
         id: idController.text.trim(),
@@ -48,23 +53,36 @@ class SignUpProvider extends ChangeNotifier {
         xp: 0,
         contributions: 0,
         role: 'student',
-        
+        createdAt: DateTime.now(),
       );
 
-      // Upload to Firestore
-      await _firestore.collection('users').doc(user.id).set(user.toMap());
+      // Upload to Firestore - use student id as document ID
+      await _firestore.collection('users').doc(user.id).set(user.toJson());
 
-      // Optionally: clear fields or show success message
+      // Navigate to email verification page
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("User registered successfully"),
+            content: Text("Verification email sent! Please check your inbox."),
             behavior: SnackBarBehavior.floating,
           ),
         );
+
+        // Navigate to email verification page
+        Navigator.pushReplacementNamed(
+          context,
+          AppRoutes.emailVerification,
+          arguments: {'email': emailController.text.trim()},
+        );
       }
+    } on FirebaseException catch (e) {
       if (context.mounted) {
-        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Firebase Error: ${e.message ?? e.toString()}"),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 import '../../../../core/theme/app_dimensions.dart';
+import '../../../../routing/app_routes.dart';
 
 class LostAndFoundItemCard extends StatelessWidget {
   final String itemName;
@@ -85,16 +86,38 @@ class LostAndFoundItemCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final isLost = status == 'Lost';
 
-    return Card(
-      margin: EdgeInsets.symmetric(
-        vertical: AppDimensions.space8,
-        horizontal: AppDimensions.horizontalPadding,
-      ),
-      elevation: AppDimensions.elevation2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppDimensions.radius12),
-      ),
-      child: Column(
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          AppRoutes.itemDetail,
+          arguments: {
+            'item': {
+              'itemName': itemName,
+              'description': description,
+              'datePosted': datePosted,
+              'location': location,
+              'category': category,
+              'status': status,
+              'posterName': posterName,
+              'posterAvatar': posterImageUrl,
+              'imageUrl': imageUrl,
+              'isResolved': isResolved,
+            },
+          },
+        );
+      },
+      borderRadius: BorderRadius.circular(AppDimensions.radius12),
+      child: Card(
+        margin: EdgeInsets.symmetric(
+          vertical: AppDimensions.space8,
+          horizontal: AppDimensions.horizontalPadding,
+        ),
+        elevation: AppDimensions.elevation2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radius12),
+        ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Item Image (if available)
@@ -405,6 +428,7 @@ class LostAndFoundItemCard extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

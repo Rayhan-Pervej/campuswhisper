@@ -1,0 +1,576 @@
+================================================================================
+LIB/CORE/CONSTANTS - FOLDER INSTRUCTIONS
+================================================================================
+
+FOLDER PURPOSE:
+Centralized constants for the entire app - app configuration, error messages,
+validation messages, and asset paths. SINGLE SOURCE OF TRUTH for all strings.
+
+FILES TO CREATE (complete in order):
+1. [ ] app_constants.dart ⭐ CRITICAL
+2. [ ] error_messages.dart ⭐ CRITICAL
+3. [ ] validation_messages.dart ⭐ CRITICAL
+4. [ ] asset_paths.dart
+
+EXISTING FILES (DO NOT MODIFY):
+✅ build_text.dart (already exists)
+
+⚠️ CRITICAL RULES FOR THIS FOLDER:
+- ALL strings used in the app MUST be defined here
+- NEVER hardcode user-facing strings in UI files
+- Use descriptive constant names (camelCase)
+- Group related constants together
+- Add comments for clarity
+- DO NOT create sub-folders
+
+================================================================================
+1. APP_CONSTANTS.DART ⭐ CRITICAL
+================================================================================
+
+PURPOSE: App-wide configuration constants
+
+DEPENDENCIES:
+✅ None
+
+EXACT CODE TEMPLATE:
+
+```dart
+class AppConstants {
+  // App Info
+  static const String appName = 'CampusWhisper';
+  static const String appVersion = '1.0.0';
+  static const String appDescription = 'Your campus social hub';
+
+  // API & Backend (for future use)
+  static const String apiUrl = 'https://api.campuswhisper.com';
+  static const String baseUrl = 'https://campuswhisper.com';
+
+  // Pagination
+  static const int postsPerPage = 20;
+  static const int eventsPerPage = 15;
+  static const int commentsPerPage = 50;
+
+  // Image/File Limits
+  static const int maxImageSizeMB = 5;
+  static const int maxImagesPerPost = 5;
+  static const int maxVideoSizeMB = 50;
+
+  // Text Limits
+  static const int maxPostTitleLength = 100;
+  static const int maxPostContentLength = 5000;
+  static const int maxCommentLength = 500;
+  static const int maxBioLength = 200;
+  static const int minPasswordLength = 6;
+
+  // Defaults
+  static const String defaultAvatarUrl = 'https://ui-avatars.com/api/?name=User&background=3F51B5&color=fff';
+  static const String placeholderImageUrl = 'https://via.placeholder.com/400x300?text=No+Image';
+
+  // Date Formats
+  static const String displayDateFormat = 'MMM dd, yyyy';
+  static const String displayTimeFormat = 'h:mm a';
+  static const String displayDateTimeFormat = 'MMM dd, yyyy \'at\' h:mm a';
+
+  // Tags (for threads/posts)
+  static const List<String> postTags = [
+    'General',
+    'Academic',
+    'Social',
+    'Events',
+    'Sports',
+    'Help',
+    'Discussion',
+    'Question',
+  ];
+
+  // Event Categories
+  static const List<String> eventCategories = [
+    'All',
+    'Academic',
+    'Cultural',
+    'Sports',
+    'Workshop',
+    'Seminar',
+    'Competition',
+    'Social',
+  ];
+
+  // Competition Categories
+  static const List<String> competitionCategories = [
+    'All',
+    'Programming',
+    'Business',
+    'Sports',
+    'Cultural',
+    'Academic',
+    'Gaming',
+    'Other',
+  ];
+
+  // Lost & Found Status
+  static const String lostStatus = 'Lost';
+  static const String foundStatus = 'Found';
+  static const String resolvedStatus = 'Resolved';
+
+  // Competition Status
+  static const String upcomingStatus = 'Upcoming';
+  static const String activeStatus = 'Active';
+  static const String endedStatus = 'Ended';
+
+  // Scholarship Types
+  static const List<String> scholarshipTypes = [
+    'Merit-based',
+    'Need-based',
+    'Sports',
+    'Cultural',
+    'Research',
+    'International',
+  ];
+
+  // CGPA Grading Scale
+  static const Map<String, double> gradePoints = {
+    'A+': 4.0,
+    'A': 3.75,
+    'A-': 3.5,
+    'B+': 3.25,
+    'B': 3.0,
+    'B-': 2.75,
+    'C+': 2.5,
+    'C': 2.25,
+    'D': 2.0,
+    'F': 0.0,
+  };
+
+  // Support
+  static const String supportEmail = 'support@campuswhisper.com';
+  static const String feedbackEmail = 'feedback@campuswhisper.com';
+  static const String privacyPolicyUrl = 'https://campuswhisper.com/privacy';
+  static const String termsOfServiceUrl = 'https://campuswhisper.com/terms';
+
+  // Social Media (example)
+  static const String facebookUrl = 'https://facebook.com/campuswhisper';
+  static const String twitterUrl = 'https://twitter.com/campuswhisper';
+  static const String instagramUrl = 'https://instagram.com/campuswhisper';
+
+  // Notification Settings
+  static const Duration snackbarDuration = Duration(seconds: 3);
+  static const Duration errorSnackbarDuration = Duration(seconds: 4);
+  static const Duration loadingDebounce = Duration(milliseconds: 300);
+
+  // Search
+  static const int minSearchLength = 2;
+  static const Duration searchDebounce = Duration(milliseconds: 500);
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File created at lib/core/constants/app_constants.dart
+[ ] Contains ALL sections (App Info, API, Pagination, Limits, Defaults, etc.)
+[ ] All constants are static const
+[ ] Descriptive names
+[ ] Grouped logically with comments
+[ ] No syntax errors
+
+SELF-CHECK COMMANDS:
+1. Verify file exists:
+   ls lib/core/constants/app_constants.dart
+
+2. Count constant declarations (should be 20+):
+   grep -c "static const" lib/core/constants/app_constants.dart
+
+USAGE EXAMPLE:
+```dart
+// App name
+Text(AppConstants.appName)
+
+// Check text length
+if (text.length > AppConstants.maxCommentLength) {
+  // Show error
+}
+
+// Event categories
+for (var category in AppConstants.eventCategories) {
+  // Build chips
+}
+
+// Grade points
+final gpa = AppConstants.gradePoints['A+'];  // 4.0
+```
+
+================================================================================
+2. ERROR_MESSAGES.DART ⭐ CRITICAL
+================================================================================
+
+PURPOSE: All error messages shown to users
+
+DEPENDENCIES:
+✅ None
+
+EXACT CODE TEMPLATE:
+
+```dart
+class ErrorMessages {
+  // General Errors
+  static const String somethingWentWrong = 'Something went wrong. Please try again.';
+  static const String networkError = 'Network error. Please check your connection.';
+  static const String serverError = 'Server error. Please try again later.';
+  static const String unknownError = 'An unknown error occurred.';
+
+  // Authentication Errors
+  static const String invalidCredentials = 'Invalid email or password.';
+  static const String emailAlreadyExists = 'This email is already registered.';
+  static const String weakPassword = 'Password is too weak. Use at least 6 characters.';
+  static const String userNotFound = 'No account found with this email.';
+  static const String emailNotVerified = 'Please verify your email address first.';
+  static const String accountDisabled = 'This account has been disabled.';
+
+  // Form Errors
+  static const String requiredField = 'This field is required.';
+  static const String invalidEmail = 'Please enter a valid email address.';
+  static const String invalidPhone = 'Please enter a valid phone number.';
+  static const String passwordMismatch = 'Passwords do not match.';
+  static const String passwordTooShort = 'Password must be at least 6 characters.';
+  static const String invalidUrl = 'Please enter a valid URL.';
+
+  // File Upload Errors
+  static const String fileTooLarge = 'File size exceeds the maximum limit.';
+  static const String invalidFileType = 'Invalid file type. Please select a valid file.';
+  static const String uploadFailed = 'File upload failed. Please try again.';
+  static const String noFileSelected = 'No file selected.';
+
+  // Data Errors
+  static const String dataNotFound = 'Requested data not found.';
+  static const String noDataAvailable = 'No data available at the moment.';
+  static const String loadFailed = 'Failed to load data. Please try again.';
+  static const String saveFailed = 'Failed to save. Please try again.';
+  static const String deleteFailed = 'Failed to delete. Please try again.';
+  static const String updateFailed = 'Failed to update. Please try again.';
+
+  // Permission Errors
+  static const String permissionDenied = 'Permission denied.';
+  static const String cameraPermissionDenied = 'Camera permission is required.';
+  static const String storagePermissionDenied = 'Storage permission is required.';
+  static const String locationPermissionDenied = 'Location permission is required.';
+
+  // Feature-Specific Errors
+  static const String eventNotFound = 'Event not found.';
+  static const String competitionNotFound = 'Competition not found.';
+  static const String postNotFound = 'Post not found.';
+  static const String commentNotFound = 'Comment not found.';
+  static const String userNotFound = 'User not found.';
+  static const String clubNotFound = 'Club not found.';
+
+  // Action Errors
+  static const String alreadyRegistered = 'You are already registered for this event.';
+  static const String registrationClosed = 'Registration is closed.';
+  static const String eventFull = 'This event is full.';
+  static const String cannotDeleteOwnComment = 'Cannot delete your own comment.';
+  static const String cannotEditAfterDeadline = 'Cannot edit after the deadline.';
+
+  // Validation Errors
+  static const String invalidDateRange = 'Invalid date range.';
+  static const String pastDateNotAllowed = 'Past dates are not allowed.';
+  static const String invalidInput = 'Invalid input provided.';
+  static const String tooManyAttempts = 'Too many attempts. Please try again later.';
+
+  // Search Errors
+  static const String searchFailed = 'Search failed. Please try again.';
+  static const String noResultsFound = 'No results found.';
+  static const String searchQueryTooShort = 'Search query is too short.';
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File created at lib/core/constants/error_messages.dart
+[ ] Contains ALL error categories
+[ ] All messages are user-friendly
+[ ] All constants are static const
+[ ] No technical jargon in messages
+[ ] No syntax errors
+
+SELF-CHECK COMMANDS:
+1. Verify file exists:
+   ls lib/core/constants/error_messages.dart
+
+2. Count error messages (should be 40+):
+   grep -c "static const" lib/core/constants/error_messages.dart
+
+USAGE EXAMPLE:
+```dart
+// In try-catch
+try {
+  await someOperation();
+} catch (e) {
+  SnackbarHelper.showError(context, ErrorMessages.somethingWentWrong);
+}
+
+// In validation
+if (data == null) {
+  SnackbarHelper.showError(context, ErrorMessages.dataNotFound);
+}
+
+// In dialog
+DialogHelper.showAlert(
+  context,
+  title: 'Error',
+  message: ErrorMessages.networkError,
+);
+```
+
+================================================================================
+3. VALIDATION_MESSAGES.DART ⭐ CRITICAL
+================================================================================
+
+PURPOSE: Validation messages used by form validators
+
+DEPENDENCIES:
+✅ None
+
+EXACT CODE TEMPLATE:
+
+```dart
+class ValidationMessages {
+  // Email
+  static const String emailRequired = 'Email is required';
+  static const String emailInvalid = 'Enter a valid email address';
+
+  // Password
+  static const String passwordRequired = 'Password is required';
+  static const String passwordTooShort = 'Password must be at least 6 characters';
+  static const String passwordTooWeak = 'Password is too weak';
+  static const String passwordMismatch = 'Passwords do not match';
+  static const String confirmPasswordRequired = 'Please confirm your password';
+
+  // Name
+  static const String nameRequired = 'Name is required';
+  static const String firstNameRequired = 'First name is required';
+  static const String lastNameRequired = 'Last name is required';
+  static const String nameTooShort = 'Name must be at least 2 characters';
+
+  // Phone
+  static const String phoneRequired = 'Phone number is required';
+  static const String phoneInvalid = 'Enter a valid phone number (01XXXXXXXXX)';
+
+  // Generic
+  static const String fieldRequired = 'This field is required';
+  static const String fieldTooShort = 'This field is too short';
+  static const String fieldTooLong = 'This field is too long';
+  static const String invalidInput = 'Invalid input';
+
+  // Title/Content
+  static const String titleRequired = 'Title is required';
+  static const String titleTooShort = 'Title must be at least 3 characters';
+  static const String titleTooLong = 'Title is too long';
+  static const String descriptionRequired = 'Description is required';
+  static const String contentRequired = 'Content is required';
+  static const String contentTooShort = 'Content is too short';
+  static const String contentTooLong = 'Content exceeds maximum length';
+
+  // Date/Time
+  static const String dateRequired = 'Date is required';
+  static const String timeRequired = 'Time is required';
+  static const String invalidDate = 'Invalid date';
+  static const String pastDateNotAllowed = 'Past dates are not allowed';
+  static const String invalidDateRange = 'Invalid date range';
+
+  // Location
+  static const String locationRequired = 'Location is required';
+  static const String addressRequired = 'Address is required';
+
+  // File/Image
+  static const String imageRequired = 'Image is required';
+  static const String fileRequired = 'File is required';
+
+  // Category/Selection
+  static const String categoryRequired = 'Category is required';
+  static const String selectionRequired = 'Please make a selection';
+
+  // URL
+  static const String urlInvalid = 'Enter a valid URL';
+
+  // Number
+  static const String numberInvalid = 'Enter a valid number';
+  static const String numberTooSmall = 'Number is too small';
+  static const String numberTooLarge = 'Number is too large';
+
+  // Scholarship/CGPA Specific
+  static const String cgpaRequired = 'CGPA is required';
+  static const String cgpaInvalid = 'Enter a valid CGPA (0.00 - 4.00)';
+  static const String gradeRequired = 'Grade is required';
+  static const String creditRequired = 'Credit hours required';
+  static const String creditInvalid = 'Enter valid credit hours';
+
+  // Course Specific
+  static const String courseNameRequired = 'Course name is required';
+  static const String courseCodeRequired = 'Course code is required';
+  static const String semesterRequired = 'Semester is required';
+
+  // Event Specific
+  static const String eventNameRequired = 'Event name is required';
+  static const String eventDateRequired = 'Event date is required';
+  static const String eventLocationRequired = 'Event location is required';
+  static const String eventDescriptionRequired = 'Event description is required';
+
+  // Competition Specific
+  static const String competitionNameRequired = 'Competition name is required';
+  static const String registrationDeadlineRequired = 'Registration deadline is required';
+  static const String maxParticipantsRequired = 'Maximum participants required';
+
+  // Lost & Found Specific
+  static const String itemNameRequired = 'Item name is required';
+  static const String itemDescriptionRequired = 'Item description is required';
+  static const String contactInfoRequired = 'Contact information is required';
+
+  // Comment/Post Specific
+  static const String commentRequired = 'Comment cannot be empty';
+  static const String commentTooLong = 'Comment is too long';
+  static const String postContentRequired = 'Post content is required';
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File created at lib/core/constants/validation_messages.dart
+[ ] Contains ALL validation message categories
+[ ] Messages are clear and user-friendly
+[ ] All constants are static const
+[ ] Feature-specific messages included
+[ ] No syntax errors
+
+SELF-CHECK COMMANDS:
+1. Verify file exists:
+   ls lib/core/constants/validation_messages.dart
+
+2. Count validation messages (should be 50+):
+   grep -c "static const" lib/core/constants/validation_messages.dart
+
+USAGE EXAMPLE:
+```dart
+// Update validators.dart to use these:
+class Validators {
+  static String? email(String? value) {
+    if (value == null || value.isEmpty) {
+      return ValidationMessages.emailRequired;
+    }
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(value)) {
+      return ValidationMessages.emailInvalid;
+    }
+    return null;
+  }
+
+  static String? required(String? value, {String? message}) {
+    if (value == null || value.trim().isEmpty) {
+      return message ?? ValidationMessages.fieldRequired;
+    }
+    return null;
+  }
+}
+
+// In forms:
+CustomInput(
+  validator: Validators.email,  // Will show ValidationMessages.emailRequired or emailInvalid
+)
+```
+
+NOTE: After creating this file, UPDATE lib/core/utils/validators.dart to use
+these constants instead of hardcoded strings!
+
+================================================================================
+4. ASSET_PATHS.DART
+================================================================================
+
+PURPOSE: Centralized asset paths for images, icons, animations
+
+DEPENDENCIES:
+✅ None
+
+CODE TEMPLATE:
+
+```dart
+class AssetPaths {
+  // Images
+  static const String logo = 'assets/images/logo.png';
+  static const String logoText = 'assets/images/logo_text.png';
+  static const String placeholder = 'assets/images/placeholder.png';
+  static const String defaultAvatar = 'assets/images/default_avatar.png';
+
+  // Illustrations (for empty states)
+  static const String noData = 'assets/illustrations/no_data.svg';
+  static const String noResults = 'assets/illustrations/no_results.svg';
+  static const String error = 'assets/illustrations/error.svg';
+  static const String success = 'assets/illustrations/success.svg';
+
+  // Icons (if using custom icons)
+  static const String customIcon1 = 'assets/icons/custom_icon1.png';
+
+  // Animations (Lottie - if using)
+  static const String loadingAnimation = 'assets/animations/loading.json';
+  static const String successAnimation = 'assets/animations/success.json';
+
+  // Backgrounds
+  static const String splashBackground = 'assets/images/splash_bg.png';
+  static const String loginBackground = 'assets/images/login_bg.png';
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File created at lib/core/constants/asset_paths.dart
+[ ] Contains organized asset paths
+[ ] All constants are static const
+[ ] Paths match actual asset locations
+[ ] No syntax errors
+
+USAGE EXAMPLE:
+```dart
+// Using image
+Image.asset(AssetPaths.logo)
+
+// Using SVG
+SvgPicture.asset(AssetPaths.noData)
+
+// Using Lottie
+Lottie.asset(AssetPaths.loadingAnimation)
+```
+
+NOTE: This file can be created later when actual assets are added to the project.
+For now, the app uses network images and icons_plus package.
+
+================================================================================
+FOLDER COMPLETION CHECKLIST
+================================================================================
+
+Before marking this folder as complete:
+
+[ ] All 4 files created
+[ ] Files 1-3 (app_constants, error_messages, validation_messages) are CRITICAL
+[ ] File 4 (asset_paths) can be created later when assets are added
+[ ] No syntax errors
+[ ] All constants properly named and grouped
+[ ] Updated validators.dart to use ValidationMessages (IMPORTANT!)
+
+IMPORTANT NEXT STEP:
+After creating validation_messages.dart, GO BACK and update lib/core/utils/validators.dart
+to use ValidationMessages constants instead of hardcoded strings!
+
+Example:
+OLD: return 'Email is required';
+NEW: return ValidationMessages.emailRequired;
+
+When folder complete, update DEVELOPMENT_INSTRUCTIONS.txt:
+- Change: [ ] lib/core/constants/
+- To: [✅] lib/core/constants/
+- Move to next folder: lib/core/extensions/
+
+================================================================================
+PRIORITY FOR PHASE 0
+================================================================================
+
+MUST CREATE NOW:
+1. ✅ app_constants.dart
+2. ✅ error_messages.dart
+3. ✅ validation_messages.dart
+
+CAN CREATE LATER:
+4. ⏳ asset_paths.dart (when assets are added)
+
+================================================================================

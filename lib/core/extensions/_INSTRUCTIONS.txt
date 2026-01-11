@@ -1,0 +1,458 @@
+================================================================================
+LIB/CORE/EXTENSIONS - FOLDER INSTRUCTIONS
+================================================================================
+
+FOLDER PURPOSE:
+Extension methods to add helpful functionality to existing Dart/Flutter classes
+like BuildContext, String, DateTime, etc. Makes code cleaner and more readable.
+
+FILES TO CREATE (complete in order):
+1. [ ] context_extensions.dart ⭐ CRITICAL
+2. [ ] string_extensions.dart
+3. [ ] datetime_extensions.dart
+
+⚠️ CRITICAL RULES FOR THIS FOLDER:
+- Extensions should be simple and commonly used
+- DO NOT add complex logic in extensions
+- Keep extension names descriptive
+- DO NOT create unnecessary extensions
+- Extensions should improve code readability
+
+================================================================================
+1. CONTEXT_EXTENSIONS.DART ⭐ CRITICAL
+================================================================================
+
+PURPOSE: Quick access to Theme, MediaQuery, and Navigator from BuildContext
+
+DEPENDENCIES:
+✅ Flutter Material package
+✅ lib/core/theme/app_dimensions.dart
+
+EXACT CODE TEMPLATE:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:campuswhisper/core/theme/app_dimensions.dart';
+
+extension ContextExtensions on BuildContext {
+  // Theme
+  ThemeData get theme => Theme.of(this);
+  TextTheme get textTheme => Theme.of(this).textTheme;
+  ColorScheme get colorScheme => Theme.of(this).colorScheme;
+
+  // MediaQuery
+  MediaQueryData get mediaQuery => MediaQuery.of(this);
+  Size get screenSize => MediaQuery.of(this).size;
+  double get screenWidth => MediaQuery.of(this).size.width;
+  double get screenHeight => MediaQuery.of(this).size.height;
+  EdgeInsets get padding => MediaQuery.of(this).padding;
+  EdgeInsets get viewInsets => MediaQuery.of(this).viewInsets;
+
+  // Screen Breakpoints
+  bool get isSmallScreen => screenWidth < 600;
+  bool get isMediumScreen => screenWidth >= 600 && screenWidth < 1200;
+  bool get isLargeScreen => screenWidth >= 1200;
+
+  // Brightness
+  bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
+  bool get isLightMode => Theme.of(this).brightness == Brightness.light;
+
+  // Navigator
+  NavigatorState get navigator => Navigator.of(this);
+
+  // Show SnackBar (helper)
+  void showSnackBar(String message) {
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  // Hide Keyboard
+  void hideKeyboard() {
+    FocusScope.of(this).unfocus();
+  }
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File created at lib/core/extensions/context_extensions.dart
+[ ] Contains ALL helper methods
+[ ] Imports AppDimensions correctly
+[ ] No syntax errors
+[ ] Extension name is descriptive
+[ ] Methods are simple and useful
+
+SELF-CHECK COMMANDS:
+1. Verify file exists:
+   ls lib/core/extensions/context_extensions.dart
+
+2. Check import:
+   grep "import.*app_dimensions" lib/core/extensions/context_extensions.dart
+
+3. Count getters (should be 15+):
+   grep -c "get " lib/core/extensions/context_extensions.dart
+
+USAGE EXAMPLE:
+
+BEFORE (without extension):
+```dart
+final colorScheme = Theme.of(context).colorScheme;
+final width = MediaQuery.of(context).size.width;
+final isDark = Theme.of(context).brightness == Brightness.dark;
+```
+
+AFTER (with extension):
+```dart
+final colorScheme = context.colorScheme;
+final width = context.screenWidth;
+final isDark = context.isDarkMode;
+```
+
+Much cleaner! ✅
+
+More examples:
+```dart
+// Get screen size
+if (context.isSmallScreen) {
+  // Mobile layout
+} else {
+  // Tablet/Desktop layout
+}
+
+// Hide keyboard
+context.hideKeyboard();
+
+// Navigate
+context.navigator.push(...);
+
+// Quick snackbar
+context.showSnackBar('Success!');
+```
+
+================================================================================
+2. STRING_EXTENSIONS.DART
+================================================================================
+
+PURPOSE: Add helpful methods to String class
+
+DEPENDENCIES:
+✅ None
+
+EXACT CODE TEMPLATE:
+
+```dart
+extension StringExtensions on String {
+  // Capitalize first letter
+  String get capitalize {
+    if (isEmpty) return this;
+    return '${this[0].toUpperCase()}${substring(1).toLowerCase()}';
+  }
+
+  // Capitalize first letter of each word
+  String get capitalizeWords {
+    if (isEmpty) return this;
+    return split(' ').map((word) => word.capitalize).join(' ');
+  }
+
+  // Check if string is valid email
+  bool get isValidEmail {
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    return emailRegex.hasMatch(this);
+  }
+
+  // Check if string is valid phone (Bangladesh format)
+  bool get isValidPhone {
+    final phoneRegex = RegExp(r'^01[0-9]{9}$');
+    return phoneRegex.hasMatch(this);
+  }
+
+  // Check if string is valid URL
+  bool get isValidUrl {
+    final urlRegex = RegExp(
+      r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$'
+    );
+    return urlRegex.hasMatch(this);
+  }
+
+  // Remove extra whitespace
+  String get removeExtraSpaces {
+    return trim().replaceAll(RegExp(r'\s+'), ' ');
+  }
+
+  // Truncate string with ellipsis
+  String truncate(int maxLength, {String ellipsis = '...'}) {
+    if (length <= maxLength) return this;
+    return '${substring(0, maxLength)}$ellipsis';
+  }
+
+  // Check if string is numeric
+  bool get isNumeric {
+    return double.tryParse(this) != null;
+  }
+
+  // Convert to int safely
+  int? get toIntOrNull {
+    return int.tryParse(this);
+  }
+
+  // Convert to double safely
+  double? get toDoubleOrNull {
+    return double.tryParse(this);
+  }
+
+  // Check if empty or whitespace
+  bool get isBlank {
+    return trim().isEmpty;
+  }
+
+  // Reverse string
+  String get reverse {
+    return split('').reversed.join('');
+  }
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File created at lib/core/extensions/string_extensions.dart
+[ ] Contains ALL helper methods
+[ ] Regex patterns are correct
+[ ] No syntax errors
+[ ] Methods are useful and commonly needed
+
+SELF-CHECK COMMANDS:
+1. Verify file exists:
+   ls lib/core/extensions/string_extensions.dart
+
+2. Count methods/getters (should be 12+):
+   grep -c -E "(get |String |bool )" lib/core/extensions/string_extensions.dart
+
+USAGE EXAMPLE:
+
+```dart
+// Capitalize
+'hello world'.capitalize          // "Hello world"
+'hello world'.capitalizeWords     // "Hello World"
+
+// Validation
+'test@example.com'.isValidEmail   // true
+'01712345678'.isValidPhone        // true
+'https://example.com'.isValidUrl  // true
+
+// Truncate
+'This is a long text'.truncate(10)  // "This is a..."
+
+// Remove spaces
+'  hello   world  '.removeExtraSpaces  // "hello world"
+
+// Check numeric
+'123'.isNumeric     // true
+'abc'.isNumeric     // false
+
+// Safe conversion
+'123'.toIntOrNull   // 123
+'abc'.toIntOrNull   // null
+
+// Check blank
+'   '.isBlank       // true
+'hello'.isBlank     // false
+```
+
+================================================================================
+3. DATETIME_EXTENSIONS.DART
+================================================================================
+
+PURPOSE: Add helpful methods to DateTime class
+
+DEPENDENCIES:
+✅ None
+
+EXACT CODE TEMPLATE:
+
+```dart
+extension DateTimeExtensions on DateTime {
+  // Check if date is today
+  bool get isToday {
+    final now = DateTime.now();
+    return year == now.year && month == now.month && day == now.day;
+  }
+
+  // Check if date is tomorrow
+  bool get isTomorrow {
+    final tomorrow = DateTime.now().add(const Duration(days: 1));
+    return year == tomorrow.year && month == tomorrow.month && day == tomorrow.day;
+  }
+
+  // Check if date is yesterday
+  bool get isYesterday {
+    final yesterday = DateTime.now().subtract(const Duration(days: 1));
+    return year == yesterday.year && month == yesterday.month && day == yesterday.day;
+  }
+
+  // Check if date is in the past
+  bool get isPast {
+    return isBefore(DateTime.now());
+  }
+
+  // Check if date is in the future
+  bool get isFuture {
+    return isAfter(DateTime.now());
+  }
+
+  // Check if date is this week
+  bool get isThisWeek {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final endOfWeek = startOfWeek.add(const Duration(days: 6));
+    return isAfter(startOfWeek) && isBefore(endOfWeek);
+  }
+
+  // Check if date is this month
+  bool get isThisMonth {
+    final now = DateTime.now();
+    return year == now.year && month == now.month;
+  }
+
+  // Check if date is this year
+  bool get isThisYear {
+    final now = DateTime.now();
+    return year == now.year;
+  }
+
+  // Get start of day (00:00:00)
+  DateTime get startOfDay {
+    return DateTime(year, month, day);
+  }
+
+  // Get end of day (23:59:59)
+  DateTime get endOfDay {
+    return DateTime(year, month, day, 23, 59, 59);
+  }
+
+  // Add days
+  DateTime addDays(int days) {
+    return add(Duration(days: days));
+  }
+
+  // Subtract days
+  DateTime subtractDays(int days) {
+    return subtract(Duration(days: days));
+  }
+
+  // Add months
+  DateTime addMonths(int months) {
+    return DateTime(year, month + months, day, hour, minute, second);
+  }
+
+  // Get difference in days from now
+  int get daysFromNow {
+    final now = DateTime.now();
+    return difference(now).inDays;
+  }
+
+  // Get difference in hours from now
+  int get hoursFromNow {
+    final now = DateTime.now();
+    return difference(now).inHours;
+  }
+
+  // Check if same day as another date
+  bool isSameDay(DateTime other) {
+    return year == other.year && month == other.month && day == other.day;
+  }
+}
+```
+
+VALIDATION CHECKLIST:
+[ ] File created at lib/core/extensions/datetime_extensions.dart
+[ ] Contains ALL helper methods
+[ ] Date comparisons are correct
+[ ] No syntax errors
+[ ] Methods are useful for date operations
+
+SELF-CHECK COMMANDS:
+1. Verify file exists:
+   ls lib/core/extensions/datetime_extensions.dart
+
+2. Count methods/getters (should be 15+):
+   grep -c -E "(get |bool |DateTime |int )" lib/core/extensions/datetime_extensions.dart
+
+USAGE EXAMPLE:
+
+```dart
+final date = DateTime.now();
+
+// Check if today/tomorrow/yesterday
+if (event.date.isToday) {
+  // Show "Today" badge
+}
+
+if (event.date.isTomorrow) {
+  // Show "Tomorrow" badge
+}
+
+// Check if past/future
+if (event.date.isPast) {
+  // Event has ended
+}
+
+// Check if this week/month/year
+if (event.date.isThisWeek) {
+  // Show in "This Week" section
+}
+
+// Get start/end of day
+final startOfDay = DateTime.now().startOfDay;  // 2026-01-10 00:00:00
+final endOfDay = DateTime.now().endOfDay;      // 2026-01-10 23:59:59
+
+// Add/subtract days
+final nextWeek = DateTime.now().addDays(7);
+final lastWeek = DateTime.now().subtractDays(7);
+
+// Get days from now
+final daysUntilEvent = event.date.daysFromNow;  // e.g., 5 days
+
+// Compare dates
+if (date1.isSameDay(date2)) {
+  // Same day
+}
+```
+
+================================================================================
+FOLDER COMPLETION CHECKLIST
+================================================================================
+
+Before marking this folder as complete:
+
+[ ] All 3 files created
+[ ] File 1 (context_extensions) is CRITICAL and MUST be complete
+[ ] Files 2-3 are helpful but not Phase 0 critical (can be created later if needed)
+[ ] No syntax errors
+[ ] All extensions are tested and work correctly
+[ ] Extensions improve code readability
+
+When folder complete, update DEVELOPMENT_INSTRUCTIONS.txt:
+- Change: [ ] lib/core/extensions/
+- To: [✅] lib/core/extensions/
+- Move to next folder: lib/ui/widgets/
+
+================================================================================
+PRIORITY FOR PHASE 0
+================================================================================
+
+MUST CREATE NOW:
+1. ✅ context_extensions.dart (widely used throughout app)
+
+CAN CREATE LATER (but recommended):
+2. ⏳ string_extensions.dart (useful but not critical)
+3. ⏳ datetime_extensions.dart (useful but not critical, date_formatter.dart is more important)
+
+Note: Extensions are "nice to have" but not absolutely required. Focus on:
+- validators.dart
+- snackbar_helper.dart
+- dialog_helper.dart
+- date_formatter.dart
+- constants files
+
+Extensions can be added as needed during development.
+
+================================================================================

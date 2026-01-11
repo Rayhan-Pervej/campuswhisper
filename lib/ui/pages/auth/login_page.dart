@@ -4,10 +4,10 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/build_text.dart';
 import '../../../providers/login_provider.dart';
 import '../../../core/theme/app_dimensions.dart';
+import '../../../routing/app_routes.dart';
 import '../../widgets/custom_input.dart';
 import '../../widgets/custom_password.dart';
 import '../../widgets/default_button.dart';
-import 'sign_up_page.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -88,6 +88,25 @@ class _LoginState extends State<Login> {
                         ],
                       ),
                     ),
+                    AppDimensions.h8,
+
+                    // Forgot Password Link
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          AppRoutes.forgotPassword,
+                        ),
+                        child: BuildText(
+                          text: "Forgot Password?",
+                          fontSize: 14,
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+
                     AppDimensions.h24,
 
                     DefaultButton(
@@ -110,11 +129,9 @@ class _LoginState extends State<Login> {
                         ),
 
                         GestureDetector(
-                          onTap: () => Navigator.push(
+                          onTap: () => Navigator.pushNamed(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => SignUpPage(),
-                            ),
+                            AppRoutes.signUp,
                           ),
                           child: BuildText(
                             color: colorScheme.primary,

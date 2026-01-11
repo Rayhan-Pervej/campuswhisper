@@ -1,0 +1,283 @@
+================================================================================
+LIB/UI/PAGES/EVENTS - FOLDER INSTRUCTIONS
+================================================================================
+
+FOLDER PURPOSE:
+Events feature - allows users to browse campus events, view details, register,
+view attendees, and comment on events.
+
+EXISTING FILES:
+✅ events_page.dart (incomplete - list view only, needs completion)
+✅ widgets/event_card.dart (complete)
+✅ widgets/category_chip_filter.dart (complete)
+✅ widgets/add_event.dart (complete - bottom dialog form)
+
+FILES TO CREATE:
+1. [ ] event_detail_page.dart ⭐ CRITICAL (view full event, register, share)
+2. [ ] event_attendees_page.dart ⭐ (list of registered attendees)
+3. [ ] event_comments_page.dart (comments/discussion for event)
+
+⚠️ NAVIGATION FLOW:
+events_page.dart (list)
+    ↓ [tap card]
+event_detail_page.dart (full details, action buttons)
+    ↓ [tap "View Attendees"]
+event_attendees_page.dart (list of users)
+    ↓ [tap "Comments"]
+event_comments_page.dart (discussion)
+
+================================================================================
+1. EVENT_DETAIL_PAGE.DART ⭐ CRITICAL
+================================================================================
+
+PURPOSE: Full event details with register, share, attendees, and comments
+
+ROUTE: /event_detail
+ARGUMENTS: Map<String, dynamic> with 'event' data
+
+DEPENDENCIES:
+✅ lib/models/event_model.dart (after Phase 0)
+✅ lib/core/utils/date_formatter.dart
+✅ lib/core/utils/snackbar_helper.dart
+✅ lib/core/utils/dialog_helper.dart
+✅ lib/ui/widgets/cached_image.dart
+✅ lib/ui/widgets/user_avatar.dart
+
+KEY FEATURES:
+- Hero animation from events_page
+- Large event image
+- Full event details (title, description, date, location, organizer)
+- Register/Unregister button
+- Attendee count with avatars
+- Share button
+- Comments button
+- Map button (open in maps)
+
+STRUCTURE OUTLINE (not full code):
+
+```dart
+class EventDetailPage extends StatefulWidget {
+  final Map<String, dynamic> event;  // Later: EventModel
+
+  const EventDetailPage({super.key, required this.event});
+}
+
+class _EventDetailPageState extends State<EventDetailPage> {
+  bool _isRegistered = false;
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          // 1. App bar with hero image
+          SliverAppBar(
+            expandedHeight: 300,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Hero(
+                tag: 'event_${widget.event['id']}',
+                child: CachedImage(
+                  imageUrl: widget.event['imageUrl'],
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+
+          // 2. Event details
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(AppDimensions.horizontalPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Category chip
+                  // Title
+                  // Date with icon
+                  // Location with icon
+                  // Attendees with avatars
+                  // Description
+                  // Organizer info
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: _buildActionBar(),
+    );
+  }
+
+  Widget _buildActionBar() {
+    // Register/Unregister button
+    // View Attendees button
+    // Comments button
+    // Share button
+  }
+
+  void _handleRegister() async {
+    // Show confirmation
+    // Update state
+    // Show success
+  }
+}
+```
+
+KEY PATTERNS TO FOLLOW:
+✅ Use SliverAppBar for image header
+✅ Hero animation with tag 'event_${event['id']}'
+✅ Bottom action bar for buttons
+✅ Use DateFormatter.formatDateTime(event.date)
+✅ Show attendee avatars (first 3)
+✅ Share button uses ShareHelper (later)
+
+REFER TO: Similar pattern in competition/lost & found detail pages
+
+================================================================================
+2. EVENT_ATTENDEES_PAGE.DART ⭐
+================================================================================
+
+PURPOSE: List all registered attendees
+
+ROUTE: /event_attendees
+ARGUMENTS: Map with 'eventId' and 'attendees' list
+
+STRUCTURE OUTLINE:
+
+```dart
+class EventAttendeesPage extends StatelessWidget {
+  final String eventTitle;
+  final List<Map<String, dynamic>> attendees;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: DefaultAppBar(
+        title: 'Attendees (${attendees.length})',
+      ),
+      body: ListView.builder(
+        itemCount: attendees.length,
+        itemBuilder: (context, index) {
+          final user = attendees[index];
+          return ListTile(
+            leading: UserAvatar(
+              imageUrl: user['avatar'],
+              name: user['name'],
+            ),
+            title: Text(user['name']),
+            subtitle: Text(user['department'] ?? ''),
+            trailing: Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              // Navigate to user profile (later)
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+```
+
+================================================================================
+3. EVENT_COMMENTS_PAGE.DART
+================================================================================
+
+PURPOSE: Event discussion/comments
+
+ROUTE: /event_comments
+ARGUMENTS: Map with 'eventId'
+
+DEPENDENCIES:
+✅ lib/models/comment_model.dart
+✅ lib/ui/widgets/user_avatar.dart
+✅ Comment widgets (to create later)
+
+STRUCTURE OUTLINE:
+
+```dart
+class EventCommentsPage extends StatefulWidget {
+  final String eventId;
+  final String eventTitle;
+
+  @override
+  _EventCommentsPageState createState() => _EventCommentsPageState();
+}
+
+class _EventCommentsPageState extends State<EventCommentsPage> {
+  final TextEditingController _commentController = TextEditingController();
+  List<Map<String, dynamic>> _comments = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: DefaultAppBar(title: 'Comments'),
+      body: Column(
+        children: [
+          // Comment list
+          Expanded(
+            child: ListView.builder(...),
+          ),
+
+          // Comment input at bottom
+          _buildCommentInput(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommentInput() {
+    // Text field with send button
+  }
+}
+```
+
+================================================================================
+COMPLETION STEPS
+================================================================================
+
+1. First complete Phase 0 (utils, constants, models, widgets)
+2. Then create event_detail_page.dart
+3. Test navigation from events_page → event_detail_page
+4. Create event_attendees_page.dart
+5. Create event_comments_page.dart
+6. Update app_routes.dart with new routes
+7. Test full flow
+
+ROUTES TO ADD IN app_routes.dart:
+
+```dart
+case '/event_detail':
+  final args = settings.arguments as Map<String, dynamic>;
+  return MaterialPageRoute(
+    builder: (_) => EventDetailPage(event: args['event']),
+  );
+
+case '/event_attendees':
+  final args = settings.arguments as Map<String, dynamic>;
+  return MaterialPageRoute(
+    builder: (_) => EventAttendeesPage(
+      eventTitle: args['eventTitle'],
+      attendees: args['attendees'],
+    ),
+  );
+
+case '/event_comments':
+  final args = settings.arguments as Map<String, dynamic>;
+  return MaterialPageRoute(
+    builder: (_) => EventCommentsPage(
+      eventId: args['eventId'],
+      eventTitle: args['eventTitle'],
+    ),
+  );
+```
+
+================================================================================
+PRIORITY
+================================================================================
+
+event_detail_page.dart is CRITICAL - without it, tapping event cards does nothing!
+This is the highest priority page after Phase 0 completion.
+
+================================================================================

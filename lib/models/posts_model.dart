@@ -5,12 +5,12 @@ class PostModel {
   final String type;
   final String createdBy;
   final String content;
-  final Timestamp? createdAt;
+  final DateTime createdAt;
   final String? courseId;
   final String? title;
   final int upvoteCount;
   final int downvoteCount;
-  final Timestamp? updatedAt;
+  final DateTime? updatedAt;
 
   PostModel({
     required this.postId,
@@ -25,33 +25,51 @@ class PostModel {
     this.updatedAt,
   });
 
-  factory PostModel.fromMap(Map<String, dynamic> map) {
+  factory PostModel.fromJson(Map<String, dynamic> json) {
     return PostModel(
-      postId: map['post_id'],
-      type: map['type'],
-      createdBy: map['created_by'],
-      content: map['content'],
-      createdAt: map['created_at'],
-      courseId: map['course_id'],
-      title: map['title'],
-      upvoteCount: map['upvote_count'] ?? 0,
-      downvoteCount: map['downvote_count'] ?? 0,
-      updatedAt: map['updated_at'],
+      postId: json['post_id'] as String,
+      type: json['type'] as String,
+      createdBy: json['created_by'] as String,
+      content: json['content'] as String,
+      createdAt: _parseDateTime(json['created_at']),
+      courseId: json['course_id'] as String?,
+      title: json['title'] as String?,
+      upvoteCount: json['upvote_count'] ?? 0,
+      downvoteCount: json['downvote_count'] ?? 0,
+      updatedAt: json['updated_at'] != null ? _parseDateTime(json['updated_at']) : null,
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'post_id': postId,
       'type': type,
       'created_by': createdBy,
       'content': content,
-      'created_at': createdAt ?? FieldValue.serverTimestamp(),
+      'created_at': Timestamp.fromDate(createdAt),
       'course_id': courseId,
       'title': title,
       'upvote_count': upvoteCount,
       'downvote_count': downvoteCount,
-      'updated_at': updatedAt,
+      'updated_at': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
     };
+  }
+
+  bool validate() {
+    return postId.isNotEmpty &&
+           type.isNotEmpty &&
+           createdBy.isNotEmpty &&
+           content.isNotEmpty;
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    } else if (value is String) {
+      return DateTime.parse(value);
+    } else if (value is int) {
+      return DateTime.fromMillisecondsSinceEpoch(value);
+    }
+    return DateTime.now();
   }
 }

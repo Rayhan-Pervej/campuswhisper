@@ -5,7 +5,7 @@ class XpHistoryModel {
   final String userId;
   final String type;
   final int amount;
-  final Timestamp? timestamp;
+  final DateTime timestamp;
   final String? relatedPost;
 
   XpHistoryModel({
@@ -17,25 +17,43 @@ class XpHistoryModel {
     this.relatedPost,
   });
 
-  factory XpHistoryModel.fromMap(Map<String, dynamic> map) {
+  factory XpHistoryModel.fromJson(Map<String, dynamic> json) {
     return XpHistoryModel(
-      id: map['id'],
-      userId: map['user_id'],
-      type: map['type'],
-      amount: map['amount'],
-      timestamp: map['timestamp'],
-      relatedPost: map['related_post'],
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      type: json['type'] as String,
+      amount: json['amount'] as int,
+      timestamp: _parseDateTime(json['timestamp']),
+      relatedPost: json['related_post'] as String?,
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'user_id': userId,
       'type': type,
       'amount': amount,
-      'timestamp': timestamp ?? FieldValue.serverTimestamp(),
+      'timestamp': Timestamp.fromDate(timestamp),
       'related_post': relatedPost,
     };
+  }
+
+  bool validate() {
+    return id.isNotEmpty &&
+           userId.isNotEmpty &&
+           type.isNotEmpty &&
+           amount >= 0;
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    } else if (value is String) {
+      return DateTime.parse(value);
+    } else if (value is int) {
+      return DateTime.fromMillisecondsSinceEpoch(value);
+    }
+    return DateTime.now();
   }
 }

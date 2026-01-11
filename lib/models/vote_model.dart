@@ -5,33 +5,51 @@ class VoteModel {
   final String postId;
   final String voterId;
   final String voteType;
-  final Timestamp? createdAt;
+  final DateTime createdAt;
 
   VoteModel({
     required this.voteId,
     required this.postId,
     required this.voterId,
     required this.voteType,
-    this.createdAt,
+    required this.createdAt,
   });
 
-  factory VoteModel.fromMap(Map<String, dynamic> map) {
+  factory VoteModel.fromJson(Map<String, dynamic> json) {
     return VoteModel(
-      voteId: map['vote_id'],
-      postId: map['post_id'],
-      voterId: map['voter_id'],
-      voteType: map['vote_type'],
-      createdAt: map['created_at'],
+      voteId: json['vote_id'] as String,
+      postId: json['post_id'] as String,
+      voterId: json['voter_id'] as String,
+      voteType: json['vote_type'] as String,
+      createdAt: _parseDateTime(json['created_at']),
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'vote_id': voteId,
       'post_id': postId,
       'voter_id': voterId,
       'vote_type': voteType,
-      'created_at': createdAt ?? FieldValue.serverTimestamp(),
+      'created_at': Timestamp.fromDate(createdAt),
     };
+  }
+
+  bool validate() {
+    return voteId.isNotEmpty &&
+           postId.isNotEmpty &&
+           voterId.isNotEmpty &&
+           voteType.isNotEmpty;
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    } else if (value is String) {
+      return DateTime.parse(value);
+    } else if (value is int) {
+      return DateTime.fromMillisecondsSinceEpoch(value);
+    }
+    return DateTime.now();
   }
 }

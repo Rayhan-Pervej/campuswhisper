@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 import '../../../../core/theme/app_dimensions.dart';
+import '../../../../routing/app_routes.dart';
 
 class EventCard extends StatelessWidget {
   final String eventTitle;
@@ -87,13 +88,37 @@ class EventCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: AppDimensions.space2),
-      elevation: AppDimensions.elevation1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppDimensions.radius12),
-      ),
-      child: Column(
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          AppRoutes.eventDetail,
+          arguments: {
+            'event': {
+              'eventTitle': eventTitle,
+              'organizerName': organizerName,
+              'description': description,
+              'eventDate': eventDate,
+              'location': location,
+              'category': category,
+              'interestedCount': interestedCount,
+              'goingCount': goingCount,
+              'eventImageUrl': eventImageUrl,
+              'organizerImageUrl': organizerImageUrl,
+              'isInterested': isInterested,
+              'isGoing': isGoing,
+            },
+          },
+        );
+      },
+      borderRadius: BorderRadius.circular(AppDimensions.radius12),
+      child: Card(
+        margin: EdgeInsets.symmetric(vertical: AppDimensions.space2),
+        elevation: AppDimensions.elevation1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radius12),
+        ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Event Image (if available)
@@ -281,6 +306,7 @@ class EventCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

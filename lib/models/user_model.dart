@@ -16,8 +16,8 @@ class UserModel {
   final bool? notifyMe;
   final String? theme;
   final String role;
-  final Timestamp? createdAt;
-  final Timestamp? lastLogin;
+  final DateTime? createdAt;
+  final DateTime? lastLogin;
 
   UserModel({
     required this.uid,
@@ -39,31 +39,31 @@ class UserModel {
     this.lastLogin,
   });
 
-  factory UserModel.fromMap(Map<String, dynamic> map) {
+  factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      uid: map['uid'],
-      email: map['email'],
-      id: map['id'],
-      firstName: map['firstName'],
-      lastName: map['lastName'],
-      university: map['university'],
-      department: map['department'],
-      batch: map['batch'],
-      xp: map['xp'] ?? 0,
-      contributions: map['contributions'] ?? 0,
-      badges: map['badges'] != null ? List<String>.from(map['badges']) : null,
-      favoriteCourses: map['favorite_courses'] != null
-          ? List<String>.from(map['favorite_courses'])
+      uid: json['uid'] as String,
+      email: json['email'] as String,
+      id: json['id'] as String,
+      firstName: json['firstName'] as String,
+      lastName: json['lastName'] as String,
+      university: json['university'] as String,
+      department: json['department'] as String,
+      batch: json['batch'] as String?,
+      xp: json['xp'] ?? 0,
+      contributions: json['contributions'] ?? 0,
+      badges: json['badges'] != null ? List<String>.from(json['badges']) : null,
+      favoriteCourses: json['favorite_courses'] != null
+          ? List<String>.from(json['favorite_courses'])
           : null,
-      notifyMe: map['notify_me'],
-      theme: map['theme'],
-      role: map['role'],
-      createdAt: map['created_at'],
-      lastLogin: map['last_login'],
+      notifyMe: json['notify_me'] as bool?,
+      theme: json['theme'] as String?,
+      role: json['role'] as String,
+      createdAt: json['created_at'] != null ? _parseDateTime(json['created_at']) : null,
+      lastLogin: json['last_login'] != null ? _parseDateTime(json['last_login']) : null,
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'uid': uid,
       'email': email,
@@ -80,8 +80,26 @@ class UserModel {
       'notify_me': notifyMe,
       'theme': theme,
       'role': role,
-      'created_at': createdAt ?? FieldValue.serverTimestamp(),
-      'last_login': lastLogin,
+      'created_at': createdAt != null ? Timestamp.fromDate(createdAt!) : FieldValue.serverTimestamp(),
+      'last_login': lastLogin != null ? Timestamp.fromDate(lastLogin!) : null,
     };
+  }
+
+  bool validate() {
+    return uid.isNotEmpty &&
+           email.isNotEmpty &&
+           firstName.isNotEmpty &&
+           lastName.isNotEmpty;
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    } else if (value is String) {
+      return DateTime.parse(value);
+    } else if (value is int) {
+      return DateTime.fromMillisecondsSinceEpoch(value);
+    }
+    return DateTime.now();
   }
 }

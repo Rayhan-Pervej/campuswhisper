@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:campuswhisper/routing/app_routes.dart';
 
 class CourseCard extends StatelessWidget {
   final String courseId;
@@ -9,6 +10,8 @@ class CourseCard extends StatelessWidget {
   final bool showDeleteIcon;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
+  final Map<String, dynamic>? courseData;
+  final String? semesterName;
 
   const CourseCard({
     super.key,
@@ -20,7 +23,22 @@ class CourseCard extends StatelessWidget {
     this.showDeleteIcon = false,
     this.onDelete,
     this.onEdit,
+    this.courseData,
+    this.semesterName,
   });
+
+  void _navigateToCourseDetail(BuildContext context) {
+    if (courseData != null && semesterName != null) {
+      Navigator.pushNamed(
+        context,
+        AppRoutes.courseDetail,
+        arguments: {
+          'course': courseData,
+          'semesterName': semesterName,
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +57,14 @@ class CourseCard extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
+          InkWell(
+            onTap: !showDeleteIcon && courseData != null && semesterName != null
+                ? () => _navigateToCourseDetail(context)
+                : null,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -167,6 +190,7 @@ class CourseCard extends StatelessWidget {
                 ),
               ],
             ),
+          ),
           ),
 
           // Delete button

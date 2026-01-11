@@ -1,7 +1,9 @@
 import 'package:campuswhisper/core/theme/app_dimensions.dart';
 import 'package:campuswhisper/ui/widgets/default_appbar.dart';
+import 'package:campuswhisper/providers/event_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:provider/provider.dart';
 
 import '../../widgets/custom_bottom_dialog.dart';
 import 'widgets/add_event.dart';
@@ -28,82 +30,43 @@ class _EventsPageState extends State<EventsPage> {
     'Conference',
   ];
 
-  final List<Map<String, dynamic>> _allEvents = [
-    {
-      'eventTitle': 'Tech Talk: Future of AI',
-      'organizerName': 'CS Department',
-      'description':
-          'Join us for an engaging discussion about the future of artificial intelligence and its impact on our daily lives. Industry experts will share insights.',
-      'eventDate': DateTime.now().add(const Duration(days: 2, hours: 5)),
-      'location': 'Main Auditorium, Building A',
-      'category': 'Academic',
-      'interestedCount': 45,
-      'goingCount': 28,
-    },
-    {
-      'eventTitle': 'Campus Music Festival',
-      'organizerName': 'Student Council',
-      'description':
-          'Annual music festival featuring local bands and student performances. Food trucks, games, and great music all day long!',
-      'eventDate': DateTime.now().add(const Duration(days: 7)),
-      'location': 'Central Campus Ground',
-      'category': 'Cultural',
-      'interestedCount': 156,
-      'goingCount': 89,
-    },
-    {
-      'eventTitle': 'Basketball Championship Finals',
-      'organizerName': 'Athletics Department',
-      'description':
-          'Don\'t miss the exciting finals of our inter-college basketball championship. Support your team!',
-      'eventDate': DateTime.now().add(const Duration(days: 1, hours: 3)),
-      'location': 'Sports Complex',
-      'category': 'Sports',
-      'interestedCount': 78,
-      'goingCount': 52,
-    },
-    {
-      'eventTitle': 'Career Fair 2025',
-      'organizerName': 'Placement Cell',
-      'description':
-          'Meet recruiters from top companies. Bring your resumes and dress professionally. Great networking opportunity!',
-      'eventDate': DateTime.now().add(const Duration(days: 14)),
-      'location': 'Convention Center',
-      'category': 'Career',
-      'interestedCount': 234,
-      'goingCount': 187,
-    },
-    {
-      'eventTitle': 'Python Workshop for Beginners',
-      'organizerName': 'Coding Club',
-      'description':
-          'Learn Python from scratch in this hands-on workshop. Perfect for beginners. Laptops required.',
-      'eventDate': DateTime.now().add(const Duration(days: 5, hours: 2)),
-      'location': 'Computer Lab 3, IT Building',
-      'category': 'Workshop',
-      'interestedCount': 67,
-      'goingCount': 45,
-    },
-    {
-      'eventTitle': 'International Food Festival',
-      'organizerName': 'Cultural Committee',
-      'description':
-          'Experience cuisines from around the world prepared by our international students. Free entry!',
-      'eventDate': DateTime.now().add(const Duration(days: 10)),
-      'location': 'Student Cafeteria Lawn',
-      'category': 'Social',
-      'interestedCount': 189,
-      'goingCount': 124,
-    },
-  ];
+  final ScrollController _scrollController = ScrollController();
 
-  List<Map<String, dynamic>> get _filteredEvents {
-    if (_selectedCategory == null) {
-      return _allEvents;
+  @override
+  void initState() {
+    super.initState();
+    // Load initial events
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<EventProvider>().loadInitial();
+    });
+
+    // Setup infinite scroll
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
+      context.read<EventProvider>().loadMore();
     }
-    return _allEvents
-        .where((event) => event['category'] == _selectedCategory)
-        .toList();
+  }
+
+  void _onCategorySelected(String? category) {
+    setState(() {
+      _selectedCategory = category;
+    });
+
+    final provider = context.read<EventProvider>();
+    if (category == null) {
+      provider.clearFilters();
+    } else {
+      provider.filterByCategory(category);
+    }
   }
 
   @override
@@ -113,69 +76,162 @@ class _EventsPageState extends State<EventsPage> {
 
     return Scaffold(
       appBar: DefaultAppBar(title: 'Events'),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            CategoryChipFilter(
-              categories: _categories,
-              selectedCategory: _selectedCategory,
-              onCategorySelected: (category) {
-                setState(() {
-                  _selectedCategory = category;
-                });
-              },
-            ),
+      body: Consumer<EventProvider>(
+        builder: (context, provider, child) {
+          // Loading state (first load)
+          if (provider.isLoading && provider.items.isEmpty) {
+            return Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(colorScheme.primary),
+              ),
+            );
+          }
 
-            ..._filteredEvents.map((event) {
-              return EventCard(
-                eventTitle: event['eventTitle'],
-                organizerName: event['organizerName'],
-                description: event['description'],
-                eventDate: event['eventDate'],
-                location: event['location'],
-                category: event['category'],
-                interestedCount: event['interestedCount'],
-                goingCount: event['goingCount'],
-                eventImageUrl: event['eventImageUrl'],
-                organizerImageUrl: event['organizerImageUrl'],
-                isInterested: event['isInterested'] ?? false,
-                isGoing: event['isGoing'] ?? false,
-                onInterested: () {
-                  setState(() {
-                    event['isInterested'] = !(event['isInterested'] ?? false);
-                    if (event['isInterested']) {
-                      event['interestedCount'] =
-                          (event['interestedCount'] ?? 0) + 1;
-                    } else {
-                      event['interestedCount'] =
-                          (event['interestedCount'] ?? 1) - 1;
-                    }
-                  });
-                },
-                onGoing: () {
-                  setState(() {
-                    event['isGoing'] = !(event['isGoing'] ?? false);
-                    if (event['isGoing']) {
-                      event['goingCount'] = (event['goingCount'] ?? 0) + 1;
-                    } else {
-                      event['goingCount'] = (event['goingCount'] ?? 1) - 1;
-                    }
-                  });
-                },
-                onShare: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Share feature for "${event['eventTitle']}"',
+          // Error state
+          if (provider.hasError && provider.items.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Iconsax.danger_outline,
+                    size: AppDimensions.largeIconSize * 2,
+                    color: colorScheme.error,
+                  ),
+                  AppDimensions.h16,
+                  Text(
+                    'Failed to load events',
+                    style: TextStyle(
+                      fontSize: AppDimensions.subtitleFontSize,
+                      color: colorScheme.onSurface.withAlpha(153),
+                    ),
+                  ),
+                  AppDimensions.h8,
+                  Text(
+                    provider.errorMessage ?? 'Please try again',
+                    style: TextStyle(
+                      fontSize: AppDimensions.bodyFontSize,
+                      color: colorScheme.onSurface.withAlpha(102),
+                    ),
+                  ),
+                  AppDimensions.h16,
+                  ElevatedButton.icon(
+                    onPressed: () => provider.refresh(),
+                    icon: Icon(Iconsax.refresh_outline),
+                    label: Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // Empty state
+          if (provider.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Iconsax.calendar_outline,
+                    size: AppDimensions.largeIconSize * 2,
+                    color: colorScheme.onSurface.withAlpha(77),
+                  ),
+                  AppDimensions.h16,
+                  Text(
+                    'No events yet',
+                    style: TextStyle(
+                      fontSize: AppDimensions.subtitleFontSize,
+                      color: colorScheme.onSurface.withAlpha(153),
+                    ),
+                  ),
+                  AppDimensions.h8,
+                  Text(
+                    'Be the first to create an event!',
+                    style: TextStyle(
+                      fontSize: AppDimensions.bodyFontSize,
+                      color: colorScheme.onSurface.withAlpha(102),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // Events list
+          return RefreshIndicator(
+            onRefresh: () => provider.refresh(),
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  CategoryChipFilter(
+                    categories: _categories,
+                    selectedCategory: _selectedCategory,
+                    onCategorySelected: _onCategorySelected,
+                  ),
+
+                  // Events
+                  ...provider.items.map((event) {
+                    return EventCard(
+                      eventTitle: event.title,
+                      organizerName: event.organizerName,
+                      description: event.description,
+                      eventDate: event.eventDate,
+                      location: event.location,
+                      category: event.category,
+                      interestedCount: 0, // TODO: Implement interested tracking
+                      goingCount: event.attendeeCount,
+                      eventImageUrl: event.imageUrl,
+                      organizerImageUrl: null,
+                      isInterested: false, // TODO: Track user's interested status
+                      isGoing: false, // TODO: Check if current user is in attendeeIds
+                      onInterested: () {
+                        // TODO: Implement interested functionality
+                        print('Interested clicked for ${event.id}');
+                      },
+                      onGoing: () {
+                        // TODO: Implement registration/unregistration
+                        print('Going clicked for ${event.id}');
+                      },
+                      onShare: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Share feature for "${event.title}"'),
+                          ),
+                        );
+                      },
+                    );
+                  }),
+
+                  // Loading more indicator
+                  if (provider.isLoadingMore)
+                    Padding(
+                      padding: EdgeInsets.all(AppDimensions.space16),
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(colorScheme.primary),
                       ),
                     ),
-                  );
-                },
-              );
-            }),
-            AppDimensions.h12,
-          ],
-        ),
+
+                  // End of list indicator
+                  if (!provider.hasMore && provider.items.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsets.all(AppDimensions.space16),
+                      child: Text(
+                        'No more events',
+                        style: TextStyle(
+                          fontSize: AppDimensions.captionFontSize,
+                          color: colorScheme.onSurface.withAlpha(102),
+                        ),
+                      ),
+                    ),
+
+                  AppDimensions.h12,
+                ],
+              ),
+            ),
+          );
+        },
       ),
       floatingActionButton: SizedBox(
         height: AppDimensions.space40 * 1.5,
@@ -188,12 +244,11 @@ class _EventsPageState extends State<EventsPage> {
               child: AddEvent(
                 categories: _categories,
                 onEventCreated: (newEvent) {
-                  setState(() {
-                    _allEvents.insert(0, newEvent);
-                  });
+                  // Create event using provider
+                  // TODO: Convert newEvent map to EventModel and use provider.createEvent()
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Event created successfully!'),
+                      content: Text('Event creation not yet implemented'),
                     ),
                   );
                 },

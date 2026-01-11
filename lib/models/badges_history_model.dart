@@ -4,7 +4,7 @@ class BadgeHistoryModel {
   final String id;
   final String userId;
   final String badgeName;
-  final Timestamp awardedAt;
+  final DateTime awardedAt;
 
   BadgeHistoryModel({
     required this.id,
@@ -13,21 +13,38 @@ class BadgeHistoryModel {
     required this.awardedAt,
   });
 
-  factory BadgeHistoryModel.fromMap(Map<String, dynamic> map) {
+  factory BadgeHistoryModel.fromJson(Map<String, dynamic> json) {
     return BadgeHistoryModel(
-      id: map['id'],
-      userId: map['user_id'],
-      badgeName: map['badge_name'],
-      awardedAt: map['awarded_at'],
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      badgeName: json['badge_name'] as String,
+      awardedAt: _parseDateTime(json['awarded_at']),
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'user_id': userId,
       'badge_name': badgeName,
-      'awarded_at': awardedAt,
+      'awarded_at': Timestamp.fromDate(awardedAt),
     };
+  }
+
+  bool validate() {
+    return id.isNotEmpty &&
+           userId.isNotEmpty &&
+           badgeName.isNotEmpty;
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    } else if (value is String) {
+      return DateTime.parse(value);
+    } else if (value is int) {
+      return DateTime.fromMillisecondsSinceEpoch(value);
+    }
+    return DateTime.now();
   }
 }

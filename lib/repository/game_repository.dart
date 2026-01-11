@@ -1,265 +1,292 @@
+import 'package:campuswhisper/core/repositories/base_repository.dart';
 import 'package:campuswhisper/models/badges_history_model.dart';
 import 'package:campuswhisper/models/vote_model.dart';
 import 'package:campuswhisper/models/xp_history_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:campuswhisper/core/database/query_builder.dart';
+import 'package:campuswhisper/core/database/paginated_result.dart';
+import 'package:campuswhisper/core/config/app_config.dart';
 
-
-
+/// Special repository for gamification features
+///
+/// Manages three collections: xp_history, badges_history, votes
+/// Plus custom gamification logic
 class GameRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _xpHistoryCollection = 'xp_history';
-  final String _badgeHistoryCollection = 'badges_history';
-  final String _votesCollection = 'votes';
+  // Sub-repositories for each model type
+  final _xpHistoryRepo = _XpHistoryRepository();
+  final _badgeHistoryRepo = _BadgeHistoryRepository();
+  final _voteRepo = _VoteRepository();
 
-  // ==================== XP HISTORY METHODS ====================
+  // ═══════════════════════════════════════════════════════════════
+  // XP HISTORY METHODS
+  // ═══════════════════════════════════════════════════════════════
 
-  // POST: Add XP history entry
+  /// Add XP history entry
   Future<String> addXpHistory(XpHistoryModel xpHistory) async {
-    try {
-      // Generate a new document ID first
-      DocumentReference docRef = _firestore.collection(_xpHistoryCollection).doc();
-      String generatedId = docRef.id;
-      
-      // Create XP history with the generated ID
-      XpHistoryModel xpWithId = XpHistoryModel(
-        id: generatedId,
-        userId: xpHistory.userId,
-        type: xpHistory.type,
-        amount: xpHistory.amount,
-        timestamp: xpHistory.timestamp,
-        relatedPost: xpHistory.relatedPost,
-      );
-      
-      // Store data in the document with the generated ID
-      await docRef.set(xpWithId.toMap());
-      
-      return generatedId;
-    } catch (e) {
-      throw Exception('Failed to add XP history: $e');
-    }
+    return await _xpHistoryRepo.create(xpHistory);
   }
 
-  // FETCH: Get XP history by user
-  Future<List<XpHistoryModel>> getXpHistoryByUser(String userId) async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection(_xpHistoryCollection)
-          .where('user_id', isEqualTo: userId)
-          .orderBy('timestamp', descending: true)
-          .get();
-      
-      return querySnapshot.docs
-          .map((doc) => XpHistoryModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to get XP history by user: $e');
-    }
+  /// Get XP history by user (with pagination)
+  Future<PaginatedResult<XpHistoryModel>> getXpHistoryByUser(
+    String userId, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return _xpHistoryRepo.getByUser(userId, limit: limit, startAfter: startAfter);
   }
 
-  // FETCH: Get all XP history
-  Future<List<XpHistoryModel>> getAllXpHistory() async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection(_xpHistoryCollection)
-          .orderBy('timestamp', descending: true)
-          .get();
-      
-      return querySnapshot.docs
-          .map((doc) => XpHistoryModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to get all XP history: $e');
-    }
+  /// Get all XP history (with pagination)
+  Future<PaginatedResult<XpHistoryModel>> getAllXpHistory({
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return _xpHistoryRepo.getAll(
+      sorts: [QuerySort.descending('timestamp')],
+      limit: limit,
+      startAfter: startAfter,
+    );
   }
 
-  // ==================== BADGE HISTORY METHODS ====================
+  // ═══════════════════════════════════════════════════════════════
+  // BADGE HISTORY METHODS
+  // ═══════════════════════════════════════════════════════════════
 
-  // POST: Award badge to user
+  /// Award badge to user
   Future<String> awardBadge(BadgeHistoryModel badgeHistory) async {
-    try {
-      // Generate a new document ID first
-      DocumentReference docRef = _firestore.collection(_badgeHistoryCollection).doc();
-      String generatedId = docRef.id;
-      
-      // Create badge history with the generated ID
-      BadgeHistoryModel badgeWithId = BadgeHistoryModel(
-        id: generatedId,
-        userId: badgeHistory.userId,
-        badgeName: badgeHistory.badgeName,
-        awardedAt: badgeHistory.awardedAt,
-      );
-      
-      // Store data in the document with the generated ID
-      await docRef.set(badgeWithId.toMap());
-      
-      return generatedId;
-    } catch (e) {
-      throw Exception('Failed to award badge: $e');
-    }
+    return await _badgeHistoryRepo.create(badgeHistory);
   }
 
-  // FETCH: Get badge history by user
-  Future<List<BadgeHistoryModel>> getBadgeHistoryByUser(String userId) async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection(_badgeHistoryCollection)
-          .where('user_id', isEqualTo: userId)
-          .orderBy('awarded_at', descending: true)
-          .get();
-      
-      return querySnapshot.docs
-          .map((doc) => BadgeHistoryModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to get badge history by user: $e');
-    }
+  /// Get badge history by user (with pagination)
+  Future<PaginatedResult<BadgeHistoryModel>> getBadgeHistoryByUser(
+    String userId, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return _badgeHistoryRepo.getByUser(userId, limit: limit, startAfter: startAfter);
   }
 
-  // FETCH: Get all badge history
-  Future<List<BadgeHistoryModel>> getAllBadgeHistory() async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection(_badgeHistoryCollection)
-          .orderBy('awarded_at', descending: true)
-          .get();
-      
-      return querySnapshot.docs
-          .map((doc) => BadgeHistoryModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to get all badge history: $e');
-    }
+  /// Get all badge history (with pagination)
+  Future<PaginatedResult<BadgeHistoryModel>> getAllBadgeHistory({
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return _badgeHistoryRepo.getAll(
+      sorts: [QuerySort.descending('awarded_at')],
+      limit: limit,
+      startAfter: startAfter,
+    );
   }
 
-  // ==================== VOTE METHODS ====================
+  // ═══════════════════════════════════════════════════════════════
+  // VOTE METHODS
+  // ═══════════════════════════════════════════════════════════════
 
-  // POST: Create vote
+  /// Create vote
   Future<String> createVote(VoteModel vote) async {
-    try {
-      // Generate a new document ID first
-      DocumentReference docRef = _firestore.collection(_votesCollection).doc();
-      String generatedId = docRef.id;
-      
-      // Create vote with the generated ID
-      VoteModel voteWithId = VoteModel(
-        voteId: generatedId,
-        postId: vote.postId,
-        voterId: vote.voterId,
-        voteType: vote.voteType,
-        createdAt: vote.createdAt,
-      );
-      
-      // Store data in the document with the generated ID
-      await docRef.set(voteWithId.toMap());
-      
-      return generatedId;
-    } catch (e) {
-      throw Exception('Failed to create vote: $e');
-    }
+    return await _voteRepo.create(vote);
   }
 
-  // FETCH: Get votes by post
-  Future<List<VoteModel>> getVotesByPost(String postId) async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection(_votesCollection)
-          .where('post_id', isEqualTo: postId)
-          .get();
-      
-      return querySnapshot.docs
-          .map((doc) => VoteModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to get votes by post: $e');
-    }
+  /// Get votes by post (with pagination)
+  Future<PaginatedResult<VoteModel>> getVotesByPost(
+    String postId, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return _voteRepo.getByPost(postId, limit: limit, startAfter: startAfter);
   }
 
-  // FETCH: Get votes by user
-  Future<List<VoteModel>> getVotesByUser(String userId) async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection(_votesCollection)
-          .where('voter_id', isEqualTo: userId)
-          .orderBy('created_at', descending: true)
-          .get();
-      
-      return querySnapshot.docs
-          .map((doc) => VoteModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      throw Exception('Failed to get votes by user: $e');
-    }
+  /// Get votes by user (with pagination)
+  Future<PaginatedResult<VoteModel>> getVotesByUser(
+    String userId, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return _voteRepo.getByUser(userId, limit: limit, startAfter: startAfter);
   }
 
-  // FETCH: Get specific user vote for a post (to prevent duplicate voting)
+  /// Get specific user vote for a post (to prevent duplicate voting)
   Future<VoteModel?> getUserVoteForPost(String userId, String postId) async {
-    try {
-      QuerySnapshot querySnapshot = await _firestore
-          .collection(_votesCollection)
-          .where('voter_id', isEqualTo: userId)
-          .where('post_id', isEqualTo: postId)
-          .limit(1)
-          .get();
-      
-      if (querySnapshot.docs.isNotEmpty) {
-        return VoteModel.fromMap(querySnapshot.docs.first.data() as Map<String, dynamic>);
-      }
-      return null;
-    } catch (e) {
-      throw Exception('Failed to get user vote for post: $e');
-    }
+    final result = await _voteRepo.query(
+      filters: [
+        QueryFilter.equals('voter_id', userId),
+        QueryFilter.equals('post_id', postId),
+      ],
+      limit: 1,
+    );
+
+    return result.items.isNotEmpty ? result.items.first : null;
   }
 
-  // ==================== GAMIFICATION LOGIC METHODS ====================
+  // ═══════════════════════════════════════════════════════════════
+  // GAMIFICATION LOGIC
+  // ═══════════════════════════════════════════════════════════════
 
-  // Helper: Calculate XP amount based on action type
+  /// Calculate XP amount based on action type
   int calculateXpAmount(String actionType) {
-    switch (actionType.toLowerCase()) {
-      case 'post_contribution':
-        return 20;
-      case 'post_upvote':
-        return 5;
-      case 'comment':
-        return 10;
-      case 'hack_upvote':
-        return 3;
-      case 'review_upvote':
-        return 5;
-      default:
-        return 1;
-    }
+    return AppConfig.xpAmounts[actionType.toLowerCase()] ?? 1;
   }
 
-  // Helper: Check if user qualifies for badge
-  Future<List<String>> checkBadgeEligibility(String userId, int totalXp, int totalContributions) async {
+  /// Check if user qualifies for new badges
+  Future<List<String>> checkBadgeEligibility(
+    String userId,
+    int totalXp,
+    int totalContributions,
+  ) async {
     List<String> newBadges = [];
-    
+
     // Get existing badges to avoid duplicates
-    List<BadgeHistoryModel> existingBadges = await getBadgeHistoryByUser(userId);
-    List<String> existingBadgeNames = existingBadges.map((b) => b.badgeName).toList();
-    
-    // XP-based badges
-    if (totalXp >= 100 && !existingBadgeNames.contains('XP Rookie')) {
-      newBadges.add('XP Rookie');
-    }
-    if (totalXp >= 500 && !existingBadgeNames.contains('XP Champion')) {
-      newBadges.add('XP Champion');
-    }
-    if (totalXp >= 1000 && !existingBadgeNames.contains('XP Master')) {
-      newBadges.add('XP Master');
-    }
-    
-    // Contribution-based badges
-    if (totalContributions >= 5 && !existingBadgeNames.contains('Contributor')) {
-      newBadges.add('Contributor');
-    }
-    if (totalContributions >= 20 && !existingBadgeNames.contains('Top Reviewer')) {
-      newBadges.add('Top Reviewer');
-    }
-    if (totalContributions >= 50 && !existingBadgeNames.contains('Campus Legend')) {
-      newBadges.add('Campus Legend');
-    }
-    
+    final existingBadges = await getBadgeHistoryByUser(userId, limit: 100);
+    final existingBadgeNames = existingBadges.items.map((b) => b.badgeName).toList();
+
+    // Check all badge thresholds from AppConfig
+    AppConfig.badgeThresholds.forEach((badgeName, threshold) {
+      if (!existingBadgeNames.contains(badgeName)) {
+        // XP-based badges
+        if (badgeName.contains('XP') && totalXp >= threshold) {
+          newBadges.add(badgeName);
+        }
+        // Contribution-based badges
+        else if (!badgeName.contains('XP') && totalContributions >= threshold) {
+          newBadges.add(badgeName);
+        }
+      }
+    });
+
     return newBadges;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INTERNAL SUB-REPOSITORIES
+// ═══════════════════════════════════════════════════════════════
+
+class _XpHistoryRepository extends BaseRepository<XpHistoryModel> {
+  @override
+  String get collectionName => 'xp_history';
+
+  @override
+  XpHistoryModel fromJson(Map<String, dynamic> json) => XpHistoryModel.fromJson(json);
+
+  @override
+  Map<String, dynamic> toJson(XpHistoryModel model) => model.toJson();
+
+  @override
+  String getId(XpHistoryModel model) => model.id;
+
+  Future<PaginatedResult<XpHistoryModel>> getByUser(
+    String userId, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [QueryFilter.equals('user_id', userId)],
+      sorts: [QuerySort.descending('timestamp')],
+      limit: limit,
+      startAfter: startAfter,
+    );
+  }
+
+  Future<PaginatedResult<XpHistoryModel>> getByType(
+    String type, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [QueryFilter.equals('type', type)],
+      sorts: [QuerySort.descending('timestamp')],
+      limit: limit,
+      startAfter: startAfter,
+    );
+  }
+}
+
+class _BadgeHistoryRepository extends BaseRepository<BadgeHistoryModel> {
+  @override
+  String get collectionName => 'badges_history';
+
+  @override
+  BadgeHistoryModel fromJson(Map<String, dynamic> json) => BadgeHistoryModel.fromJson(json);
+
+  @override
+  Map<String, dynamic> toJson(BadgeHistoryModel model) => model.toJson();
+
+  @override
+  String getId(BadgeHistoryModel model) => model.id;
+
+  Future<PaginatedResult<BadgeHistoryModel>> getByUser(
+    String userId, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [QueryFilter.equals('user_id', userId)],
+      sorts: [QuerySort.descending('awarded_at')],
+      limit: limit,
+      startAfter: startAfter,
+    );
+  }
+
+  Future<PaginatedResult<BadgeHistoryModel>> getByBadge(
+    String badgeName, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [QueryFilter.equals('badge_name', badgeName)],
+      sorts: [QuerySort.descending('awarded_at')],
+      limit: limit,
+      startAfter: startAfter,
+    );
+  }
+}
+
+class _VoteRepository extends BaseRepository<VoteModel> {
+  @override
+  String get collectionName => 'votes';
+
+  @override
+  VoteModel fromJson(Map<String, dynamic> json) => VoteModel.fromJson(json);
+
+  @override
+  Map<String, dynamic> toJson(VoteModel model) => model.toJson();
+
+  @override
+  String getId(VoteModel model) => model.voteId;
+
+  Future<PaginatedResult<VoteModel>> getByPost(
+    String postId, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [QueryFilter.equals('post_id', postId)],
+      limit: limit,
+      startAfter: startAfter,
+    );
+  }
+
+  Future<PaginatedResult<VoteModel>> getByUser(
+    String userId, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [QueryFilter.equals('voter_id', userId)],
+      sorts: [QuerySort.descending('created_at')],
+      limit: limit,
+      startAfter: startAfter,
+    );
+  }
+
+  Future<PaginatedResult<VoteModel>> getByType(
+    String voteType, {
+    int limit = 20,
+    dynamic startAfter,
+  }) async {
+    return query(
+      filters: [QueryFilter.equals('vote_type', voteType)],
+      sorts: [QuerySort.descending('created_at')],
+      limit: limit,
+      startAfter: startAfter,
+    );
   }
 }

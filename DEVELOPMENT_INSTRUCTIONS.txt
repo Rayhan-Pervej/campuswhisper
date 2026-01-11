@@ -1,360 +1,945 @@
 ================================================================================
-CAMPUSWHISPER - DEVELOPMENT INSTRUCTIONS & GUIDELINES
+CAMPUSWHISPER - COMPLETE DEVELOPMENT GUIDE
 ================================================================================
 
-PROJECT OVERVIEW:
-A Flutter-based campus social application with features like Lost & Found,
-Events, Course Routine, and Campus pages.
+📖 **READ THIS FIRST - EVERYTHING YOU NEED IN ONE FILE**
+
+Last Updated: 2026-01-11
+Project Status: 97% Complete (Phase 0-9 ✅ | Phase 10 In Progress)
+Development Approach: Root to Leaf (Parent → Child hierarchy)
+Architecture: Data Flow with Repository Pattern (Database-agnostic)
 
 ================================================================================
-THEME & STYLING GUIDELINES
+⚡ QUICK REFERENCE (AI: READ THIS FIRST!)
 ================================================================================
 
-1. COLOR SCHEME (lib/core/theme/app_theme.dart):
-   - Primary: Color(0xFF3F51B5) - Vibrant Indigo
-   - Secondary: Color(0xFFFF6F61) - Coral/Salmon
-   - Error: Color(0xFFD32F2F) - Strong red (light theme)
-   - Surface: Colors.white (light theme)
-   - On Surface: Color(0xFF2C2C2C) - Dark grey text
+**🎯 Project Status:** 97% Complete | Phase 0-9 ✅ | Phase 10 In Progress
 
-   Always use: Theme.of(context).colorScheme.primary (etc.)
-   Never hardcode colors!
+**🏗️ Architecture Pattern (MUST USE):**
+UI → Provider (PaginatedProvider) → Repository (BaseRepository) → DatabaseService
 
-2. DIMENSIONS (lib/core/theme/app_dimensions.dart):
-   - This is a RESPONSIVE system - values scale with screen size
-   - ALWAYS use AppDimensions for ALL spacing, sizing, and dimensions
+**✅ What's Complete:**
+- ✅ All 18+ data models with JSON serialization
+- ✅ All 18 global widgets (inputs, buttons, dialogs, cards, etc.)
+- ✅ All utilities (validators, date formatter, snackbar, dialog helpers)
+- ✅ All constants (error messages, validation, app config)
+- ✅ Complete database abstraction layer (database-agnostic)
+- ✅ Complete repository pattern with BaseRepository
+- ✅ Complete provider pattern with PaginatedProvider
+- ✅ All main UI pages connected to Firebase
+- ✅ All authentication flows working
+- ✅ All profile/settings pages complete
+- ✅ Theme system (light/dark mode follows system)
+- ✅ Last login tracking implemented
 
-   Common usages:
-   - Spacing: AppDimensions.space4, space8, space12, space16, space24, space32
-   - Heights: AppDimensions.h4, h8, h12, h16, h24, h32
-   - Widths: AppDimensions.w4, w8, w12, w16, w24, w32
-   - Padding: AppDimensions.horizontalPadding, verticalPadding
-   - Font sizes: AppDimensions.titleFontSize, bodyFontSize, captionFontSize
-   - Icon sizes: AppDimensions.smallIconSize, mediumIconSize, largeIconSize
-   - Radius: AppDimensions.radius4, radius8, radius12, radius16
-   - Elevation: AppDimensions.elevation1, elevation2, elevation4
+**⚠️ CRITICAL RULES:**
+1. ALWAYS use colorScheme (NEVER hardcode colors)
+2. ALWAYS use AppDimensions (NEVER hardcode spacing)
+3. NEVER write CRUD from scratch (extend BaseRepository)
+4. NEVER access DatabaseService from UI (use providers)
+5. ALWAYS use safeOperation() for user actions
+6. ALWAYS use existing patterns (read similar pages first)
+7. ALWAYS dispose controllers in dispose()
 
-   NEVER use hardcoded values like:
-   - SizedBox(height: 16) ❌
-   - padding: EdgeInsets.all(12) ❌
-   - fontSize: 14 ❌
-
-   ALWAYS use:
-   - AppDimensions.h16 ✅
-   - padding: EdgeInsets.all(AppDimensions.space12) ✅
-   - fontSize: AppDimensions.bodyFontSize ✅
-
-3. OPACITY/ALPHA VALUES:
-   Use .withAlpha() instead of deprecated .withOpacity()
-
-   Standard alpha values:
-   - 60% opacity = withAlpha(153)
-   - 30% opacity = withAlpha(77)
-   - 20% opacity = withAlpha(51)
-   - 10% opacity = withAlpha(26)
-
-   Example:
-   - colorScheme.onSurface.withAlpha(153) // 60% opacity
-
-4. INPUT FIELD STYLING (Reference: lib/ui/widgets/custom_input.dart):
-   Clean, minimalist style for all input fields:
-
-   - Background: colorScheme.surface (NOT primaryContainer)
-   - Border: colorScheme.onSurface.withAlpha(60) - subtle gray
-   - Border width: 1.5
-   - Border radius: 12
-   - Focused border: colorScheme.primary with width 2
-   - Error border: colorScheme.error with width 1.5
-   - Hint text: colorScheme.onSurface.withAlpha(153) - 60% opacity
-   - Icons: colorScheme.onSurface.withAlpha(153)
-
-   This creates a clean white/surface background with subtle gray borders.
+**📚 Key Sections to Read:**
+- Section 5: Data Flow Architecture (MUST READ - has all patterns)
+- Section 6: Centralized Systems (validators, snackbar, dialog helpers)
+- Section 7: Theme & Styling Guidelines (colorScheme, AppDimensions)
+- Section 10: Reference Implementations (learn from existing code)
 
 ================================================================================
-ARCHITECTURE & FILE STRUCTURE
+TABLE OF CONTENTS
 ================================================================================
 
-1. FOLDER ORGANIZATION:
-   lib/
-   ├── core/
-   │   ├── theme/
-   │   │   ├── app_theme.dart         (Color schemes)
-   │   │   └── app_dimensions.dart    (Responsive sizing)
-   │   └── constants/
-   ├── models/                         (Data models)
-   ├── providers/                      (State management - NOT used for UI-only work)
-   ├── routing/                        (Navigation)
-   ├── ui/
-   │   ├── pages/
-   │   │   ├── events/
-   │   │   │   ├── events_page.dart
-   │   │   │   └── widgets/           (Page-specific widgets)
-   │   │   │       ├── event_card.dart
-   │   │   │       ├── category_chip_filter.dart
-   │   │   │       └── add_event.dart
-   │   │   ├── lost_and_found/
-   │   │   │   ├── lost_and_found_page.dart
-   │   │   │   └── widgets/
-   │   │   │       ├── lost_and_found_item_card.dart
-   │   │   │       ├── status_chip_filter.dart
-   │   │   │       └── add_lost_found_item.dart
-   │   │   └── course_routine/
-   │   │       └── widgets/           (Reusable core widgets)
-   │   └── widgets/                   (Global reusable widgets)
-   │       ├── default_appbar.dart
-   │       ├── search_appbar.dart     (Expanding search AppBar)
-   │       ├── custom_input.dart
-   │       ├── custom_dropdown.dart
-   │       ├── default_button.dart
-   │       └── custom_bottom_dialog.dart
-
-2. WIDGET PLACEMENT RULES:
-   - Page-specific widgets → lib/ui/pages/[page_name]/widgets/
-   - Widgets used in 2+ places → lib/ui/widgets/
-   - Keep related components together
+1. QUICK START FOR NEW SESSIONS
+2. PROJECT OVERVIEW & STATUS
+3. COMPLETE PROJECT STRUCTURE
+4. DEVELOPMENT PHASES
+5. DATA FLOW ARCHITECTURE ⭐ CRITICAL
+6. CENTRALIZED SYSTEMS
+7. THEME & STYLING GUIDELINES
+8. ARCHITECTURE & FILE ORGANIZATION
+9. CODING PATTERNS & BEST PRACTICES
+10. REFERENCE IMPLEMENTATIONS
+11. NEXT STEPS & WHAT'S MISSING
+12. WORKFLOW & CHECKLIST
 
 ================================================================================
-CODING PATTERNS & BEST PRACTICES
+1. QUICK START FOR NEW SESSIONS (AI READ THIS FIRST!)
 ================================================================================
 
-1. PAGE STRUCTURE (Reference: events_page.dart, lost_and_found_page.dart):
+**When starting a new session:**
 
-   class XPage extends StatefulWidget {
-     const XPage({super.key});
+1. ✅ Read this entire file (DEVELOPMENT_INSTRUCTIONS.txt)
+2. ✅ Check Section 2 for current project status
+3. ✅ Check Section 11 for next priority tasks
+4. ✅ Review similar existing implementations before coding
+5. ✅ Follow Section 7 (Theme Guidelines) strictly
+6. ✅ Use Section 9 (Coding Patterns) as templates
 
-     @override
-     State<XPage> createState() => _XPageState();
-   }
+**CRITICAL RULES (AI MUST FOLLOW):**
+- ⭐ ALWAYS use colorScheme (NEVER Colors.white, Colors.red, etc.)
+- ⭐ ALWAYS use AppDimensions (NEVER hardcoded numbers like 16, 12)
+- ⭐ ALWAYS use ErrorMessages constants (NEVER hardcoded strings)
+- ⭐ NEVER bypass BaseRepository (extend it for new repositories)
+- ⭐ NEVER access DatabaseService directly from UI
+- ⭐ ALWAYS use PaginatedProvider for list pages
+- ⭐ ALWAYS use safeOperation() for user actions (built-in feedback)
+- ⭐ ALWAYS dispose controllers properly
+- ⭐ ALWAYS read existing similar code before creating new features
 
-   class _XPageState extends State<XPage> {
-     // State variables
-     String? _selectedFilter;
-     bool _isSearching = false;
+**Sample AI Greeting:**
+"Hi! I've read the development guide and understand CampusWhisper is at
+97% complete with Phases 0-9 COMPLETE ✅
 
-     // Sample data for UI demonstration
-     final List<Map<String, dynamic>> _allItems = [...];
+Key understanding:
+- All UI pages connected to Firebase with real data
+- Theme system follows device (no manual toggle)
+- Last login tracking implemented
+- Profile colors fixed (no gradients, uses colorScheme)
+- All providers registered and working
 
-     // Filtered/computed data
-     List<Map<String, dynamic>> get _filteredItems {
-       // Filtering logic
-     }
-
-     @override
-     Widget build(BuildContext context) {
-       final theme = Theme.of(context);
-       final colorScheme = theme.colorScheme;
-
-       return Scaffold(
-         appBar: ...,
-         body: ...,
-         floatingActionButton: ...,
-       );
-     }
-   }
-
-2. CARD WIDGETS:
-   Always include:
-   - Elevation using AppDimensions.elevation1 or elevation2
-   - Border radius using AppDimensions.radius12
-   - Consistent padding using AppDimensions.space16
-   - Theme-aware colors from colorScheme
-
-   Example:
-   Card(
-     margin: EdgeInsets.symmetric(
-       vertical: AppDimensions.space8,
-       horizontal: AppDimensions.horizontalPadding,
-     ),
-     elevation: AppDimensions.elevation2,
-     shape: RoundedRectangleBorder(
-       borderRadius: BorderRadius.circular(AppDimensions.radius12),
-     ),
-     child: Padding(
-       padding: EdgeInsets.all(AppDimensions.space16),
-       child: ...,
-     ),
-   )
-
-3. FILTER CHIPS PATTERN:
-   Horizontal scrolling chips with auto-scroll to selection
-   Reference: lib/ui/pages/events/widgets/category_chip_filter.dart
-
-   Features:
-   - Horizontal SingleChildScrollView
-   - ScrollController for auto-scroll
-   - GlobalKey for each chip
-   - AnimatedContainer for smooth transitions
-   - Selected state styling
-
-4. SEARCH PATTERN (Modern 2025 UX):
-   Use SearchAppBar (lib/ui/widgets/search_appbar.dart)
-
-   Features:
-   - Expanding AppBar animation
-   - Title fades out, search field slides in
-   - Auto-focus on search activation
-   - Clear button when typing
-   - Clean minimal styling (matches custom_input.dart)
-
-   Implementation:
-   SearchAppBar(
-     title: 'Page Title',
-     isSearching: _isSearching,
-     searchQuery: _searchQuery,
-     onSearchToggle: () => setState(() => _isSearching = !_isSearching),
-     onSearchChanged: (query) => setState(() => _searchQuery = query),
-   )
-
-5. BOTTOM DIALOG PATTERN:
-   Use CustomBottomDialog.show() for forms
-
-   CustomBottomDialog.show(
-     context: context,
-     title: 'Dialog Title',
-     child: YourFormWidget(
-       onSubmit: (data) {
-         // Handle submission
-         Navigator.of(context).pop();
-       },
-     ),
-   );
-
-6. SAMPLE DATA STRUCTURE:
-   For UI development, use List<Map<String, dynamic>>:
-
-   final List<Map<String, dynamic>> _items = [
-     {
-       'itemName': 'Item Name',
-       'description': 'Description text',
-       'datePosted': DateTime.now(),
-       'category': 'Category',
-       'status': 'Status',
-       // ... other fields
-     },
-   ];
+Ready to work on Phase 10 tasks. What would you like to focus on?
+1. Add dummy data to Firebase for testing
+2. Create detail pages (thread, event, competition detail)
+3. Implement comment system
+4. Testing & polish
+5. Other features"
 
 ================================================================================
-STATE MANAGEMENT
+2. PROJECT OVERVIEW & STATUS
 ================================================================================
 
-For UI-only work (current focus):
-- Use StatefulWidget with setState()
-- NO providers/state management needed yet
-- Keep state local to pages
-- Data flow happens later when integrating backend
+**Project Name:** CampusWhisper
+**Type:** Flutter Campus Social Application
+**Backend:** Firebase (Firestore, Auth, Storage)
+**State Management:** Provider pattern with custom base classes
 
-For future backend integration:
-- lib/providers/ folder is ready
-- Will implement proper state management then
+**Features Implemented:**
+✅ Authentication (Login, Signup, Email Verification, Password Reset)
+✅ Home Dashboard (connected to Firebase)
+✅ Thread/Discussions (Posts with filters, pagination)
+✅ Study Hub (Course Routine, Roadmap, CGPA Calculator, Scholarship)
+✅ Campus Hub (Events, Lost & Found, Clubs, Competitions - all with Firebase)
+✅ More Tab (Profile, Edit Profile, Settings, Notifications, Saved, About)
+✅ User Profile Management (XP tracking, badges, last login)
+✅ Theme System (follows device light/dark mode)
 
-================================================================================
-ICONS
-================================================================================
+**Current Status (2026-01-11):**
+- Total Completion: 97%
+- Phase 0-9: ✅ COMPLETE
+- Phase 10: 🔄 IN PROGRESS (Testing & Polish)
 
-Using: icons_plus package (Iconsax icons)
+**What's Working:**
+✅ Complete authentication flow
+✅ User registration and login
+✅ Profile management (view, edit)
+✅ Last login timestamp tracking
+✅ All list pages with Firebase data
+✅ Infinite scroll pagination (20 items per page)
+✅ Pull-to-refresh on all pages
+✅ Category/type/status filters
+✅ Search functionality
+✅ Empty/loading/error states
+✅ Theme follows system (light/dark mode)
+✅ All colors use colorScheme (no hardcoded colors)
 
-Common icons:
-- Search: Iconsax.search_normal_outline
-- Add: Iconsax.add_outline
-- Close: Iconsax.close_square_outline
-- Calendar: Iconsax.calendar_outline
-- Location: Iconsax.location_outline
-- Heart: Iconsax.heart_outline
-- Share: Iconsax.share_outline
-- Message: Iconsax.message_outline
-- Tick: Iconsax.tick_circle_outline
-- Clock: Iconsax.clock_outline
-- Trend: Iconsax.trend_up_outline
+**What's NOT Working:**
+❌ No real data in Firebase (all pages show empty states)
+❌ Image upload functionality (StorageService ready, not integrated)
+❌ Comment system (CommentProvider ready, UI not integrated)
+❌ Detail pages (thread, event, competition detail pages needed)
+❌ Push notifications
+❌ Real-time updates (listeners not implemented)
 
-Always use _outline variants for consistency.
-
-================================================================================
-COMPLETED FEATURES
-================================================================================
-
-1. LOST & FOUND PAGE:
-   ✅ Lost and Found item cards with:
-      - Status badges (Lost/Found)
-      - Poster information
-      - Item details (location, category)
-      - Contact and Mark Resolved buttons
-      - Resolved items section with reduced opacity
-   ✅ Status filter chips (Lost/Found/All)
-   ✅ Stats dashboard (Lost Items, Found Items, Resolved)
-   ✅ Expanding search in AppBar (modern UX pattern)
-   ✅ Category filters while searching
-   ✅ Real-time search filtering across name, description, location
-   ✅ Search results counter
-   ✅ Add new item dialog with category selection
-   ✅ Floating action button for adding items
-
-2. SEARCH FUNCTIONALITY:
-   ✅ Expanding AppBar search (SearchAppBar widget)
-   ✅ Clean minimal styling matching custom_input.dart
-   ✅ Auto-focus on activation
-   ✅ Clear button
-   ✅ Real-time filtering
-   ✅ Category-based refinement
-   ✅ Results counter with active filters display
+**Recent Changes (2026-01-11):**
+✅ Fixed profile page colors (removed gradients, uses colorScheme)
+✅ Implemented last login tracking
+✅ Updated UserRepository with updateLastLogin method
+✅ LoginProvider now updates last login on successful login
+✅ Removed theme toggle (app follows system theme)
+✅ Fixed all hardcoded Colors to use colorScheme
+✅ All dummy data removed from More section pages
 
 ================================================================================
-REFERENCE PAGES
+3. COMPLETE PROJECT STRUCTURE
 ================================================================================
 
-When creating new pages, reference these existing implementations:
-
-1. EVENTS PAGE (lib/ui/pages/events/events_page.dart):
-   - Category filtering
-   - Event cards with interaction buttons
-   - Add event dialog
-   - Stats display
-
-2. LOST & FOUND PAGE (lib/ui/pages/lost_and_found/lost_and_found_page.dart):
-   - Search integration
-   - Status filtering
-   - Multiple filter combinations
-   - Resolved/Active item separation
-
-3. CUSTOM INPUT (lib/ui/widgets/custom_input.dart):
-   - Clean input field styling
-   - Focus states
-   - Validation patterns
+lib/
+│
+├── main.dart                                     ✅ COMPLETE
+│
+├── core/                                         [CENTRALIZED SYSTEMS]
+│   ├── theme/
+│   │   ├── app_theme.dart                        ✅ COMPLETE
+│   │   ├── app_dimensions.dart                   ✅ COMPLETE
+│   │   └── theme_provider.dart                   ✅ COMPLETE
+│   │
+│   ├── database/                                 ✅ DATABASE ABSTRACTION
+│   │   ├── database_service.dart                 ✅ COMPLETE
+│   │   ├── firestore_adapter.dart                ✅ COMPLETE
+│   │   ├── query_builder.dart                    ✅ COMPLETE
+│   │   └── paginated_result.dart                 ✅ COMPLETE
+│   │
+│   ├── repositories/                             ✅ REPOSITORY PATTERN
+│   │   └── base_repository.dart                  ✅ COMPLETE
+│   │
+│   ├── providers/                                ✅ PROVIDER PATTERN
+│   │   ├── base_provider.dart                    ✅ COMPLETE
+│   │   └── paginated_provider.dart               ✅ COMPLETE
+│   │
+│   ├── config/
+│   │   └── app_config.dart                       ✅ COMPLETE
+│   │
+│   ├── exceptions/
+│   │   └── app_exceptions.dart                   ✅ COMPLETE
+│   │
+│   ├── constants/
+│   │   ├── app_constants.dart                    ✅ COMPLETE
+│   │   ├── error_messages.dart                   ✅ COMPLETE
+│   │   ├── validation_messages.dart              ✅ COMPLETE
+│   │   └── build_text.dart                       ✅ COMPLETE
+│   │
+│   ├── utils/
+│   │   ├── validators.dart                       ✅ COMPLETE
+│   │   ├── date_formatter.dart                   ✅ COMPLETE
+│   │   ├── snackbar_helper.dart                  ✅ COMPLETE
+│   │   └── dialog_helper.dart                    ✅ COMPLETE
+│   │
+│   ├── services/
+│   │   ├── auth_service.dart                     ✅ COMPLETE
+│   │   └── storage_service.dart                  ✅ COMPLETE
+│   │
+│   └── extensions/
+│       └── context_extensions.dart               ✅ COMPLETE
+│
+├── models/                                       ✅ ALL MODELS COMPLETE
+│   ├── user_model.dart                           ✅
+│   ├── posts_model.dart                          ✅
+│   ├── vote_model.dart                           ✅
+│   ├── event_model.dart                          ✅
+│   ├── competition_model.dart                    ✅
+│   ├── lost_found_item_model.dart                ✅
+│   ├── club_model.dart                           ✅
+│   ├── comment_model.dart                        ✅
+│   ├── course_routine_model.dart                 ✅
+│   └── [13 more models...]                       ✅
+│
+├── providers/                                    ✅ ALL PROVIDERS COMPLETE
+│   ├── login_provider.dart                       ✅ (with last login tracking)
+│   ├── sign_up_provider.dart                     ✅
+│   ├── user_provider.dart                        ✅
+│   ├── post_provider.dart                        ✅
+│   ├── event_provider.dart                       ✅
+│   ├── competition_provider.dart                 ✅
+│   ├── lost_found_provider.dart                  ✅
+│   ├── club_provider.dart                        ✅
+│   ├── comment_provider.dart                     ✅
+│   └── [6 more providers...]                     ✅
+│
+├── repository/                                   ✅ ALL REPOSITORIES COMPLETE
+│   ├── user_repository.dart                      ✅ (with updateLastLogin)
+│   ├── post_repository.dart                      ✅
+│   ├── event_repository.dart                     ✅
+│   ├── competition_repository.dart               ✅
+│   ├── lost_found_repository.dart                ✅
+│   ├── club_repository.dart                      ✅
+│   ├── comment_repository.dart                   ✅
+│   └── [4 more repositories...]                  ✅
+│
+├── routing/
+│   ├── app_routes.dart                           ✅ COMPLETE
+│   └── custom_transitions.dart                   ✅ COMPLETE
+│
+└── ui/
+    ├── widgets/                                  ✅ ALL WIDGETS COMPLETE
+    │   ├── custom_input.dart                     ✅
+    │   ├── default_button.dart                   ✅
+    │   ├── empty_state.dart                      ✅
+    │   ├── error_widget.dart                     ✅
+    │   ├── user_avatar.dart                      ✅
+    │   ├── cached_image.dart                     ✅
+    │   └── [12 more widgets...]                  ✅
+    │
+    └── pages/
+        ├── auth/                                 ✅ COMPLETE
+        │   ├── login_page.dart                   ✅
+        │   ├── sign_up_page.dart                 ✅
+        │   ├── forgot_password_page.dart         ✅
+        │   └── email_verification_page.dart      ✅
+        │
+        ├── navigation/                           ✅ COMPLETE
+        │   └── navigation_page.dart              ✅
+        │
+        ├── home/                                 ✅ COMPLETE
+        │   ├── home_page.dart                    ✅ (connected to Firebase)
+        │   └── widgets/                          ✅
+        │
+        ├── thread/                               ⚠️ NEEDS DETAIL PAGE
+        │   ├── thread_page.dart                  ✅ (connected to Firebase)
+        │   ├── thread_detail_page.dart           ❌ TODO
+        │   └── widgets/                          ✅
+        │       ├── comment_card.dart             ❌ TODO
+        │       └── comment_input.dart            ❌ TODO
+        │
+        ├── study/                                ✅ COMPLETE
+        │   ├── study_page.dart                   ✅
+        │   ├── course_routine/                   ✅
+        │   ├── course_roadmap/                   ✅
+        │   ├── cgpa_calculator/                  ✅
+        │   └── scholarship/                      ✅
+        │
+        ├── campus/                               ⚠️ NEEDS DETAIL PAGES
+        │   ├── campus_page.dart                  ✅
+        │   ├── events/                           ⚠️
+        │   │   ├── events_page.dart              ✅ (connected to Firebase)
+        │   │   ├── event_detail_page.dart        ✅ (created, needs Firebase)
+        │   │   ├── event_attendees_page.dart     ✅ (created, needs Firebase)
+        │   │   └── event_comments_page.dart      ✅ (created, needs Firebase)
+        │   ├── lost_and_found/                   ⚠️
+        │   │   ├── lost_and_found_page.dart      ✅ (connected to Firebase)
+        │   │   ├── item_detail_page.dart         ✅ (created, needs Firebase)
+        │   │   └── contact_poster_page.dart      ✅ (created, needs Firebase)
+        │   ├── clubs/                            ✅
+        │   │   ├── clubs_page.dart               ✅ (connected to Firebase)
+        │   │   └── club_detail_page.dart         ✅ (created, needs Firebase)
+        │   └── competitions/                     ⚠️
+        │       ├── competitions_page.dart        ✅ (connected to Firebase)
+        │       ├── competition_detail_page.dart  ✅ (created, needs Firebase)
+        │       ├── registration_page.dart        ✅ (created, needs Firebase)
+        │       └── participants_page.dart        ✅ (created, needs Firebase)
+        │
+        ├── more/                                 ✅ COMPLETE
+        │   ├── more_page.dart                    ✅ (connected to Firebase)
+        │   ├── profile/
+        │   │   ├── profile_page.dart             ✅ (colors fixed)
+        │   │   └── edit_profile_page.dart        ✅
+        │   ├── settings/
+        │   │   └── settings_page.dart            ✅ (theme toggle removed)
+        │   ├── notifications/
+        │   │   └── notifications_page.dart       ✅ (dummy data removed)
+        │   ├── saved/
+        │   │   └── saved_page.dart               ✅ (dummy data removed)
+        │   └── about/
+        │       └── about_page.dart               ✅ (colors fixed)
+        │
+        └── shared/                               ✅ COMPLETE
+            ├── report_page.dart                  ✅
+            ├── chat_page.dart                    ✅
+            ├── image_viewer_page.dart            ✅
+            ├── splash_screen.dart                ✅
+            └── error_page.dart                   ✅
 
 ================================================================================
-IMPORTANT REMINDERS
+4. DEVELOPMENT PHASES
 ================================================================================
 
-1. ALWAYS read existing files before modifying
-2. ALWAYS use AppDimensions for spacing/sizing
-3. ALWAYS use colorScheme for colors
-4. NEVER hardcode values
-5. Keep consistent with existing patterns
-6. Widgets should be reusable and well-organized
-7. Use descriptive variable names
-8. Follow the existing code style
-9. Test on different screen sizes (responsive design)
-10. Clean, minimal UI following custom_input.dart style
+**✅ PHASE 0: FOUNDATION** - COMPLETE
+- Core utilities, constants, extensions
+- Global widgets
+- Data models
+- Database abstraction layer
+- Repository pattern with BaseRepository
+- Provider pattern with PaginatedProvider
+
+**✅ PHASE 1: AUTHENTICATION** - COMPLETE
+- Login, Signup, Email Verification, Password Reset
+
+**✅ PHASE 2: MAIN TABS** - COMPLETE
+- Home, Thread, Study Hub, Campus Hub, More Hub
+
+**✅ PHASE 3: STUDY CHILD PAGES** - COMPLETE
+- Course Routine, Roadmap, CGPA Calculator, Scholarship
+
+**✅ PHASE 4: CAMPUS CHILD PAGES** - COMPLETE
+- Events, Lost & Found, Clubs, Competitions (detail pages created)
+
+**✅ PHASE 5: MORE CHILD PAGES** - COMPLETE
+- Profile, Edit Profile, Settings, Notifications, Saved, About
+
+**✅ PHASE 6: BACKEND INTEGRATION - REPOSITORIES** - COMPLETE
+- 6 repositories extending BaseRepository
+
+**✅ PHASE 7: SHARED PAGES** - COMPLETE
+- Report, Chat, Image Viewer, Splash, Error pages
+
+**✅ PHASE 8: FIREBASE SERVICES** - COMPLETE
+- AuthService, StorageService
+
+**✅ PHASE 9: CONNECT UI TO BACKEND** - COMPLETE
+- All list pages connected to Firebase
+- UserProvider with profile management
+- Last login tracking implemented
+- Theme system finalized
+- All colors use colorScheme
+- All dummy data removed from core pages
+
+**🔄 PHASE 10: TESTING & POLISH** - IN PROGRESS
+Next priorities:
+1. Add dummy data to Firebase for testing
+2. Test all features end-to-end
+3. Implement comment system UI
+4. Create thread detail page
+5. Polish UI/UX
+6. Performance optimization
 
 ================================================================================
-WORKFLOW
+5. DATA FLOW ARCHITECTURE ⭐ CRITICAL
 ================================================================================
 
-When starting new work:
-1. Read DEVELOPMENT_INSTRUCTIONS.txt (this file)
-2. Review relevant reference files
-3. Check theme files (app_theme.dart, app_dimensions.dart)
-4. Look at similar existing pages for patterns
-5. Plan widget structure before coding
-6. Use TodoWrite for tracking multi-step tasks
-7. Keep code organized in proper folders
-8. Test thoroughly before considering complete
+**🎯 ARCHITECTURE PATTERN (MUST USE):**
+
+```
+UI (Pages/Widgets)
+      ↕
+Providers (State Management + User Feedback)
+      ↕
+Repositories (Business Logic + CRUD)
+      ↕
+Database Service (Abstract Interface)
+      ↕
+Firestore Adapter (Concrete Implementation)
+      ↕
+Firebase/Firestore
+```
+
+**🔧 LAYER 1: DATABASE ABSTRACTION**
+
+Location: `lib/core/database/`
+
+- DatabaseService: Abstract interface for ALL database operations
+- FirestoreAdapter: Concrete implementation using Firestore
+- Query building, pagination, CRUD operations
+
+**🔧 LAYER 2: REPOSITORY PATTERN**
+
+Location: `lib/core/repositories/base_repository.dart`
+
+**BaseRepository<T>**: Generic repository eliminating 80% code duplication
+
+Example:
+```dart
+class PostRepository extends BaseRepository<PostModel> {
+  @override
+  String get collectionName => 'posts';
+
+  @override
+  PostModel fromJson(Map<String, dynamic> json) => PostModel.fromJson(json);
+
+  @override
+  Map<String, dynamic> toJson(PostModel model) => model.toJson();
+
+  @override
+  String getId(PostModel model) => model.id;
+
+  // You get create, getAll, getById, update, delete for FREE!
+
+  // Add custom methods:
+  Future<void> updateLastLogin(String userId) async {
+    // Custom logic here
+  }
+}
+```
+
+**🔧 LAYER 3: PROVIDER PATTERN**
+
+Location: `lib/core/providers/`
+
+**PaginatedProvider<T>**: Extends BaseProvider with pagination
+
+Example:
+```dart
+class PostProvider extends PaginatedProvider<PostModel> {
+  final PostRepository _repository = PostRepository();
+
+  @override
+  Future<PaginatedResult<PostModel>> fetchItems({
+    List<QueryFilter>? filters,
+    dynamic cursor,
+  }) async {
+    return _repository.getAll(
+      filters: filters,
+      limit: 20,
+      cursor: cursor,
+    );
+  }
+}
+```
+
+**🔧 LAYER 4: UI INTEGRATION**
+
+Use Consumer or ListenableBuilder:
+```dart
+Consumer<PostProvider>(
+  builder: (context, provider, child) {
+    if (provider.isLoading && provider.items.isEmpty) {
+      return CircularProgressIndicator();
+    }
+
+    if (provider.hasError && provider.items.isEmpty) {
+      return ErrorWidget(onRetry: provider.refresh);
+    }
+
+    if (provider.isEmpty) {
+      return EmptyState(message: 'No posts yet');
+    }
+
+    return RefreshIndicator(
+      onRefresh: provider.refresh,
+      child: ListView.builder(
+        itemCount: provider.items.length,
+        itemBuilder: (context, index) => PostCard(provider.items[index]),
+      ),
+    );
+  },
+)
+```
 
 ================================================================================
-CONTACT & NOTES
+6. CENTRALIZED SYSTEMS (USE THESE - DON'T RECREATE!)
 ================================================================================
 
-Project: CampusWhisper - Flutter Campus Social App
-Focus: UI Development (Backend integration comes later)
-Current Status: Lost & Found page complete with modern search UX
+**1. VALIDATION → lib/core/utils/validators.dart**
 
-Last Updated: 2025-12-30
+```dart
+CustomInput(
+  validator: Validators.email,  // or .required, .phone, .minLength(6)
+)
+```
+
+**2. SNACKBAR → lib/core/utils/snackbar_helper.dart**
+
+```dart
+SnackbarHelper.showSuccess(context, 'Success!');
+SnackbarHelper.showError(context, 'Error occurred');
+SnackbarHelper.showInfo(context, 'Info message');
+SnackbarHelper.showWarning(context, 'Warning message');
+```
+
+**3. DIALOGS → lib/core/utils/dialog_helper.dart**
+
+```dart
+final confirmed = await DialogHelper.showConfirmation(
+  context,
+  title: 'Delete Item',
+  message: 'Are you sure?',
+);
+if (confirmed) {
+  // Delete
+}
+```
+
+**4. DATE FORMATTING → lib/core/utils/date_formatter.dart**
+
+```dart
+DateFormatter.formatDate(date);           // "Jan 11, 2026"
+DateFormatter.timeAgo(date);              // "2 hours ago"
+DateFormatter.formatCustom(date, 'yyyy-MM-dd');
+```
+
+**5. CONSTANTS**
+
+```dart
+// lib/core/constants/error_messages.dart
+ErrorMessages.somethingWentWrong
+ErrorMessages.networkError
+ErrorMessages.postCreated
+
+// lib/core/constants/validation_messages.dart
+ValidationMessages.emailRequired
+ValidationMessages.passwordTooShort
+
+// lib/core/constants/app_constants.dart
+AppConstants.appName
+AppConstants.apiUrl
+```
+
+================================================================================
+7. THEME & STYLING GUIDELINES ⭐ CRITICAL
+================================================================================
+
+**COLOR SCHEME (MUST USE)**
+
+✅ ALWAYS: `Theme.of(context).colorScheme.primary`
+❌ NEVER: `Color(0xFF3F51B5)` or `Colors.blue` or `Colors.white`
+
+Common colorScheme properties:
+- `colorScheme.primary` - Primary brand color
+- `colorScheme.onPrimary` - Text/icons on primary
+- `colorScheme.secondary` - Secondary brand color
+- `colorScheme.surface` - Surface backgrounds
+- `colorScheme.onSurface` - Text on surfaces
+- `colorScheme.surfaceContainerHighest` - Elevated surfaces
+- `colorScheme.error` - Error states
+- `colorScheme.onError` - Text/icons on error
+
+**OPACITY/ALPHA VALUES**
+
+Use `.withAlpha()` instead of deprecated `.withOpacity()`:
+- 60% opacity = `withAlpha(153)`
+- 30% opacity = `withAlpha(77)`
+- 20% opacity = `withAlpha(51)`
+- 10% opacity = `withAlpha(26)`
+
+Example:
+```dart
+colorScheme.onSurface.withAlpha(153)  // 60% opacity text
+```
+
+**DIMENSIONS (MUST USE)**
+
+✅ CORRECT:
+```dart
+SizedBox(height: AppDimensions.h16)
+padding: EdgeInsets.all(AppDimensions.space12)
+fontSize: AppDimensions.bodyFontSize
+borderRadius: BorderRadius.circular(AppDimensions.radius12)
+```
+
+❌ WRONG:
+```dart
+SizedBox(height: 16)
+padding: EdgeInsets.all(12)
+fontSize: 14
+borderRadius: BorderRadius.circular(12)
+```
+
+**Available AppDimensions:**
+
+Spacing: `space4`, `space8`, `space12`, `space16`, `space24`, `space32`
+Height: `h4`, `h8`, `h12`, `h16`, `h24`, `h32`
+Width: `w4`, `w8`, `w12`, `w16`, `w24`, `w32`
+Padding: `horizontalPadding`, `verticalPadding`
+Font sizes: `titleFontSize`, `bodyFontSize`, `captionFontSize`
+Icon sizes: `smallIconSize`, `mediumIconSize`, `largeIconSize`
+Radius: `radius4`, `radius8`, `radius12`, `radius16`
+Elevation: `elevation1`, `elevation2`, `elevation4`
+
+================================================================================
+8. ARCHITECTURE & FILE ORGANIZATION
+================================================================================
+
+**WIDGET PLACEMENT RULES:**
+
+Global widgets (lib/ui/widgets/):
+- Used in 2+ different pages
+- Generic purpose (buttons, inputs, dialogs, appbars)
+
+Page-specific widgets (lib/ui/pages/[page]/widgets/):
+- Tightly coupled to specific feature
+- Custom cards, filters, forms
+
+**MODEL REQUIREMENTS:**
+
+All models must include:
+- `fromJson()` constructor
+- `toJson()` method
+- Field validation if needed
+
+**PROVIDER PATTERN:**
+
+- Extend `ChangeNotifier` or `PaginatedProvider`
+- Handle data fetching
+- Manage state
+- Business logic
+
+**REPOSITORY PATTERN:**
+
+- Extend `BaseRepository`
+- Firestore CRUD operations
+- Custom queries
+
+================================================================================
+9. CODING PATTERNS & BEST PRACTICES
+================================================================================
+
+**1. PAGE STRUCTURE PATTERN**
+
+```dart
+class FeaturePage extends StatefulWidget {
+  const FeaturePage({super.key});
+
+  @override
+  State<FeaturePage> createState() => _FeaturePageState();
+}
+
+class _FeaturePageState extends State<FeaturePage> {
+  // 1. State variables
+  String? _selectedFilter;
+  bool _isLoading = false;
+
+  // 2. Controllers
+  final TextEditingController _searchController = TextEditingController();
+
+  // 3. initState
+  @override
+  void initState() {
+    super.initState();
+    // Initialize
+  }
+
+  // 4. dispose
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  // 5. build
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      appBar: DefaultAppBar(title: 'Feature'),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    // Body implementation
+  }
+}
+```
+
+**2. CARD WIDGET PATTERN**
+
+```dart
+class FeatureCard extends StatelessWidget {
+  final Map<String, dynamic> item;
+
+  const FeatureCard({super.key, required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      margin: EdgeInsets.symmetric(
+        vertical: AppDimensions.space8,
+        horizontal: AppDimensions.horizontalPadding,
+      ),
+      elevation: AppDimensions.elevation2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppDimensions.radius12),
+      ),
+      child: InkWell(
+        onTap: () => _navigateToDetail(context),
+        borderRadius: BorderRadius.circular(AppDimensions.radius12),
+        child: Padding(
+          padding: EdgeInsets.all(AppDimensions.space16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Card content
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToDetail(BuildContext context) {
+    Navigator.pushNamed(
+      context,
+      AppRoutes.featureDetail,
+      arguments: item,
+    );
+  }
+}
+```
+
+**3. ERROR HANDLING PATTERN**
+
+```dart
+try {
+  await someOperation();
+  if (context.mounted) {
+    SnackbarHelper.showSuccess(context, ErrorMessages.successMessage);
+  }
+} catch (e) {
+  if (context.mounted) {
+    SnackbarHelper.showError(context, ErrorMessages.somethingWentWrong);
+  }
+}
+```
+
+**4. ICONS (icons_plus package - Iconsax)**
+
+Always use `_outline` variants:
+- Search: `Iconsax.search_normal_outline`
+- Add: `Iconsax.add_outline`
+- Calendar: `Iconsax.calendar_outline`
+- Heart: `Iconsax.heart_outline`
+- User: `Iconsax.user_outline`
+- Settings: `Iconsax.setting_2_outline`
+
+For active state: Use `_bold` variants
+- `Iconsax.home_2_bold`
+- `Iconsax.message_2_bold`
+
+================================================================================
+10. REFERENCE IMPLEMENTATIONS
+================================================================================
+
+Before creating similar features, ALWAYS read these:
+
+1. **Events Page** (lib/ui/pages/campus/events/events_page.dart)
+   - Connected to Firebase via EventProvider
+   - Category filtering with chips
+   - Infinite scroll pagination
+   - Pull-to-refresh
+   - Empty/loading/error states
+
+2. **Thread Page** (lib/ui/pages/thread/thread_page.dart)
+   - Connected to Firebase via PostProvider
+   - Type filtering (question, discussion, announcement)
+   - Pagination and refresh
+
+3. **Profile Page** (lib/ui/pages/more/profile/profile_page.dart)
+   - Uses colorScheme (no hardcoded colors)
+   - No gradients (solid backgrounds)
+   - Proper data display with UserProvider
+
+4. **Login Provider** (lib/providers/login_provider.dart)
+   - Last login tracking implementation
+   - Proper error handling
+   - Context-mounted checks
+
+5. **User Repository** (lib/repository/user_repository.dart)
+   - Custom updateLastLogin method
+   - Extends BaseRepository
+   - Proper error handling
+
+================================================================================
+11. NEXT STEPS & WHAT'S MISSING
+================================================================================
+
+**🎯 IMMEDIATE PRIORITIES:**
+
+**1. ADD DUMMY DATA TO FIREBASE** ⭐⭐⭐ CRITICAL
+All pages are connected but show empty states. Need:
+- Create Firestore collections
+- Add sample users (10-15)
+- Add sample posts (20-30)
+- Add sample events (10-15)
+- Add sample clubs (5-10)
+- Add sample competitions (5-10)
+- Add sample lost & found items (10-15)
+
+**2. TEST END-TO-END FUNCTIONALITY** ⭐⭐⭐
+- Test user registration and login
+- Test last login updates
+- Test all list pages with real data
+- Test pagination (scroll to load more)
+- Test pull-to-refresh
+- Test filters and search
+- Test profile page data display
+
+**3. IMPLEMENT COMMENT SYSTEM** ⭐⭐
+Create UI for comments:
+- thread_detail_page.dart with comments
+- comment_card.dart widget
+- comment_input.dart widget
+- Connect to CommentProvider
+
+**4. POLISH & OPTIMIZE** ⭐
+- Test on different screen sizes
+- Optimize performance
+- Fix any UI glitches
+- Improve loading states
+- Add better error messages
+
+**OPTIONAL ENHANCEMENTS:**
+- Image upload integration (StorageService ready)
+- Real-time updates (Firestore listeners)
+- Push notifications
+- Advanced search
+- User blocking/reporting
+
+================================================================================
+12. WORKFLOW & CHECKLIST
+================================================================================
+
+**BEFORE STARTING ANY WORK:**
+
+1. ✅ Read this file (DEVELOPMENT_INSTRUCTIONS.txt)
+2. ✅ Check Section 2 for current project status
+3. ✅ Check Section 11 for next priorities
+4. ✅ Read similar existing implementations
+5. ✅ Review Section 7 (Theme Guidelines)
+
+**WHEN CREATING A NEW FEATURE:**
+
+1. ✅ Read similar reference implementations
+2. ✅ Use AppDimensions for all spacing
+3. ✅ Use colorScheme for all colors
+4. ✅ Use ErrorMessages for all messages
+5. ✅ Use centralized helpers (validators, snackbar, dialogs)
+6. ✅ Handle empty/loading/error states
+7. ✅ Dispose controllers properly
+8. ✅ Test on different screen sizes
+9. ✅ Update this file with completion status
+
+**COMMON MISTAKES TO AVOID:**
+
+1. ❌ Hardcoding colors (use colorScheme)
+2. ❌ Hardcoding spacing (use AppDimensions)
+3. ❌ Hardcoding messages (use ErrorMessages)
+4. ❌ Not disposing controllers
+5. ❌ Not handling empty/loading/error states
+6. ❌ Using Colors.white, Colors.red, etc.
+7. ❌ Not checking context.mounted before async operations
+8. ❌ Bypassing BaseRepository
+9. ❌ Creating duplicate utilities
+10. ❌ Not reading existing implementations
+
+================================================================================
+CURRENT FOCUS
+================================================================================
+
+📍 **Phase 10: Testing & Polish** (IN PROGRESS)
+
+**Next Action:**
+Choose ONE of these approaches:
+
+**Option 1: Add Dummy Data First** (Recommended)
+1. Create Firebase collections
+2. Add sample data for all entities
+3. Test all pages with real data
+4. Fix any issues that appear
+
+**Option 2: Implement Missing Features**
+1. Create thread_detail_page.dart with comments
+2. Integrate comment system
+3. Test comment functionality
+4. Add to other detail pages
+
+**Option 3: Polish & Optimize**
+1. Test all features end-to-end
+2. Fix UI glitches
+3. Optimize performance
+4. Improve error handling
+
+**Recommended: Start with Option 1** - Add dummy data so you can see the app working with real Firebase data, then test everything thoroughly.
+
+================================================================================
+REMEMBER
+================================================================================
+
+- Quality over speed
+- Follow patterns religiously
+- Use centralized systems (NEVER hardcode)
+- colorScheme for colors, AppDimensions for spacing, ErrorMessages for text
+- Read before writing
+- Test thoroughly
+- Update this file when complete
+
+**All infrastructure is COMPLETE!** ✅
+**Now focus on testing and polish!** 🚀
+
+Last Updated: 2026-01-11
+Current Status: 97% Complete (Phases 0-9 ✅ | Phase 10 In Progress)
+Next Milestone: Add dummy data to Firebase and test all features
+
+================================================================================
