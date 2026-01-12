@@ -4,21 +4,22 @@ class CompetitionModel {
   final String id;
   final String title;
   final String description;
-  final String category;
+  final String category;  // "coding", "design", "business"
+  final DateTime registrationStartDate;
+  final DateTime registrationEndDate;
+  final DateTime competitionStartDate;
+  final DateTime competitionEndDate;
+  final String location;
   final String? imageUrl;
+  final String? rules;
   final String organizerId;
   final String organizerName;
-  final DateTime registrationDeadline;
-  final DateTime competitionDate;
-  final DateTime? competitionEndDate;
-  final String location;
-  final String? rules;
-  final String? prizes;
   final List<String> participantIds;
   final int maxParticipants;
-  final String status;  // 'Upcoming', 'Active', 'Ended'
-  final bool isTeamBased;
-  final int? teamSize;
+  final int teamSize;  // 1 for individual
+  final Map<String, String>? prizes;  // {"first": "Rs. 10,000", "second": "Rs. 5,000", "third": "Rs. 2,000"}
+  final String status;  // "upcoming", "ongoing", "completed"
+  final bool isActive;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -27,20 +28,21 @@ class CompetitionModel {
     required this.title,
     required this.description,
     required this.category,
+    required this.registrationStartDate,
+    required this.registrationEndDate,
+    required this.competitionStartDate,
+    required this.competitionEndDate,
+    required this.location,
     this.imageUrl,
+    this.rules,
     required this.organizerId,
     required this.organizerName,
-    required this.registrationDeadline,
-    required this.competitionDate,
-    this.competitionEndDate,
-    required this.location,
-    this.rules,
-    this.prizes,
     this.participantIds = const [],
-    this.maxParticipants = 50,
-    this.status = 'Upcoming',
-    this.isTeamBased = false,
-    this.teamSize,
+    this.maxParticipants = 100,
+    this.teamSize = 1,
+    this.prizes,
+    this.status = 'upcoming',
+    this.isActive = true,
     required this.createdAt,
     this.updatedAt,
   });
@@ -51,22 +53,23 @@ class CompetitionModel {
       title: json['title'] as String,
       description: json['description'] as String,
       category: json['category'] as String,
+      registrationStartDate: (json['registrationStartDate'] as Timestamp).toDate(),
+      registrationEndDate: (json['registrationEndDate'] as Timestamp).toDate(),
+      competitionStartDate: (json['competitionStartDate'] as Timestamp).toDate(),
+      competitionEndDate: (json['competitionEndDate'] as Timestamp).toDate(),
+      location: json['location'] as String,
       imageUrl: json['imageUrl'] as String?,
+      rules: json['rules'] as String?,
       organizerId: json['organizerId'] as String,
       organizerName: json['organizerName'] as String,
-      registrationDeadline: (json['registrationDeadline'] as Timestamp).toDate(),
-      competitionDate: (json['competitionDate'] as Timestamp).toDate(),
-      competitionEndDate: json['competitionEndDate'] != null
-          ? (json['competitionEndDate'] as Timestamp).toDate()
-          : null,
-      location: json['location'] as String,
-      rules: json['rules'] as String?,
-      prizes: json['prizes'] as String?,
       participantIds: List<String>.from(json['participantIds'] ?? []),
-      maxParticipants: json['maxParticipants'] as int? ?? 50,
-      status: json['status'] as String? ?? 'Upcoming',
-      isTeamBased: json['isTeamBased'] as bool? ?? false,
-      teamSize: json['teamSize'] as int?,
+      maxParticipants: json['maxParticipants'] as int? ?? 100,
+      teamSize: json['teamSize'] as int? ?? 1,
+      prizes: json['prizes'] != null
+          ? Map<String, String>.from(json['prizes'])
+          : null,
+      status: json['status'] as String? ?? 'upcoming',
+      isActive: json['isActive'] as bool? ?? true,
       createdAt: (json['createdAt'] as Timestamp).toDate(),
       updatedAt: json['updatedAt'] != null
           ? (json['updatedAt'] as Timestamp).toDate()
@@ -80,22 +83,21 @@ class CompetitionModel {
       'title': title,
       'description': description,
       'category': category,
+      'registrationStartDate': Timestamp.fromDate(registrationStartDate),
+      'registrationEndDate': Timestamp.fromDate(registrationEndDate),
+      'competitionStartDate': Timestamp.fromDate(competitionStartDate),
+      'competitionEndDate': Timestamp.fromDate(competitionEndDate),
+      'location': location,
       'imageUrl': imageUrl,
+      'rules': rules,
       'organizerId': organizerId,
       'organizerName': organizerName,
-      'registrationDeadline': Timestamp.fromDate(registrationDeadline),
-      'competitionDate': Timestamp.fromDate(competitionDate),
-      'competitionEndDate': competitionEndDate != null
-          ? Timestamp.fromDate(competitionEndDate!)
-          : null,
-      'location': location,
-      'rules': rules,
-      'prizes': prizes,
       'participantIds': participantIds,
       'maxParticipants': maxParticipants,
-      'status': status,
-      'isTeamBased': isTeamBased,
       'teamSize': teamSize,
+      'prizes': prizes,
+      'status': status,
+      'isActive': isActive,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
     };
@@ -106,20 +108,21 @@ class CompetitionModel {
     String? title,
     String? description,
     String? category,
-    String? imageUrl,
-    String? organizerId,
-    String? organizerName,
-    DateTime? registrationDeadline,
-    DateTime? competitionDate,
+    DateTime? registrationStartDate,
+    DateTime? registrationEndDate,
+    DateTime? competitionStartDate,
     DateTime? competitionEndDate,
     String? location,
+    String? imageUrl,
     String? rules,
-    String? prizes,
+    String? organizerId,
+    String? organizerName,
     List<String>? participantIds,
     int? maxParticipants,
-    String? status,
-    bool? isTeamBased,
     int? teamSize,
+    Map<String, String>? prizes,
+    String? status,
+    bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -128,20 +131,21 @@ class CompetitionModel {
       title: title ?? this.title,
       description: description ?? this.description,
       category: category ?? this.category,
-      imageUrl: imageUrl ?? this.imageUrl,
-      organizerId: organizerId ?? this.organizerId,
-      organizerName: organizerName ?? this.organizerName,
-      registrationDeadline: registrationDeadline ?? this.registrationDeadline,
-      competitionDate: competitionDate ?? this.competitionDate,
+      registrationStartDate: registrationStartDate ?? this.registrationStartDate,
+      registrationEndDate: registrationEndDate ?? this.registrationEndDate,
+      competitionStartDate: competitionStartDate ?? this.competitionStartDate,
       competitionEndDate: competitionEndDate ?? this.competitionEndDate,
       location: location ?? this.location,
+      imageUrl: imageUrl ?? this.imageUrl,
       rules: rules ?? this.rules,
-      prizes: prizes ?? this.prizes,
+      organizerId: organizerId ?? this.organizerId,
+      organizerName: organizerName ?? this.organizerName,
       participantIds: participantIds ?? this.participantIds,
       maxParticipants: maxParticipants ?? this.maxParticipants,
-      status: status ?? this.status,
-      isTeamBased: isTeamBased ?? this.isTeamBased,
       teamSize: teamSize ?? this.teamSize,
+      prizes: prizes ?? this.prizes,
+      status: status ?? this.status,
+      isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -158,10 +162,13 @@ class CompetitionModel {
 
   // Helper getters
   bool get isFull => participantIds.length >= maxParticipants;
-  bool get isRegistrationOpen => DateTime.now().isBefore(registrationDeadline);
-  bool get isUpcoming => status == 'Upcoming';
-  bool get isActive => status == 'Active';
-  bool get isEnded => status == 'Ended';
+  bool get isRegistrationOpen =>
+      DateTime.now().isAfter(registrationStartDate) &&
+      DateTime.now().isBefore(registrationEndDate);
+  bool get isUpcoming => status == 'upcoming';
+  bool get isOngoing => status == 'ongoing';
+  bool get isCompleted => status == 'completed';
   int get participantCount => participantIds.length;
   int get spotsLeft => maxParticipants - participantIds.length;
+  bool get isTeamBased => teamSize > 1;
 }

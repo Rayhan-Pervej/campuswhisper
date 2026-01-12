@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:provider/provider.dart';
 import 'package:campuswhisper/core/constants/build_text.dart';
 import 'package:campuswhisper/core/theme/app_dimensions.dart';
-import 'package:campuswhisper/ui/widgets/user_avatar.dart';
+import 'package:campuswhisper/providers/user_provider.dart';
 
 class CommentInput extends StatelessWidget {
   final TextEditingController controller;
@@ -10,6 +11,8 @@ class CommentInput extends StatelessWidget {
   final VoidCallback onSubmit;
   final String? replyToAuthor;
   final VoidCallback? onCancelReply;
+  final String? editingCommentAuthor; // For edit mode
+  final VoidCallback? onCancelEdit; // For edit mode
   final String hintText;
 
   const CommentInput({
@@ -19,12 +22,30 @@ class CommentInput extends StatelessWidget {
     this.focusNode,
     this.replyToAuthor,
     this.onCancelReply,
+    this.editingCommentAuthor,
+    this.onCancelEdit,
     this.hintText = 'Write a comment...',
   });
+
+  String _getUserInitials(String userName) {
+    final parts = userName.trim().split(' ');
+    if (parts.isEmpty) return 'U';
+    if (parts.length == 1) {
+      return parts[0].isNotEmpty ? parts[0][0].toUpperCase() : 'U';
+    }
+    final firstInitial = parts[0].isNotEmpty ? parts[0][0].toUpperCase() : '';
+    final lastInitial = parts[1].isNotEmpty ? parts[1][0].toUpperCase() : '';
+    return '$firstInitial$lastInitial';
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final userProvider = context.watch<UserProvider>();
+    final currentUser = userProvider.currentUser;
+    final userName = currentUser != null
+        ? '${currentUser.firstName} ${currentUser.lastName}'
+        : 'User';
 
     return Container(
       decoration: BoxDecoration(
@@ -39,8 +60,42 @@ class CommentInput extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Edit mode indicator
+            if (editingCommentAuthor != null)
+              Container(
+                padding: EdgeInsets.all(AppDimensions.space8),
+                margin: EdgeInsets.only(bottom: AppDimensions.space8),
+                decoration: BoxDecoration(
+                  color: colorScheme.tertiaryContainer.withAlpha(77),
+                  borderRadius: BorderRadius.circular(AppDimensions.radius8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Iconsax.edit_outline, size: 16, color: colorScheme.tertiary),
+                    AppDimensions.w8,
+                    Expanded(
+                      child: BuildText(
+                        text: 'Editing comment',
+                        fontSize: 12,
+                        color: colorScheme.tertiary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (onCancelEdit != null)
+                      InkWell(
+                        onTap: onCancelEdit,
+                        borderRadius: BorderRadius.circular(AppDimensions.radius8),
+                        child: Icon(
+                          Icons.close,
+                          size: 16,
+                          color: colorScheme.tertiary,
+                        ),
+                      ),
+                  ],
+                ),
+              )
             // Reply indicator
-            if (replyToAuthor != null)
+            else if (replyToAuthor != null)
               Container(
                 padding: EdgeInsets.all(AppDimensions.space8),
                 margin: EdgeInsets.only(bottom: AppDimensions.space8),
@@ -76,7 +131,19 @@ class CommentInput extends StatelessWidget {
             // Comment input field
             Row(
               children: [
-                UserAvatar(name: 'Current User', size: 32),
+                // User avatar matching thread card style
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: colorScheme.primary,
+                  child: Text(
+                    _getUserInitials(userName),
+                    style: TextStyle(
+                      color: colorScheme.onPrimary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
                 AppDimensions.w12,
                 Expanded(
                   child: TextField(

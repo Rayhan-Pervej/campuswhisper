@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_dimensions.dart';
+import '../../../../providers/comment_provider.dart';
 
 class ThreadCard extends StatelessWidget {
   final String firstName;
@@ -17,7 +19,12 @@ class ThreadCard extends StatelessWidget {
   final VoidCallback? onUpvote;
   final VoidCallback? onDownvote;
   final VoidCallback? onComment;
-  final VoidCallback? onMenuTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+  final String? userVoteType; // 'upvote', 'downvote', or null
+  final String postId;
+  final String createdBy;
+  final String currentUserId;
 
   const ThreadCard({
     super.key,
@@ -34,7 +41,12 @@ class ThreadCard extends StatelessWidget {
     this.onUpvote,
     this.onDownvote,
     this.onComment,
-    this.onMenuTap,
+    this.onEdit,
+    this.onDelete,
+    this.userVoteType,
+    required this.postId,
+    required this.createdBy,
+    required this.currentUserId,
   });
 
   String get userInitials {
@@ -108,17 +120,18 @@ class ThreadCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Three dot menu
-                IconButton(
-                  onPressed: onMenuTap ?? () => _showOptionsMenu(context),
-                  icon: Icon(
-                    Icons.more_vert,
-                    size: AppDimensions.mediumIconSize,
-                    color: colorScheme.onSurface.withOpacity(0.6),
+                // Three dot menu (only show if user owns the post)
+                if (createdBy == currentUserId)
+                  IconButton(
+                    onPressed: () => _showOptionsMenu(context),
+                    icon: Icon(
+                      Icons.more_vert,
+                      size: AppDimensions.mediumIconSize,
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
               ],
             ),
             AppDimensions.h12,
@@ -165,6 +178,7 @@ class ThreadCard extends StatelessWidget {
                   count: upvoteCount,
                   onTap: onUpvote,
                   color: colorScheme.primary,
+                  isActive: userVoteType == 'upvote',
                 ),
                 AppDimensions.w24,
                 // Downvote
@@ -173,12 +187,13 @@ class ThreadCard extends StatelessWidget {
                   count: downvoteCount,
                   onTap: onDownvote,
                   color: colorScheme.error,
+                  isActive: userVoteType == 'downvote',
                 ),
                 AppDimensions.w24,
-                // Comment
-                _ActionButton(
-                  icon: Iconsax.message_outline,
-                  count: commentCount,
+                // Comment (fetch dynamic count from Firestore)
+                _DynamicCommentButton(
+                  postId: postId,
+                  fallbackCount: commentCount < 0 ? 0 : commentCount,
                   onTap: onComment,
                   color: colorScheme.onSurface.withOpacity(0.6),
                 ),
@@ -214,37 +229,98 @@ class ThreadCard extends StatelessWidget {
                   ),
                 ),
                 AppDimensions.h16,
-                // Add your custom buttons here
+                // Edit button
                 _MenuButton(
                   icon: Iconsax.edit_outline,
                   label: 'Edit',
                   onTap: () {
                     Navigator.pop(context);
-                    // Handle edit
+                    if (onEdit != null) {
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        onEdit!();
+                      });
+                    }
                   },
                 ),
                 AppDimensions.h8,
+                // Delete button
                 _MenuButton(
-                  icon: Iconsax.share_outline,
-                  label: 'Share',
+                  icon: Iconsax.trash_outline,
+                  label: 'Delete',
                   onTap: () {
                     Navigator.pop(context);
-                    // Handle share
-                  },
-                ),
-                AppDimensions.h8,
-                _MenuButton(
-                  icon: Iconsax.flag_outline,
-                  label: 'Report',
-                  onTap: () {
-                    Navigator.pop(context);
-                    // Handle report
+                    Future.delayed(const Duration(milliseconds: 100), () {
+                      _showDeleteConfirmation(context);
+                    });
                   },
                   isDestructive: true,
                 ),
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDimensions.radius16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Iconsax.danger_outline,
+                color: colorScheme.error,
+                size: AppDimensions.mediumIconSize,
+              ),
+              AppDimensions.w8,
+              Text(
+                'Delete Post',
+                style: TextStyle(
+                  fontSize: AppDimensions.subtitleFontSize,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Are you sure you want to delete this post? This action cannot be undone.',
+            style: TextStyle(
+              fontSize: AppDimensions.bodyFontSize,
+              color: colorScheme.onSurface.withValues(alpha: 0.8),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                if (onDelete != null) {
+                  onDelete!();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.error,
+                foregroundColor: colorScheme.onError,
+              ),
+              child: Text('Delete'),
+            ),
+          ],
         );
       },
     );
@@ -256,35 +332,44 @@ class _ActionButton extends StatelessWidget {
   final int count;
   final VoidCallback? onTap;
   final Color color;
+  final bool isActive;
 
   const _ActionButton({
     required this.icon,
     required this.count,
     this.onTap,
     required this.color,
+    this.isActive = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final displayColor = isActive ? color : color.withValues(alpha: 0.6);
+    final bgColor = isActive ? color.withValues(alpha: 0.1) : Colors.transparent;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppDimensions.radius8),
-      child: Padding(
+      child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: AppDimensions.space8,
           vertical: AppDimensions.space4,
         ),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(AppDimensions.radius8),
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: AppDimensions.smallIconSize, color: color),
+            Icon(icon, size: AppDimensions.smallIconSize, color: displayColor),
             AppDimensions.w4,
             Text(
               count.toString(),
               style: TextStyle(
                 fontSize: AppDimensions.captionFontSize,
-                color: color,
-                fontWeight: FontWeight.w600,
+                color: displayColor,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
               ),
             ),
           ],
@@ -336,6 +421,41 @@ class _MenuButton extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Dynamic comment button that fetches real-time count from Firestore
+class _DynamicCommentButton extends StatelessWidget {
+  final String postId;
+  final int fallbackCount;
+  final VoidCallback? onTap;
+  final Color color;
+
+  const _DynamicCommentButton({
+    required this.postId,
+    required this.fallbackCount,
+    this.onTap,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final commentProvider = context.read<CommentProvider>();
+
+    return FutureBuilder<int>(
+      future: commentProvider.getCommentCount(postId),
+      builder: (context, snapshot) {
+        // Use fetched count if available, otherwise use fallback
+        final count = snapshot.data ?? fallbackCount;
+
+        return _ActionButton(
+          icon: Iconsax.message_outline,
+          count: count,
+          onTap: onTap,
+          color: color,
+        );
+      },
     );
   }
 }

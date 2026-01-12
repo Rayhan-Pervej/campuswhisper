@@ -1,6 +1,5 @@
 import 'package:campuswhisper/core/repositories/base_repository.dart';
 import 'package:campuswhisper/models/badges_history_model.dart';
-import 'package:campuswhisper/models/vote_model.dart';
 import 'package:campuswhisper/models/xp_history_model.dart';
 import 'package:campuswhisper/core/database/query_builder.dart';
 import 'package:campuswhisper/core/database/paginated_result.dart';
@@ -8,13 +7,15 @@ import 'package:campuswhisper/core/config/app_config.dart';
 
 /// Special repository for gamification features
 ///
-/// Manages three collections: xp_history, badges_history, votes
+/// Manages two collections: xp_history, badges_history
 /// Plus custom gamification logic
+///
+/// Note: Votes are now handled as subcollections under posts.
+/// Use PostRepository for vote operations.
 class GameRepository {
   // Sub-repositories for each model type
   final _xpHistoryRepo = _XpHistoryRepository();
   final _badgeHistoryRepo = _BadgeHistoryRepository();
-  final _voteRepo = _VoteRepository();
 
   // ═══════════════════════════════════════════════════════════════
   // XP HISTORY METHODS
@@ -74,46 +75,6 @@ class GameRepository {
       limit: limit,
       startAfter: startAfter,
     );
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // VOTE METHODS
-  // ═══════════════════════════════════════════════════════════════
-
-  /// Create vote
-  Future<String> createVote(VoteModel vote) async {
-    return await _voteRepo.create(vote);
-  }
-
-  /// Get votes by post (with pagination)
-  Future<PaginatedResult<VoteModel>> getVotesByPost(
-    String postId, {
-    int limit = 20,
-    dynamic startAfter,
-  }) async {
-    return _voteRepo.getByPost(postId, limit: limit, startAfter: startAfter);
-  }
-
-  /// Get votes by user (with pagination)
-  Future<PaginatedResult<VoteModel>> getVotesByUser(
-    String userId, {
-    int limit = 20,
-    dynamic startAfter,
-  }) async {
-    return _voteRepo.getByUser(userId, limit: limit, startAfter: startAfter);
-  }
-
-  /// Get specific user vote for a post (to prevent duplicate voting)
-  Future<VoteModel?> getUserVoteForPost(String userId, String postId) async {
-    final result = await _voteRepo.query(
-      filters: [
-        QueryFilter.equals('voter_id', userId),
-        QueryFilter.equals('post_id', postId),
-      ],
-      limit: 1,
-    );
-
-    return result.items.isNotEmpty ? result.items.first : null;
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -233,58 +194,6 @@ class _BadgeHistoryRepository extends BaseRepository<BadgeHistoryModel> {
     return query(
       filters: [QueryFilter.equals('badge_name', badgeName)],
       sorts: [QuerySort.descending('awarded_at')],
-      limit: limit,
-      startAfter: startAfter,
-    );
-  }
-}
-
-class _VoteRepository extends BaseRepository<VoteModel> {
-  @override
-  String get collectionName => 'votes';
-
-  @override
-  VoteModel fromJson(Map<String, dynamic> json) => VoteModel.fromJson(json);
-
-  @override
-  Map<String, dynamic> toJson(VoteModel model) => model.toJson();
-
-  @override
-  String getId(VoteModel model) => model.voteId;
-
-  Future<PaginatedResult<VoteModel>> getByPost(
-    String postId, {
-    int limit = 20,
-    dynamic startAfter,
-  }) async {
-    return query(
-      filters: [QueryFilter.equals('post_id', postId)],
-      limit: limit,
-      startAfter: startAfter,
-    );
-  }
-
-  Future<PaginatedResult<VoteModel>> getByUser(
-    String userId, {
-    int limit = 20,
-    dynamic startAfter,
-  }) async {
-    return query(
-      filters: [QueryFilter.equals('voter_id', userId)],
-      sorts: [QuerySort.descending('created_at')],
-      limit: limit,
-      startAfter: startAfter,
-    );
-  }
-
-  Future<PaginatedResult<VoteModel>> getByType(
-    String voteType, {
-    int limit = 20,
-    dynamic startAfter,
-  }) async {
-    return query(
-      filters: [QueryFilter.equals('vote_type', voteType)],
-      sorts: [QuerySort.descending('created_at')],
       limit: limit,
       startAfter: startAfter,
     );

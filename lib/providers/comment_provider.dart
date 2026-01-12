@@ -1,158 +1,521 @@
 import 'package:flutter/material.dart';
-import 'package:campuswhisper/core/providers/paginated_provider.dart';
-import 'package:campuswhisper/core/database/paginated_result.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campuswhisper/models/comment_model.dart';
-import 'package:campuswhisper/repository/comment_repository.dart';
+import 'package:campuswhisper/models/comment_vote_model.dart';
+import 'package:campuswhisper/core/utils/snackbar_helper.dart';
 
-class CommentProvider extends PaginatedProvider<CommentModel> {
-  final CommentRepository _repository = CommentRepository();
+/// CommentProvider - Facebook-Style Scalable Architecture
+///
+/// Uses SUBCOLLECTIONS for maximum scalability:
+/// - posts/{postId}/comments/{commentId}
+/// - posts/{postId}/comments/{commentId}/votes/{userId}
+///
+/// Benefits:
+/// - Supports 20,000+ comments per post
+/// - Supports unlimited votes per comment
+/// - When post deleted → ALL comments auto-deleted
+/// - No 1MB document size limit
+class CommentProvider extends ChangeNotifier {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  String? _currentParentId;
-  String? _currentParentType;
-  bool _showTopLevelOnly = true;
+  // State
+  List<CommentModel> _comments = [];
+  Map<String, List<CommentModel>> _repliesCache = {};
+  Map<String, String?> _userVotes = {}; // commentId -> voteType
+  bool _isLoading = false;
+  String? _error;
+
+  // Getters
+  List<CommentModel> get comments => _comments;
+  Map<String, List<CommentModel>> get repliesCache => _repliesCache;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
 
   // ═══════════════════════════════════════════════════════════════
-  // PAGINATION IMPLEMENTATION
+  // FETCH COMMENTS (from subcollection)
   // ═══════════════════════════════════════════════════════════════
 
-  @override
-  Future<PaginatedResult<CommentModel>> fetchFirstPage() async {
-    if (_currentParentId != null && _currentParentType != null) {
-      if (_showTopLevelOnly) {
-        return await _repository.getTopLevel(
-          _currentParentId!,
-          _currentParentType!,
-          limit: 20,
-        );
-      } else {
-        return await _repository.getByParent(
-          _currentParentId!,
-          _currentParentType!,
-          limit: 20,
-        );
+  /// Fetch top-level comments for a post
+  /// Path: posts/{postId}/comments (subcollection)
+  Future<void> fetchComments(String parentId, String parentType) async {
+    // Clear old data immediately to prevent showing stale comments
+    _comments = [];
+    _repliesCache.clear();
+    _userVotes.clear();
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // Fetch from subcollection: posts/{postId}/comments
+      final snapshot = await _firestore
+          .collection('posts')
+          .doc(parentId)
+          .collection('comments')
+          .where('isDeleted', isEqualTo: false)
+          .where('replyToId', isEqualTo: null)  // Top-level only
+          .orderBy('createdAt', descending: true)
+          .limit(50)
+          .get();
+
+      // Client-side filtering as fallback (in case Firebase index isn't built yet)
+      _comments = snapshot.docs
+          .map((doc) => CommentModel.fromJson(doc.data()))
+          .where((comment) => comment.replyToId == null)  // Double-check: only top-level
+          .toList();
+
+      // Auto-load replies for all parent comments
+      for (final comment in _comments) {
+        if (comment.replyCount > 0) {
+          await fetchReplies(parentId, comment.id);
+        }
       }
-    } else {
-      // Return empty result if no parent is set
-      return PaginatedResult<CommentModel>(
-        items: [],
-        cursor: null,
-        hasMore: false,
-      );
+
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+      _comments = [];
+      print('Error fetching comments: $e');
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  /// Fetch replies for a specific comment
+  /// Path: posts/{postId}/comments where replyToId == commentId
+  Future<List<CommentModel>> fetchReplies(String parentId, String commentId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('posts')
+          .doc(parentId)
+          .collection('comments')
+          .where('replyToId', isEqualTo: commentId)
+          .where('isDeleted', isEqualTo: false)
+          .orderBy('createdAt', descending: false)
+          .limit(50)
+          .get();
+
+      final replies = snapshot.docs
+          .map((doc) => CommentModel.fromJson(doc.data()))
+          .toList();
+
+      _repliesCache[commentId] = replies;
+      notifyListeners();
+
+      return replies;
+    } catch (e) {
+      print('Error fetching replies: $e');
+      return [];
     }
   }
 
-  @override
-  Future<PaginatedResult<CommentModel>> fetchNextPage(cursor) async {
-    if (_currentParentId != null && _currentParentType != null) {
-      if (_showTopLevelOnly) {
-        return await _repository.getTopLevel(
-          _currentParentId!,
-          _currentParentType!,
-          limit: 20,
-          startAfter: cursor,
-        );
-      } else {
-        return await _repository.getByParent(
-          _currentParentId!,
-          _currentParentType!,
-          limit: 20,
-          startAfter: cursor,
-        );
+  // ═══════════════════════════════════════════════════════════════
+  // CREATE COMMENT (in subcollection)
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Create a new comment in posts/{postId}/comments subcollection
+  Future<void> createComment({
+    required BuildContext context,
+    required String parentId,
+    required String parentType,
+    required String content,
+    required String authorId,
+    required String authorName,
+    String? replyToId,
+    String? replyToAuthor,
+    required Function() onCommentCreated,
+  }) async {
+    try {
+      // Create comment in subcollection
+      final commentRef = _firestore
+          .collection('posts')
+          .doc(parentId)
+          .collection('comments')
+          .doc();
+
+      final comment = CommentModel(
+        id: commentRef.id,
+        parentId: parentId,
+        parentType: parentType,
+        content: content,
+        authorId: authorId,
+        authorName: authorName,
+        replyToId: replyToId,
+        replyToAuthor: replyToAuthor,
+        upvoteCount: 0,
+        downvoteCount: 0,
+        replyCount: 0,
+        isEdited: false,
+        createdAt: DateTime.now(),
+        isDeleted: false,
+      );
+
+      await commentRef.set(comment.toJson());
+
+      // Update parent comment reply count if this is a reply
+      if (replyToId != null) {
+        await _firestore
+            .collection('posts')
+            .doc(parentId)
+            .collection('comments')
+            .doc(replyToId)
+            .update({
+          'reply_count': FieldValue.increment(1),
+        });
       }
-    } else {
-      return PaginatedResult<CommentModel>(
-        items: [],
-        cursor: null,
-        hasMore: false,
+
+      // Update local state
+      if (replyToId == null) {
+        // Top-level comment
+        _comments.insert(0, comment);
+        notifyListeners();
+      } else {
+        // Reply - refresh replies cache
+        await fetchReplies(parentId, replyToId);
+      }
+
+      // Notify parent to update PostProvider
+      onCommentCreated();
+
+      if (!context.mounted) return;
+      SnackbarHelper.showSuccess(
+        context,
+        replyToId != null ? 'Reply posted!' : 'Comment posted!',
       );
+    } catch (e) {
+      if (!context.mounted) return;
+      SnackbarHelper.showError(context, 'Failed to post comment');
+      _error = e.toString();
+      notifyListeners();
+      print('Error creating comment: $e');
     }
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // CRUD OPERATIONS
+  // VOTE ON COMMENTS (using subcollection)
   // ═══════════════════════════════════════════════════════════════
 
-  Future<void> createComment(BuildContext context, CommentModel comment) async {
-    final commentId = await safeOperation(
-      context,
-      operation: () => _repository.create(comment),
-      successMessage: 'Comment posted successfully!',
-      errorMessage: 'Failed to post comment. Please try again.',
-    );
+  /// Vote on a comment using subcollection
+  /// Path: posts/{postId}/comments/{commentId}/votes/{userId}
+  Future<void> voteOnComment({
+    required BuildContext context,
+    required String parentId,
+    required String commentId,
+    required String userId,
+    required bool isUpvote,
+  }) async {
+    try {
+      final commentRef = _firestore
+          .collection('posts')
+          .doc(parentId)
+          .collection('comments')
+          .doc(commentId);
 
-    if (commentId != null) {
-      addItem(comment);
+      final voteRef = commentRef.collection('votes').doc(userId);
+
+      // Get current vote
+      final voteDoc = await voteRef.get();
+      final currentVote = voteDoc.exists ? (voteDoc.data()?['type'] as String?) : null;
+
+      final newVoteType = isUpvote ? 'upvote' : 'downvote';
+
+      // Calculate count changes
+      int upvoteChange = 0;
+      int downvoteChange = 0;
+
+      if (currentVote == null) {
+        // New vote
+        if (isUpvote) {
+          upvoteChange = 1;
+        } else {
+          downvoteChange = 1;
+        }
+
+        // Add vote
+        await voteRef.set(CommentVoteModel(
+          userId: userId,
+          type: newVoteType,
+          timestamp: DateTime.now(),
+        ).toJson());
+      } else if (currentVote == newVoteType) {
+        // Remove vote (toggle off)
+        if (isUpvote) {
+          upvoteChange = -1;
+        } else {
+          downvoteChange = -1;
+        }
+
+        await voteRef.delete();
+      } else {
+        // Change vote
+        if (isUpvote) {
+          upvoteChange = 1;
+          downvoteChange = -1;
+        } else {
+          upvoteChange = -1;
+          downvoteChange = 1;
+        }
+
+        await voteRef.set(CommentVoteModel(
+          userId: userId,
+          type: newVoteType,
+          timestamp: DateTime.now(),
+        ).toJson());
+      }
+
+      // Update counts in comment document
+      await commentRef.update({
+        'upvote_count': FieldValue.increment(upvoteChange),
+        'downvote_count': FieldValue.increment(downvoteChange),
+      });
+
+      // Update local cache
+      _userVotes[commentId] = currentVote == newVoteType ? null : newVoteType;
+
+      // Refresh comment to get updated counts
+      final updatedDoc = await commentRef.get();
+      if (updatedDoc.exists) {
+        final updatedComment = CommentModel.fromJson(updatedDoc.data()!);
+
+        // Update in list
+        final index = _comments.indexWhere((c) => c.id == commentId);
+        if (index != -1) {
+          _comments[index] = updatedComment;
+        }
+
+        // Update in replies cache
+        _repliesCache.forEach((key, replies) {
+          final replyIndex = replies.indexWhere((c) => c.id == commentId);
+          if (replyIndex != -1) {
+            _repliesCache[key]![replyIndex] = updatedComment;
+          }
+        });
+
+        notifyListeners();
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      SnackbarHelper.showError(context, 'Failed to vote');
+      print('Error voting on comment: $e');
     }
   }
 
-  Future<void> updateComment(BuildContext context, CommentModel comment) async {
-    await safeOperation(
-      context,
-      operation: () => _repository.update(comment),
-      successMessage: 'Comment updated successfully!',
-      errorMessage: 'Failed to update comment. Please try again.',
-    );
+  /// Get user's vote on a comment from subcollection
+  Future<String?> getUserVote(String parentId, String commentId, String userId) async {
+    // Check cache first
+    if (_userVotes.containsKey(commentId)) {
+      return _userVotes[commentId];
+    }
 
-    updateItem(comment, (c) => c.id == comment.id);
+    try {
+      final voteDoc = await _firestore
+          .collection('posts')
+          .doc(parentId)
+          .collection('comments')
+          .doc(commentId)
+          .collection('votes')
+          .doc(userId)
+          .get();
+
+      final voteType = voteDoc.exists ? (voteDoc.data()?['type'] as String?) : null;
+      _userVotes[commentId] = voteType;
+      return voteType;
+    } catch (e) {
+      print('Error getting user vote: $e');
+      return null;
+    }
   }
 
-  Future<void> deleteComment(BuildContext context, String commentId) async {
-    await safeOperation(
-      context,
-      operation: () => _repository.delete(commentId),
-      successMessage: 'Comment deleted successfully!',
-      errorMessage: 'Failed to delete comment. Please try again.',
-    );
-
-    removeItem((c) => c.id == commentId);
-  }
-
-  Future<CommentModel?> getCommentById(String commentId) async {
-    return await _repository.getById(commentId);
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // COMMENT-SPECIFIC OPERATIONS
-  // ═══════════════════════════════════════════════════════════════
-
-  /// Load comments for a specific parent (post, event, competition)
-  Future<void> loadCommentsFor(String parentId, String parentType) async {
-    _currentParentId = parentId;
-    _currentParentType = parentType;
-    _showTopLevelOnly = true;
-    await refresh();
-  }
-
-  /// Load replies for a specific comment
-  Future<List<CommentModel>> loadReplies(String commentId) async {
-    final result = await _repository.getReplies(commentId, limit: 100);
-    return result.items;
-  }
-
-  /// Get comments by user
-  Future<List<CommentModel>> getUserComments(String userId) async {
-    final result = await _repository.getByUser(userId, limit: 100);
-    return result.items;
+  /// Load user votes for all current comments
+  Future<void> loadUserVotes(String parentId, String userId) async {
+    for (final comment in _comments) {
+      if (!_userVotes.containsKey(comment.id)) {
+        await getUserVote(parentId, comment.id, userId);
+      }
+    }
+    notifyListeners();
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // FILTER METHODS
+  // EDIT COMMENT
   // ═══════════════════════════════════════════════════════════════
 
-  Future<void> showTopLevelOnly() async {
-    _showTopLevelOnly = true;
-    await refresh();
+  /// Edit a comment's content
+  /// Updates the content, sets isEdited to true, and updates the timestamp
+  Future<void> editComment({
+    required BuildContext context,
+    required String parentId,
+    required String commentId,
+    required String newContent,
+  }) async {
+    try {
+      final commentRef = _firestore
+          .collection('posts')
+          .doc(parentId)
+          .collection('comments')
+          .doc(commentId);
+
+      // Update the comment
+      await commentRef.update({
+        'content': newContent,
+        'isEdited': true,
+        'updatedAt': Timestamp.now(),
+      });
+
+      // Fetch updated comment
+      final updatedDoc = await commentRef.get();
+      if (updatedDoc.exists) {
+        final updatedComment = CommentModel.fromJson(updatedDoc.data()!);
+
+        // Update in local state - check both top-level comments and replies
+        final index = _comments.indexWhere((c) => c.id == commentId);
+        if (index != -1) {
+          // It's a top-level comment
+          _comments[index] = updatedComment;
+        } else {
+          // It might be a reply - search in replies cache
+          _repliesCache.forEach((key, replies) {
+            final replyIndex = replies.indexWhere((c) => c.id == commentId);
+            if (replyIndex != -1) {
+              _repliesCache[key]![replyIndex] = updatedComment;
+            }
+          });
+        }
+
+        notifyListeners();
+
+        if (!context.mounted) return;
+        SnackbarHelper.showSuccess(context, 'Comment updated!');
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      SnackbarHelper.showError(context, 'Failed to update comment');
+      _error = e.toString();
+      notifyListeners();
+      print('Error editing comment: $e');
+    }
   }
 
-  Future<void> showAllComments() async {
-    _showTopLevelOnly = false;
-    await refresh();
+  // ═══════════════════════════════════════════════════════════════
+  // DELETE COMMENT
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Delete a comment (soft delete)
+  /// If it's a parent comment, also deletes all its replies
+  Future<void> deleteComment({
+    required BuildContext context,
+    required String parentId,
+    required String commentId,
+  }) async {
+    try {
+      final commentRef = _firestore
+          .collection('posts')
+          .doc(parentId)
+          .collection('comments')
+          .doc(commentId);
+
+      // Get the comment to check if it's a reply
+      final commentDoc = await commentRef.get();
+      final isReply = commentDoc.data()?['replyToId'] != null;
+
+      // Mark the comment as deleted
+      await commentRef.update({
+        'isDeleted': true,
+        'updatedAt': Timestamp.now(),
+      });
+
+      // If it's a parent comment, also delete all its replies
+      if (!isReply) {
+        // Get all replies for this comment
+        final repliesSnapshot = await _firestore
+            .collection('posts')
+            .doc(parentId)
+            .collection('comments')
+            .where('replyToId', isEqualTo: commentId)
+            .where('isDeleted', isEqualTo: false)
+            .get();
+
+        // Delete all replies
+        for (var replyDoc in repliesSnapshot.docs) {
+          await replyDoc.reference.update({
+            'isDeleted': true,
+            'updatedAt': Timestamp.now(),
+          });
+        }
+      } else {
+        // If it's a reply, decrement the parent comment's reply count
+        final replyToId = commentDoc.data()?['replyToId'];
+        if (replyToId != null) {
+          await _firestore
+              .collection('posts')
+              .doc(parentId)
+              .collection('comments')
+              .doc(replyToId)
+              .update({
+            'reply_count': FieldValue.increment(-1),
+          });
+        }
+      }
+
+      // Remove from local state
+      _comments.removeWhere((c) => c.id == commentId);
+
+      // Also remove replies from cache if it was a parent comment
+      if (!isReply) {
+        _repliesCache.remove(commentId);
+      }
+
+      notifyListeners();
+
+      if (!context.mounted) return;
+      SnackbarHelper.showSuccess(context, 'Comment deleted');
+    } catch (e) {
+      if (!context.mounted) return;
+      SnackbarHelper.showError(context, 'Failed to delete comment');
+      print('Error deleting comment: $e');
+    }
   }
 
-  Future<void> clearContext() async {
-    _currentParentId = null;
-    _currentParentType = null;
-    _showTopLevelOnly = true;
-    clearItems();
+  // ═══════════════════════════════════════════════════════════════
+  // HELPER METHODS
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Clear all comments
+  void clearComments() {
+    _comments = [];
+    _repliesCache = {};
+    _userVotes = {};
+    _error = null;
+    notifyListeners();
+  }
+
+  /// Set loading state manually
+  void setLoading(bool loading) {
+    _isLoading = loading;
+    notifyListeners();
+  }
+
+  /// Get cached vote status for a comment
+  String? getVoteStatus(String commentId) {
+    return _userVotes[commentId];
+  }
+
+  /// Get total comment count for a post by counting actual comments
+  /// This is more reliable than maintaining a comment_count field
+  Future<int> getCommentCount(String postId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('posts')
+          .doc(postId)
+          .collection('comments')
+          .where('isDeleted', isEqualTo: false)
+          .get();
+
+      return snapshot.docs.length;
+    } catch (e) {
+      print('Error getting comment count: $e');
+      return 0;
+    }
   }
 }

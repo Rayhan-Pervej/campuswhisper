@@ -1,5 +1,7 @@
 // 1. Create this file: lib/routes/app_routes.dart
 
+import 'package:campuswhisper/models/posts_model.dart';
+import 'package:campuswhisper/core/utils/date_formatter.dart';
 import 'package:campuswhisper/providers/cgpa_calculator_provider.dart';
 import 'package:campuswhisper/providers/course_roadmap_provider.dart';
 import 'package:campuswhisper/providers/scholarship_provider.dart';
@@ -34,7 +36,6 @@ import 'package:campuswhisper/ui/pages/more/settings/settings_page.dart';
 import 'package:campuswhisper/ui/pages/more/notifications/notifications_page.dart';
 import 'package:campuswhisper/ui/pages/more/saved/saved_page.dart';
 import 'package:campuswhisper/ui/pages/more/about/about_page.dart';
-import 'package:campuswhisper/ui/pages/admin/admin_dummy_data_page.dart';
 import 'package:flutter/material.dart';
 import 'package:campuswhisper/ui/pages/auth/login_page.dart';
 import 'package:campuswhisper/ui/pages/campus/campus_page.dart';
@@ -76,7 +77,6 @@ class AppRoutes {
   static const String notifications = '/notifications';
   static const String saved = '/saved';
   static const String about = '/about';
-  static const String adminDummyData = '/admin_dummy_data';
 
   // Route generator
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -105,13 +105,13 @@ class AppRoutes {
           settings: settings,
         );
       case courseRoutine:
-        return MaterialPageRoute(
-          builder: (_) => ChangeNotifierProvider(
-            create: (_) => CourseRoadmapProvider(),
-            child: const CourseRoutinePage(),
-          ),
-          settings: settings,
-        );
+      // return MaterialPageRoute(
+      //   builder: (_) => ChangeNotifierProvider(
+      //     create: (_) => CourseRoadmapProvider(),
+      //     child: const CourseRoutinePage(),
+      //   ),
+      //   settings: settings,
+      // );
       case coursePlan:
         return MaterialPageRoute(
           builder: (_) => ChangeNotifierProvider(
@@ -157,7 +157,29 @@ class AppRoutes {
 
       case threadDetail:
         final args = settings.arguments as Map<String, dynamic>?;
-        final thread = args?['thread'] ?? {};
+        final post = args?['post'];
+
+        // Convert PostModel to Map for ThreadDetailPage
+        Map<String, dynamic> thread;
+        if (post is PostModel) {
+          thread = {
+            'post_id': post.postId,  // CRITICAL: Include post ID for comments
+            'id': post.postId,        // Alternative field name
+            'userName': post.createdByName ?? post.createdBy,
+            'content': post.content,
+            'tag': post.type,
+            'time': DateFormatter.timeAgo(post.createdAt),
+            'upvoteCount': post.upvoteCount,
+            'downvoteCount': post.downvoteCount,
+            'comment_count': post.commentCount,  // Include comment count
+            'createdBy': post.createdBy,  // Add createdBy for ownership check
+          };
+        } else if (post is Map<String, dynamic>) {
+          thread = post;
+        } else {
+          thread = <String, dynamic>{};
+        }
+
         return MaterialPageRoute(
           builder: (_) => ThreadDetailPage(thread: thread),
           settings: settings,
@@ -171,19 +193,17 @@ class AppRoutes {
 
       case courseDetail:
         final args = settings.arguments as Map<String, dynamic>?;
-        final course = args?['course'] ?? {};
+        final course = args?['course'] ?? <String, dynamic>{};
         final semesterName = args?['semesterName'] ?? 'Unknown Semester';
         return MaterialPageRoute(
-          builder: (_) => CourseDetailPage(
-            course: course,
-            semesterName: semesterName,
-          ),
+          builder: (_) =>
+              CourseDetailPage(course: course, semesterName: semesterName),
           settings: settings,
         );
 
       case eventDetail:
         final args = settings.arguments as Map<String, dynamic>?;
-        final event = args?['event'] ?? {};
+        final event = args?['event'] ?? <String, dynamic>{};
         return MaterialPageRoute(
           builder: (_) => EventDetailPage(event: event),
           settings: settings,
@@ -192,12 +212,11 @@ class AppRoutes {
       case eventAttendees:
         final args = settings.arguments as Map<String, dynamic>?;
         final eventTitle = args?['eventTitle'] ?? 'Event';
-        final attendees = args?['attendees'] as List<Map<String, dynamic>>? ?? [];
+        final attendees =
+            args?['attendees'] as List<Map<String, dynamic>>? ?? [];
         return MaterialPageRoute(
-          builder: (_) => EventAttendeesPage(
-            eventTitle: eventTitle,
-            attendees: attendees,
-          ),
+          builder: (_) =>
+              EventAttendeesPage(eventTitle: eventTitle, attendees: attendees),
           settings: settings,
         );
 
@@ -206,16 +225,14 @@ class AppRoutes {
         final eventId = args?['eventId'] ?? '';
         final eventTitle = args?['eventTitle'] ?? 'Event';
         return MaterialPageRoute(
-          builder: (_) => EventCommentsPage(
-            eventId: eventId,
-            eventTitle: eventTitle,
-          ),
+          builder: (_) =>
+              EventCommentsPage(eventId: eventId, eventTitle: eventTitle),
           settings: settings,
         );
 
       case itemDetail:
         final args = settings.arguments as Map<String, dynamic>?;
-        final item = args?['item'] ?? {};
+        final item = args?['item'] ?? <String, dynamic>{};
         return MaterialPageRoute(
           builder: (_) => ItemDetailPage(item: item),
           settings: settings,
@@ -223,7 +240,7 @@ class AppRoutes {
 
       case contactPoster:
         final args = settings.arguments as Map<String, dynamic>?;
-        final item = args?['item'] ?? {};
+        final item = args?['item'] ?? <String, dynamic>{};
         return MaterialPageRoute(
           builder: (_) => ContactPosterPage(item: item),
           settings: settings,
@@ -237,7 +254,7 @@ class AppRoutes {
 
       case clubDetail:
         final args = settings.arguments as Map<String, dynamic>?;
-        final club = args?['club'] ?? {};
+        final club = args?['club'] ?? <String, dynamic>{};
         return MaterialPageRoute(
           builder: (_) => ClubDetailPage(club: club),
           settings: settings,
@@ -245,7 +262,7 @@ class AppRoutes {
 
       case competitionDetail:
         final args = settings.arguments as Map<String, dynamic>?;
-        final competition = args?['competition'] ?? {};
+        final competition = args?['competition'] ?? <String, dynamic>{};
         return MaterialPageRoute(
           builder: (_) => CompetitionDetailPage(competition: competition),
           settings: settings,
@@ -253,7 +270,7 @@ class AppRoutes {
 
       case competitionRegistration:
         final args = settings.arguments as Map<String, dynamic>?;
-        final competition = args?['competition'] ?? {};
+        final competition = args?['competition'] ?? <String, dynamic>{};
         return MaterialPageRoute(
           builder: (_) => CompetitionRegistrationPage(competition: competition),
           settings: settings,
@@ -262,7 +279,8 @@ class AppRoutes {
       case competitionParticipants:
         final args = settings.arguments as Map<String, dynamic>?;
         final competitionTitle = args?['competitionTitle'] ?? 'Competition';
-        final participants = args?['participants'] as List<Map<String, dynamic>>? ?? [];
+        final participants =
+            args?['participants'] as List<Map<String, dynamic>>? ?? [];
         return MaterialPageRoute(
           builder: (_) => CompetitionParticipantsPage(
             competitionTitle: competitionTitle,
@@ -334,12 +352,6 @@ class AppRoutes {
       case about:
         return MaterialPageRoute(
           builder: (_) => const AboutPage(),
-          settings: settings,
-        );
-
-      case adminDummyData:
-        return MaterialPageRoute(
-          builder: (_) => const AdminDummyDataPage(),
           settings: settings,
         );
 

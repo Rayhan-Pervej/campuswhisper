@@ -637,20 +637,20 @@ class _ClubCard extends StatelessWidget {
                       color: colorScheme.secondary,
                     ),
                   ),
-                  if (club.establishedDate != null) ...[
-                    AppDimensions.w8,
-                    Icon(
-                      Iconsax.calendar_outline,
-                      size: 14,
-                      color: colorScheme.onSurface.withAlpha(153),
-                    ),
-                    AppDimensions.w4,
-                    BuildText(
-                      text: 'Est. ${club.establishedDate!.year}',
-                      fontSize: 12,
-                      color: colorScheme.onSurface.withAlpha(153),
-                    ),
-                  ],
+                  // if (club.establishedDate != null) ...[
+                  //   AppDimensions.w8,
+                  //   Icon(
+                  //     Iconsax.calendar_outline,
+                  //     size: 14,
+                  //     color: colorScheme.onSurface.withAlpha(153),
+                  //   ),
+                  //   AppDimensions.w4,
+                  //   BuildText(
+                  //     text: 'Est. ${club.establishedDate!.year}',
+                  //     fontSize: 12,
+                  //     color: colorScheme.onSurface.withAlpha(153),
+                  //   ),
+                  // ],
                 ],
               ),
               AppDimensions.h16,

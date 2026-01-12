@@ -8,7 +8,9 @@
       "Bash(dart analyze:*)",
       "Bash(flutter build:*)",
       "Bash(ls:*)",
-      "Bash(flutter run:*)"
+      "Bash(flutter run:*)",
+      "Bash(flutter doctor:*)",
+      "Bash(flutter pub run:*)"
     ]
   }
 }

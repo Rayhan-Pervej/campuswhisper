@@ -319,12 +319,12 @@ class _LostAndFoundPageState extends State<LostAndFoundPage> {
                           width: 1,
                           color: colorScheme.onSurface.withValues(alpha: 0.2),
                         ),
-                        _StatItem(
-                          icon: Iconsax.tick_circle_outline,
-                          label: 'Resolved',
-                          count: provider.items.where((item) => item.isResolved).length,
-                          color: Colors.green,
-                        ),
+                        // _StatItem(
+                        //   icon: Iconsax.tick_circle_outline,
+                        //   label: 'Resolved',
+                        //   count: provider.items.where((item) => item.isResolved).length,
+                        //   color: Colors.green,
+                        // ),
                       ],
                     ),
                   ),

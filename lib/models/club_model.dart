@@ -4,23 +4,20 @@ class ClubModel {
   final String id;
   final String name;
   final String description;
-  final String category;  // 'Academic', 'Cultural', 'Sports', 'Social', etc.
+  final String category;  // "academic", "cultural", "sports"
   final String? logoUrl;
-  final String? coverImageUrl;
   final String presidentId;
   final String presidentName;
   final List<String> memberIds;
-  final List<String> adminIds;
+  final int maxMembers;
   final String contactEmail;
   final String? contactPhone;
-  final String? facebookUrl;
-  final String? instagramUrl;
-  final String? websiteUrl;
+  final String? meetingLocation;
+  final String? meetingSchedule;
+  final Map<String, String>? socialLinks;  // {"facebook": "url", "instagram": "url", "website": "url"}
   final bool isActive;
-  final DateTime? establishedDate;
   final DateTime createdAt;
   final DateTime? updatedAt;
-  final Map<String, dynamic>? additionalInfo;
 
   const ClubModel({
     required this.id,
@@ -28,21 +25,18 @@ class ClubModel {
     required this.description,
     required this.category,
     this.logoUrl,
-    this.coverImageUrl,
     required this.presidentId,
     required this.presidentName,
     this.memberIds = const [],
-    this.adminIds = const [],
+    this.maxMembers = 50,
     required this.contactEmail,
     this.contactPhone,
-    this.facebookUrl,
-    this.instagramUrl,
-    this.websiteUrl,
+    this.meetingLocation,
+    this.meetingSchedule,
+    this.socialLinks,
     this.isActive = true,
-    this.establishedDate,
     required this.createdAt,
     this.updatedAt,
-    this.additionalInfo,
   });
 
   factory ClubModel.fromJson(Map<String, dynamic> json) {
@@ -52,25 +46,22 @@ class ClubModel {
       description: json['description'] as String,
       category: json['category'] as String,
       logoUrl: json['logoUrl'] as String?,
-      coverImageUrl: json['coverImageUrl'] as String?,
       presidentId: json['presidentId'] as String,
       presidentName: json['presidentName'] as String,
       memberIds: List<String>.from(json['memberIds'] ?? []),
-      adminIds: List<String>.from(json['adminIds'] ?? []),
+      maxMembers: json['maxMembers'] as int? ?? 50,
       contactEmail: json['contactEmail'] as String,
       contactPhone: json['contactPhone'] as String?,
-      facebookUrl: json['facebookUrl'] as String?,
-      instagramUrl: json['instagramUrl'] as String?,
-      websiteUrl: json['websiteUrl'] as String?,
-      isActive: json['isActive'] as bool? ?? true,
-      establishedDate: json['establishedDate'] != null
-          ? (json['establishedDate'] as Timestamp).toDate()
+      meetingLocation: json['meetingLocation'] as String?,
+      meetingSchedule: json['meetingSchedule'] as String?,
+      socialLinks: json['socialLinks'] != null
+          ? Map<String, String>.from(json['socialLinks'])
           : null,
+      isActive: json['isActive'] as bool? ?? true,
       createdAt: (json['createdAt'] as Timestamp).toDate(),
       updatedAt: json['updatedAt'] != null
           ? (json['updatedAt'] as Timestamp).toDate()
           : null,
-      additionalInfo: json['additionalInfo'] as Map<String, dynamic>?,
     );
   }
 
@@ -81,23 +72,18 @@ class ClubModel {
       'description': description,
       'category': category,
       'logoUrl': logoUrl,
-      'coverImageUrl': coverImageUrl,
       'presidentId': presidentId,
       'presidentName': presidentName,
       'memberIds': memberIds,
-      'adminIds': adminIds,
+      'maxMembers': maxMembers,
       'contactEmail': contactEmail,
       'contactPhone': contactPhone,
-      'facebookUrl': facebookUrl,
-      'instagramUrl': instagramUrl,
-      'websiteUrl': websiteUrl,
+      'meetingLocation': meetingLocation,
+      'meetingSchedule': meetingSchedule,
+      'socialLinks': socialLinks,
       'isActive': isActive,
-      'establishedDate': establishedDate != null
-          ? Timestamp.fromDate(establishedDate!)
-          : null,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
-      'additionalInfo': additionalInfo,
     };
   }
 
@@ -107,21 +93,18 @@ class ClubModel {
     String? description,
     String? category,
     String? logoUrl,
-    String? coverImageUrl,
     String? presidentId,
     String? presidentName,
     List<String>? memberIds,
-    List<String>? adminIds,
+    int? maxMembers,
     String? contactEmail,
     String? contactPhone,
-    String? facebookUrl,
-    String? instagramUrl,
-    String? websiteUrl,
+    String? meetingLocation,
+    String? meetingSchedule,
+    Map<String, String>? socialLinks,
     bool? isActive,
-    DateTime? establishedDate,
     DateTime? createdAt,
     DateTime? updatedAt,
-    Map<String, dynamic>? additionalInfo,
   }) {
     return ClubModel(
       id: id ?? this.id,
@@ -129,21 +112,18 @@ class ClubModel {
       description: description ?? this.description,
       category: category ?? this.category,
       logoUrl: logoUrl ?? this.logoUrl,
-      coverImageUrl: coverImageUrl ?? this.coverImageUrl,
       presidentId: presidentId ?? this.presidentId,
       presidentName: presidentName ?? this.presidentName,
       memberIds: memberIds ?? this.memberIds,
-      adminIds: adminIds ?? this.adminIds,
+      maxMembers: maxMembers ?? this.maxMembers,
       contactEmail: contactEmail ?? this.contactEmail,
       contactPhone: contactPhone ?? this.contactPhone,
-      facebookUrl: facebookUrl ?? this.facebookUrl,
-      instagramUrl: instagramUrl ?? this.instagramUrl,
-      websiteUrl: websiteUrl ?? this.websiteUrl,
+      meetingLocation: meetingLocation ?? this.meetingLocation,
+      meetingSchedule: meetingSchedule ?? this.meetingSchedule,
+      socialLinks: socialLinks ?? this.socialLinks,
       isActive: isActive ?? this.isActive,
-      establishedDate: establishedDate ?? this.establishedDate,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      additionalInfo: additionalInfo ?? this.additionalInfo,
     );
   }
 
@@ -158,6 +138,7 @@ class ClubModel {
 
   // Helper getters
   int get memberCount => memberIds.length;
-  int get adminCount => adminIds.length;
-  bool get hasSocialLinks => facebookUrl != null || instagramUrl != null || websiteUrl != null;
+  bool get isFull => memberIds.length >= maxMembers;
+  int get spotsLeft => maxMembers - memberIds.length;
+  bool get hasSocialLinks => socialLinks != null && socialLinks!.isNotEmpty;
 }

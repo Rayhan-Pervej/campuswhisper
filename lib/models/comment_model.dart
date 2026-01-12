@@ -1,5 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Comment Model - Scalable Facebook-Style Architecture
+/// Uses subcollections for votes instead of arrays (supports 20000+ likes/comments)
+///
+/// Firestore Structure:
+/// posts/{postId}/comments/{commentId}
+///   - Uses subcollection: posts/{postId}/comments/{commentId}/votes/{userId}
+///   - Avoids 1MB document size limit
+///   - Scales to millions of votes
 class CommentModel {
   final String id;
   final String parentId;  // ID of post/event/competition
@@ -8,12 +16,15 @@ class CommentModel {
   final String authorId;
   final String authorName;
   final String? authorAvatarUrl;
-  final String? replyToId;  // For nested replies
+  final String? replyToId;  // For nested replies (another comment ID)
   final String? replyToAuthor;
-  final int upvotes;
-  final int downvotes;
-  final List<String> upvotedBy;
-  final List<String> downvotedBy;
+
+  // Counts only (actual votes stored in subcollection)
+  final int upvoteCount;
+  final int downvoteCount;
+  final int replyCount;  // Number of replies
+
+  // Status
   final bool isEdited;
   final DateTime createdAt;
   final DateTime? updatedAt;
@@ -29,10 +40,9 @@ class CommentModel {
     this.authorAvatarUrl,
     this.replyToId,
     this.replyToAuthor,
-    this.upvotes = 0,
-    this.downvotes = 0,
-    this.upvotedBy = const [],
-    this.downvotedBy = const [],
+    this.upvoteCount = 0,
+    this.downvoteCount = 0,
+    this.replyCount = 0,
     this.isEdited = false,
     required this.createdAt,
     this.updatedAt,
@@ -50,10 +60,9 @@ class CommentModel {
       authorAvatarUrl: json['authorAvatarUrl'] as String?,
       replyToId: json['replyToId'] as String?,
       replyToAuthor: json['replyToAuthor'] as String?,
-      upvotes: json['upvotes'] as int? ?? 0,
-      downvotes: json['downvotes'] as int? ?? 0,
-      upvotedBy: List<String>.from(json['upvotedBy'] ?? []),
-      downvotedBy: List<String>.from(json['downvotedBy'] ?? []),
+      upvoteCount: json['upvote_count'] as int? ?? json['upvotes'] as int? ?? 0,
+      downvoteCount: json['downvote_count'] as int? ?? json['downvotes'] as int? ?? 0,
+      replyCount: json['reply_count'] as int? ?? 0,
       isEdited: json['isEdited'] as bool? ?? false,
       createdAt: (json['createdAt'] as Timestamp).toDate(),
       updatedAt: json['updatedAt'] != null
@@ -74,10 +83,9 @@ class CommentModel {
       'authorAvatarUrl': authorAvatarUrl,
       'replyToId': replyToId,
       'replyToAuthor': replyToAuthor,
-      'upvotes': upvotes,
-      'downvotes': downvotes,
-      'upvotedBy': upvotedBy,
-      'downvotedBy': downvotedBy,
+      'upvote_count': upvoteCount,
+      'downvote_count': downvoteCount,
+      'reply_count': replyCount,
       'isEdited': isEdited,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
@@ -95,10 +103,9 @@ class CommentModel {
     String? authorAvatarUrl,
     String? replyToId,
     String? replyToAuthor,
-    int? upvotes,
-    int? downvotes,
-    List<String>? upvotedBy,
-    List<String>? downvotedBy,
+    int? upvoteCount,
+    int? downvoteCount,
+    int? replyCount,
     bool? isEdited,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -114,10 +121,9 @@ class CommentModel {
       authorAvatarUrl: authorAvatarUrl ?? this.authorAvatarUrl,
       replyToId: replyToId ?? this.replyToId,
       replyToAuthor: replyToAuthor ?? this.replyToAuthor,
-      upvotes: upvotes ?? this.upvotes,
-      downvotes: downvotes ?? this.downvotes,
-      upvotedBy: upvotedBy ?? this.upvotedBy,
-      downvotedBy: downvotedBy ?? this.downvotedBy,
+      upvoteCount: upvoteCount ?? this.upvoteCount,
+      downvoteCount: downvoteCount ?? this.downvoteCount,
+      replyCount: replyCount ?? this.replyCount,
       isEdited: isEdited ?? this.isEdited,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -135,7 +141,7 @@ class CommentModel {
   int get hashCode => id.hashCode;
 
   // Helper getters
-  int get score => upvotes - downvotes;
+  int get score => upvoteCount - downvoteCount;
   bool get isReply => replyToId != null;
   bool get isTopLevel => replyToId == null;
 }

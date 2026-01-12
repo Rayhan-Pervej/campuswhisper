@@ -32,15 +32,24 @@ class FirestoreAdapter implements DatabaseService {
     String? id,
   }) async {
     try {
-      DocumentReference docRef = id != null
+      DocumentReference docRef = id != null && id.isNotEmpty
           ? _firestore.collection(collection).doc(id)
           : _firestore.collection(collection).doc();
 
-      await docRef.set({
+      // Prepare data with timestamps if not already present
+      final Map<String, dynamic> dataToSave = {
         ...data,
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      };
+
+      // Only add server timestamps if not already set
+      if (!dataToSave.containsKey('created_at') && !dataToSave.containsKey('createdAt')) {
+        dataToSave['created_at'] = FieldValue.serverTimestamp();
+      }
+      if (!dataToSave.containsKey('updated_at') && !dataToSave.containsKey('updatedAt')) {
+        dataToSave['updated_at'] = FieldValue.serverTimestamp();
+      }
+
+      await docRef.set(dataToSave);
 
       return docRef.id;
     } catch (e) {

@@ -59,7 +59,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CompetitionProvider()),
         ChangeNotifierProvider(create: (_) => LostFoundProvider()),
         ChangeNotifierProvider(create: (_) => CommentProvider()),
-        ChangeNotifierProvider(create: (_) => CourseRoutineProvider()),
+        //ChangeNotifierProvider(create: (_) => CourseRoutineProvider()),
       ],
 
       child: MyApp(),

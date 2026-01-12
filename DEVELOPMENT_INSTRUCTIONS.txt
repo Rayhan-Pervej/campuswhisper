@@ -2,591 +2,902 @@
 CAMPUSWHISPER - COMPLETE DEVELOPMENT GUIDE
 ================================================================================
 
-📖 **READ THIS FIRST - EVERYTHING YOU NEED IN ONE FILE**
+📖 **EVERYTHING YOU NEED IN ONE FILE**
 
-Last Updated: 2026-01-11
-Project Status: 97% Complete (Phase 0-9 ✅ | Phase 10 In Progress)
-Development Approach: Root to Leaf (Parent → Child hierarchy)
-Architecture: Data Flow with Repository Pattern (Database-agnostic)
+Last Updated: 2026-01-12
+Project Status: ✅ UI Complete | 🔄 Backend Implementation Starting
+Architecture: SIMPLIFIED - Direct Firebase + Provider Pattern
 
 ================================================================================
-⚡ QUICK REFERENCE (AI: READ THIS FIRST!)
+📋 TABLE OF CONTENTS
 ================================================================================
 
-**🎯 Project Status:** 97% Complete | Phase 0-9 ✅ | Phase 10 In Progress
+1. QUICK REFERENCE
+2. PROJECT STRUCTURE
+3. DATABASE SCHEMA (Complete Firestore Structure)
+4. PHASE-BY-PHASE IMPLEMENTATION PLAN
+5. SIMPLIFIED ARCHITECTURE & CODE PATTERNS
+6. THEME & STYLING GUIDELINES
+7. WORKFLOW & CHECKLIST
 
-**🏗️ Architecture Pattern (MUST USE):**
-UI → Provider (PaginatedProvider) → Repository (BaseRepository) → DatabaseService
+================================================================================
+1. ⚡ QUICK REFERENCE
+================================================================================
 
-**✅ What's Complete:**
-- ✅ All 18+ data models with JSON serialization
-- ✅ All 18 global widgets (inputs, buttons, dialogs, cards, etc.)
-- ✅ All utilities (validators, date formatter, snackbar, dialog helpers)
-- ✅ All constants (error messages, validation, app config)
-- ✅ Complete database abstraction layer (database-agnostic)
-- ✅ Complete repository pattern with BaseRepository
-- ✅ Complete provider pattern with PaginatedProvider
-- ✅ All main UI pages connected to Firebase
-- ✅ All authentication flows working
-- ✅ All profile/settings pages complete
-- ✅ Theme system (light/dark mode follows system)
-- ✅ Last login tracking implemented
+**🎯 Current Status:**
+✅ All UI pages complete and working
+✅ All models defined with JSON serialization
+✅ Database schema fully documented below
+🔄 Ready to add backend feature-by-feature
+
+**🏗️ SIMPLIFIED ARCHITECTURE:**
+```
+UI (Widget/Page)
+      ↓
+Provider (State Management)
+      ↓
+Firestore (Direct Firebase Calls)
+```
 
 **⚠️ CRITICAL RULES:**
-1. ALWAYS use colorScheme (NEVER hardcode colors)
-2. ALWAYS use AppDimensions (NEVER hardcode spacing)
-3. NEVER write CRUD from scratch (extend BaseRepository)
-4. NEVER access DatabaseService from UI (use providers)
-5. ALWAYS use safeOperation() for user actions
-6. ALWAYS use existing patterns (read similar pages first)
-7. ALWAYS dispose controllers in dispose()
-
-**📚 Key Sections to Read:**
-- Section 5: Data Flow Architecture (MUST READ - has all patterns)
-- Section 6: Centralized Systems (validators, snackbar, dialog helpers)
-- Section 7: Theme & Styling Guidelines (colorScheme, AppDimensions)
-- Section 10: Reference Implementations (learn from existing code)
+1. ✅ ALWAYS use colorScheme (NEVER Colors.white, Colors.red, etc.)
+2. ✅ ALWAYS use AppDimensions (NEVER hardcoded numbers)
+3. ✅ ALWAYS check Section 3 (DATABASE SCHEMA) for field names
+4. ✅ Use model classes for JSON serialization
+5. ✅ Start simple - direct Firestore calls in providers
+6. ✅ Build one feature at a time
+7. ✅ ALWAYS dispose controllers
 
 ================================================================================
-TABLE OF CONTENTS
-================================================================================
-
-1. QUICK START FOR NEW SESSIONS
-2. PROJECT OVERVIEW & STATUS
-3. COMPLETE PROJECT STRUCTURE
-4. DEVELOPMENT PHASES
-5. DATA FLOW ARCHITECTURE ⭐ CRITICAL
-6. CENTRALIZED SYSTEMS
-7. THEME & STYLING GUIDELINES
-8. ARCHITECTURE & FILE ORGANIZATION
-9. CODING PATTERNS & BEST PRACTICES
-10. REFERENCE IMPLEMENTATIONS
-11. NEXT STEPS & WHAT'S MISSING
-12. WORKFLOW & CHECKLIST
-
-================================================================================
-1. QUICK START FOR NEW SESSIONS (AI READ THIS FIRST!)
-================================================================================
-
-**When starting a new session:**
-
-1. ✅ Read this entire file (DEVELOPMENT_INSTRUCTIONS.txt)
-2. ✅ Check Section 2 for current project status
-3. ✅ Check Section 11 for next priority tasks
-4. ✅ Review similar existing implementations before coding
-5. ✅ Follow Section 7 (Theme Guidelines) strictly
-6. ✅ Use Section 9 (Coding Patterns) as templates
-
-**CRITICAL RULES (AI MUST FOLLOW):**
-- ⭐ ALWAYS use colorScheme (NEVER Colors.white, Colors.red, etc.)
-- ⭐ ALWAYS use AppDimensions (NEVER hardcoded numbers like 16, 12)
-- ⭐ ALWAYS use ErrorMessages constants (NEVER hardcoded strings)
-- ⭐ NEVER bypass BaseRepository (extend it for new repositories)
-- ⭐ NEVER access DatabaseService directly from UI
-- ⭐ ALWAYS use PaginatedProvider for list pages
-- ⭐ ALWAYS use safeOperation() for user actions (built-in feedback)
-- ⭐ ALWAYS dispose controllers properly
-- ⭐ ALWAYS read existing similar code before creating new features
-
-**Sample AI Greeting:**
-"Hi! I've read the development guide and understand CampusWhisper is at
-97% complete with Phases 0-9 COMPLETE ✅
-
-Key understanding:
-- All UI pages connected to Firebase with real data
-- Theme system follows device (no manual toggle)
-- Last login tracking implemented
-- Profile colors fixed (no gradients, uses colorScheme)
-- All providers registered and working
-
-Ready to work on Phase 10 tasks. What would you like to focus on?
-1. Add dummy data to Firebase for testing
-2. Create detail pages (thread, event, competition detail)
-3. Implement comment system
-4. Testing & polish
-5. Other features"
-
-================================================================================
-2. PROJECT OVERVIEW & STATUS
-================================================================================
-
-**Project Name:** CampusWhisper
-**Type:** Flutter Campus Social Application
-**Backend:** Firebase (Firestore, Auth, Storage)
-**State Management:** Provider pattern with custom base classes
-
-**Features Implemented:**
-✅ Authentication (Login, Signup, Email Verification, Password Reset)
-✅ Home Dashboard (connected to Firebase)
-✅ Thread/Discussions (Posts with filters, pagination)
-✅ Study Hub (Course Routine, Roadmap, CGPA Calculator, Scholarship)
-✅ Campus Hub (Events, Lost & Found, Clubs, Competitions - all with Firebase)
-✅ More Tab (Profile, Edit Profile, Settings, Notifications, Saved, About)
-✅ User Profile Management (XP tracking, badges, last login)
-✅ Theme System (follows device light/dark mode)
-
-**Current Status (2026-01-11):**
-- Total Completion: 97%
-- Phase 0-9: ✅ COMPLETE
-- Phase 10: 🔄 IN PROGRESS (Testing & Polish)
-
-**What's Working:**
-✅ Complete authentication flow
-✅ User registration and login
-✅ Profile management (view, edit)
-✅ Last login timestamp tracking
-✅ All list pages with Firebase data
-✅ Infinite scroll pagination (20 items per page)
-✅ Pull-to-refresh on all pages
-✅ Category/type/status filters
-✅ Search functionality
-✅ Empty/loading/error states
-✅ Theme follows system (light/dark mode)
-✅ All colors use colorScheme (no hardcoded colors)
-
-**What's NOT Working:**
-❌ No real data in Firebase (all pages show empty states)
-❌ Image upload functionality (StorageService ready, not integrated)
-❌ Comment system (CommentProvider ready, UI not integrated)
-❌ Detail pages (thread, event, competition detail pages needed)
-❌ Push notifications
-❌ Real-time updates (listeners not implemented)
-
-**Recent Changes (2026-01-11):**
-✅ Fixed profile page colors (removed gradients, uses colorScheme)
-✅ Implemented last login tracking
-✅ Updated UserRepository with updateLastLogin method
-✅ LoginProvider now updates last login on successful login
-✅ Removed theme toggle (app follows system theme)
-✅ Fixed all hardcoded Colors to use colorScheme
-✅ All dummy data removed from More section pages
-
-================================================================================
-3. COMPLETE PROJECT STRUCTURE
+2. 📂 PROJECT STRUCTURE
 ================================================================================
 
 lib/
+├── models/                           ✅ All complete
+│   ├── user_model.dart               (Section 3.1)
+│   ├── posts_model.dart              (Section 3.2)
+│   ├── event_model.dart              (Section 3.3)
+│   ├── club_model.dart               (Section 3.4)
+│   ├── competition_model.dart        (Section 3.5)
+│   ├── lost_found_item_model.dart    (Section 3.6)
+│   ├── comment_model.dart            (Section 3.7)
+│   ├── course_routine_model.dart     (Section 3.8)
+│   └── [other models...]
 │
-├── main.dart                                     ✅ COMPLETE
+├── providers/                        🔄 Simplify these
+│   ├── user_provider.dart
+│   ├── post_provider.dart
+│   ├── event_provider.dart
+│   ├── club_provider.dart
+│   └── [other providers...]
 │
-├── core/                                         [CENTRALIZED SYSTEMS]
+├── ui/
+│   ├── widgets/                      ✅ All complete
+│   │   ├── custom_input.dart
+│   │   ├── default_button.dart
+│   │   ├── empty_state.dart
+│   │   └── [18+ widgets...]
+│   │
+│   └── pages/                        ✅ All complete
+│       ├── auth/
+│       │   ├── login_page.dart
+│       │   └── sign_up_page.dart
+│       ├── thread/
+│       │   ├── thread_page.dart
+│       │   └── thread_detail_page.dart
+│       ├── events/
+│       │   └── events_page.dart
+│       ├── more/
+│       │   └── profile/
+│       │       └── profile_page.dart
+│       └── [all other pages...]
+│
+├── core/
 │   ├── theme/
-│   │   ├── app_theme.dart                        ✅ COMPLETE
-│   │   ├── app_dimensions.dart                   ✅ COMPLETE
-│   │   └── theme_provider.dart                   ✅ COMPLETE
-│   │
-│   ├── database/                                 ✅ DATABASE ABSTRACTION
-│   │   ├── database_service.dart                 ✅ COMPLETE
-│   │   ├── firestore_adapter.dart                ✅ COMPLETE
-│   │   ├── query_builder.dart                    ✅ COMPLETE
-│   │   └── paginated_result.dart                 ✅ COMPLETE
-│   │
-│   ├── repositories/                             ✅ REPOSITORY PATTERN
-│   │   └── base_repository.dart                  ✅ COMPLETE
-│   │
-│   ├── providers/                                ✅ PROVIDER PATTERN
-│   │   ├── base_provider.dart                    ✅ COMPLETE
-│   │   └── paginated_provider.dart               ✅ COMPLETE
-│   │
-│   ├── config/
-│   │   └── app_config.dart                       ✅ COMPLETE
-│   │
-│   ├── exceptions/
-│   │   └── app_exceptions.dart                   ✅ COMPLETE
-│   │
-│   ├── constants/
-│   │   ├── app_constants.dart                    ✅ COMPLETE
-│   │   ├── error_messages.dart                   ✅ COMPLETE
-│   │   ├── validation_messages.dart              ✅ COMPLETE
-│   │   └── build_text.dart                       ✅ COMPLETE
-│   │
+│   │   ├── app_theme.dart
+│   │   └── app_dimensions.dart
 │   ├── utils/
-│   │   ├── validators.dart                       ✅ COMPLETE
-│   │   ├── date_formatter.dart                   ✅ COMPLETE
-│   │   ├── snackbar_helper.dart                  ✅ COMPLETE
-│   │   └── dialog_helper.dart                    ✅ COMPLETE
-│   │
-│   ├── services/
-│   │   ├── auth_service.dart                     ✅ COMPLETE
-│   │   └── storage_service.dart                  ✅ COMPLETE
-│   │
-│   └── extensions/
-│       └── context_extensions.dart               ✅ COMPLETE
+│   │   ├── validators.dart
+│   │   ├── snackbar_helper.dart
+│   │   ├── dialog_helper.dart
+│   │   └── date_formatter.dart
+│   ├── constants/
+│   │   └── error_messages.dart
+│   └── services/
+│       └── auth_service.dart
 │
-├── models/                                       ✅ ALL MODELS COMPLETE
-│   ├── user_model.dart                           ✅
-│   ├── posts_model.dart                          ✅
-│   ├── vote_model.dart                           ✅
-│   ├── event_model.dart                          ✅
-│   ├── competition_model.dart                    ✅
-│   ├── lost_found_item_model.dart                ✅
-│   ├── club_model.dart                           ✅
-│   ├── comment_model.dart                        ✅
-│   ├── course_routine_model.dart                 ✅
-│   └── [13 more models...]                       ✅
-│
-├── providers/                                    ✅ ALL PROVIDERS COMPLETE
-│   ├── login_provider.dart                       ✅ (with last login tracking)
-│   ├── sign_up_provider.dart                     ✅
-│   ├── user_provider.dart                        ✅
-│   ├── post_provider.dart                        ✅
-│   ├── event_provider.dart                       ✅
-│   ├── competition_provider.dart                 ✅
-│   ├── lost_found_provider.dart                  ✅
-│   ├── club_provider.dart                        ✅
-│   ├── comment_provider.dart                     ✅
-│   └── [6 more providers...]                     ✅
-│
-├── repository/                                   ✅ ALL REPOSITORIES COMPLETE
-│   ├── user_repository.dart                      ✅ (with updateLastLogin)
-│   ├── post_repository.dart                      ✅
-│   ├── event_repository.dart                     ✅
-│   ├── competition_repository.dart               ✅
-│   ├── lost_found_repository.dart                ✅
-│   ├── club_repository.dart                      ✅
-│   ├── comment_repository.dart                   ✅
-│   └── [4 more repositories...]                  ✅
-│
-├── routing/
-│   ├── app_routes.dart                           ✅ COMPLETE
-│   └── custom_transitions.dart                   ✅ COMPLETE
-│
-└── ui/
-    ├── widgets/                                  ✅ ALL WIDGETS COMPLETE
-    │   ├── custom_input.dart                     ✅
-    │   ├── default_button.dart                   ✅
-    │   ├── empty_state.dart                      ✅
-    │   ├── error_widget.dart                     ✅
-    │   ├── user_avatar.dart                      ✅
-    │   ├── cached_image.dart                     ✅
-    │   └── [12 more widgets...]                  ✅
-    │
-    └── pages/
-        ├── auth/                                 ✅ COMPLETE
-        │   ├── login_page.dart                   ✅
-        │   ├── sign_up_page.dart                 ✅
-        │   ├── forgot_password_page.dart         ✅
-        │   └── email_verification_page.dart      ✅
-        │
-        ├── navigation/                           ✅ COMPLETE
-        │   └── navigation_page.dart              ✅
-        │
-        ├── home/                                 ✅ COMPLETE
-        │   ├── home_page.dart                    ✅ (connected to Firebase)
-        │   └── widgets/                          ✅
-        │
-        ├── thread/                               ⚠️ NEEDS DETAIL PAGE
-        │   ├── thread_page.dart                  ✅ (connected to Firebase)
-        │   ├── thread_detail_page.dart           ❌ TODO
-        │   └── widgets/                          ✅
-        │       ├── comment_card.dart             ❌ TODO
-        │       └── comment_input.dart            ❌ TODO
-        │
-        ├── study/                                ✅ COMPLETE
-        │   ├── study_page.dart                   ✅
-        │   ├── course_routine/                   ✅
-        │   ├── course_roadmap/                   ✅
-        │   ├── cgpa_calculator/                  ✅
-        │   └── scholarship/                      ✅
-        │
-        ├── campus/                               ⚠️ NEEDS DETAIL PAGES
-        │   ├── campus_page.dart                  ✅
-        │   ├── events/                           ⚠️
-        │   │   ├── events_page.dart              ✅ (connected to Firebase)
-        │   │   ├── event_detail_page.dart        ✅ (created, needs Firebase)
-        │   │   ├── event_attendees_page.dart     ✅ (created, needs Firebase)
-        │   │   └── event_comments_page.dart      ✅ (created, needs Firebase)
-        │   ├── lost_and_found/                   ⚠️
-        │   │   ├── lost_and_found_page.dart      ✅ (connected to Firebase)
-        │   │   ├── item_detail_page.dart         ✅ (created, needs Firebase)
-        │   │   └── contact_poster_page.dart      ✅ (created, needs Firebase)
-        │   ├── clubs/                            ✅
-        │   │   ├── clubs_page.dart               ✅ (connected to Firebase)
-        │   │   └── club_detail_page.dart         ✅ (created, needs Firebase)
-        │   └── competitions/                     ⚠️
-        │       ├── competitions_page.dart        ✅ (connected to Firebase)
-        │       ├── competition_detail_page.dart  ✅ (created, needs Firebase)
-        │       ├── registration_page.dart        ✅ (created, needs Firebase)
-        │       └── participants_page.dart        ✅ (created, needs Firebase)
-        │
-        ├── more/                                 ✅ COMPLETE
-        │   ├── more_page.dart                    ✅ (connected to Firebase)
-        │   ├── profile/
-        │   │   ├── profile_page.dart             ✅ (colors fixed)
-        │   │   └── edit_profile_page.dart        ✅
-        │   ├── settings/
-        │   │   └── settings_page.dart            ✅ (theme toggle removed)
-        │   ├── notifications/
-        │   │   └── notifications_page.dart       ✅ (dummy data removed)
-        │   ├── saved/
-        │   │   └── saved_page.dart               ✅ (dummy data removed)
-        │   └── about/
-        │       └── about_page.dart               ✅ (colors fixed)
-        │
-        └── shared/                               ✅ COMPLETE
-            ├── report_page.dart                  ✅
-            ├── chat_page.dart                    ✅
-            ├── image_viewer_page.dart            ✅
-            ├── splash_screen.dart                ✅
-            └── error_page.dart                   ✅
+└── routing/
+    └── app_routes.dart
 
 ================================================================================
-4. DEVELOPMENT PHASES
+3. 🗄️ DATABASE SCHEMA (Complete Firestore Structure)
 ================================================================================
 
-**✅ PHASE 0: FOUNDATION** - COMPLETE
-- Core utilities, constants, extensions
-- Global widgets
-- Data models
-- Database abstraction layer
-- Repository pattern with BaseRepository
-- Provider pattern with PaginatedProvider
+### Database: Firebase Firestore
+- Type: NoSQL Document Database
+- Structure: Collections → Documents → Fields
+- Subcollections: For votes, comments, and nested data
 
-**✅ PHASE 1: AUTHENTICATION** - COMPLETE
-- Login, Signup, Email Verification, Password Reset
+### Key Principles:
+1. Denormalization: Store user names with posts to avoid extra queries
+2. Subcollections: For one-to-many relationships (votes, comments)
+3. Auto-Generated IDs: Let Firestore generate document IDs
+4. Timestamps: Use FieldValue.serverTimestamp() for consistency
 
-**✅ PHASE 2: MAIN TABS** - COMPLETE
-- Home, Thread, Study Hub, Campus Hub, More Hub
-
-**✅ PHASE 3: STUDY CHILD PAGES** - COMPLETE
-- Course Routine, Roadmap, CGPA Calculator, Scholarship
-
-**✅ PHASE 4: CAMPUS CHILD PAGES** - COMPLETE
-- Events, Lost & Found, Clubs, Competitions (detail pages created)
-
-**✅ PHASE 5: MORE CHILD PAGES** - COMPLETE
-- Profile, Edit Profile, Settings, Notifications, Saved, About
-
-**✅ PHASE 6: BACKEND INTEGRATION - REPOSITORIES** - COMPLETE
-- 6 repositories extending BaseRepository
-
-**✅ PHASE 7: SHARED PAGES** - COMPLETE
-- Report, Chat, Image Viewer, Splash, Error pages
-
-**✅ PHASE 8: FIREBASE SERVICES** - COMPLETE
-- AuthService, StorageService
-
-**✅ PHASE 9: CONNECT UI TO BACKEND** - COMPLETE
-- All list pages connected to Firebase
-- UserProvider with profile management
-- Last login tracking implemented
-- Theme system finalized
-- All colors use colorScheme
-- All dummy data removed from core pages
-
-**🔄 PHASE 10: TESTING & POLISH** - IN PROGRESS
-Next priorities:
-1. Add dummy data to Firebase for testing
-2. Test all features end-to-end
-3. Implement comment system UI
-4. Create thread detail page
-5. Polish UI/UX
-6. Performance optimization
+### Collections Summary:
+| Collection | Purpose |
+|------------|---------|
+| users | User profiles & authentication |
+| posts | Thread posts/discussions |
+| events | Campus events |
+| clubs | Student clubs/organizations |
+| competitions | Competitions & contests |
+| lost_found_items | Lost & found items |
+| comments | Comments on posts/events |
+| course_routines | Student course schedules |
+| scholarships | Scholarship information |
+| notifications | User notifications |
 
 ================================================================================
-5. DATA FLOW ARCHITECTURE ⭐ CRITICAL
+3.1. 👤 USERS COLLECTION
 ================================================================================
 
-**🎯 ARCHITECTURE PATTERN (MUST USE):**
+**Collection Path:** users/{userId}
 
-```
-UI (Pages/Widgets)
-      ↕
-Providers (State Management + User Feedback)
-      ↕
-Repositories (Business Logic + CRUD)
-      ↕
-Database Service (Abstract Interface)
-      ↕
-Firestore Adapter (Concrete Implementation)
-      ↕
-Firebase/Firestore
-```
+**Document Structure:**
+{
+  "uid": "firebase_auth_uid",           // Firebase Auth UID
+  "id": "auto_generated",               // Alternative ID (can be same as uid)
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@university.edu",
+  "university": "Example University",
+  "department": "Computer Science",
+  "batch": "2024",                      // Optional: graduation year
 
-**🔧 LAYER 1: DATABASE ABSTRACTION**
+  // Gamification
+  "xp": 0,                              // Experience points
+  "contributions": 0,                   // Number of posts/comments
+  "badges": [],                         // Array of badge IDs
 
-Location: `lib/core/database/`
+  // Preferences
+  "favoriteCourses": [],                // Array of course IDs
+  "notifyMe": true,                     // Notification preference
+  "theme": "system",                    // "light", "dark", or "system"
 
-- DatabaseService: Abstract interface for ALL database operations
-- FirestoreAdapter: Concrete implementation using Firestore
-- Query building, pagination, CRUD operations
-
-**🔧 LAYER 2: REPOSITORY PATTERN**
-
-Location: `lib/core/repositories/base_repository.dart`
-
-**BaseRepository<T>**: Generic repository eliminating 80% code duplication
-
-Example:
-```dart
-class PostRepository extends BaseRepository<PostModel> {
-  @override
-  String get collectionName => 'posts';
-
-  @override
-  PostModel fromJson(Map<String, dynamic> json) => PostModel.fromJson(json);
-
-  @override
-  Map<String, dynamic> toJson(PostModel model) => model.toJson();
-
-  @override
-  String getId(PostModel model) => model.id;
-
-  // You get create, getAll, getById, update, delete for FREE!
-
-  // Add custom methods:
-  Future<void> updateLastLogin(String userId) async {
-    // Custom logic here
-  }
+  // Metadata
+  "role": "student",                    // "student", "admin", "moderator"
+  "createdAt": Timestamp,
+  "lastLogin": Timestamp
 }
-```
 
-**🔧 LAYER 3: PROVIDER PATTERN**
+**Used In:**
+- Profile Page (profile_page.dart)
+- Edit Profile Page (edit_profile_page.dart)
+- Settings Page (settings_page.dart)
+- Posts: created_by (uid), created_by_name (firstName + lastName)
+- Events: organizerId (uid), organizerName (firstName + lastName)
 
-Location: `lib/core/providers/`
+================================================================================
+3.2. 💬 POSTS COLLECTION
+================================================================================
 
-**PaginatedProvider<T>**: Extends BaseProvider with pagination
+**Collection Path:** posts/{postId}
 
-Example:
-```dart
-class PostProvider extends PaginatedProvider<PostModel> {
-  final PostRepository _repository = PostRepository();
+**Document Structure:**
+{
+  "post_id": "auto_generated",          // Firestore document ID
+  "type": "question",                   // "question", "discussion", "announcement"
 
-  @override
-  Future<PaginatedResult<PostModel>> fetchItems({
-    List<QueryFilter>? filters,
-    dynamic cursor,
-  }) async {
-    return _repository.getAll(
-      filters: filters,
-      limit: 20,
-      cursor: cursor,
-    );
-  }
+  // Author Info (Denormalized)
+  "created_by": "user_uid",
+  "created_by_name": "John Doe",        // Stored to avoid extra query
+
+  // Content
+  "title": "How to solve X?",           // Optional
+  "content": "Full post content...",
+  "course_id": "CS101",                 // Optional
+
+  // Engagement
+  "upvote_count": 0,
+  "downvote_count": 0,
+  "comment_count": 0,                   // Optional
+
+  // Metadata
+  "created_at": Timestamp,
+  "updated_at": Timestamp
 }
-```
 
-**🔧 LAYER 4: UI INTEGRATION**
+**Subcollection:** posts/{postId}/votes/{userId}
+{
+  "type": "upvote",                     // "upvote" or "downvote"
+  "timestamp": Timestamp
+}
 
-Use Consumer or ListenableBuilder:
-```dart
-Consumer<PostProvider>(
-  builder: (context, provider, child) {
-    if (provider.isLoading && provider.items.isEmpty) {
-      return CircularProgressIndicator();
-    }
+**Why Subcollection?**
+- Scalable: Doesn't increase post document size
+- Atomic: Use transactions for vote updates
+- User-specific: Easy to check if user voted
 
-    if (provider.hasError && provider.items.isEmpty) {
-      return ErrorWidget(onRetry: provider.refresh);
-    }
+**Used In:**
+- Thread Page (thread_page.dart) - List, filter, create
+- Thread Detail Page (thread_detail_page.dart) - View, comment
+- Add Post Dialog (add_post.dart) - Create
+- Home Page (home_page.dart) - Recent posts
 
-    if (provider.isEmpty) {
-      return EmptyState(message: 'No posts yet');
-    }
+================================================================================
+3.3. 🎉 EVENTS COLLECTION
+================================================================================
 
-    return RefreshIndicator(
-      onRefresh: provider.refresh,
-      child: ListView.builder(
-        itemCount: provider.items.length,
-        itemBuilder: (context, index) => PostCard(provider.items[index]),
-      ),
-    );
+**Collection Path:** events/{eventId}
+
+**Document Structure:**
+{
+  "id": "auto_generated",
+  "title": "Tech Fest 2026",
+  "description": "Annual technology festival...",
+  "category": "tech",                   // "tech", "cultural", "sports", "academic"
+  "location": "Main Auditorium",
+
+  // Dates
+  "eventDate": Timestamp,               // Start date/time
+  "eventEndDate": Timestamp,            // End date (optional)
+
+  // Media
+  "imageUrl": "https://...",            // Optional banner
+
+  // Organizer (Denormalized)
+  "organizerId": "user_uid",
+  "organizerName": "John Doe",
+
+  // Registration
+  "attendeeIds": [],                    // Array of registered user UIDs
+  "maxAttendees": 100,
+
+  // Status
+  "isActive": true,
+
+  // Metadata
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp,
+  "additionalInfo": {}                  // Flexible field
+}
+
+**Computed Properties (in Model):**
+- isFull: attendeeIds.length >= maxAttendees
+- isPast: eventDate < DateTime.now()
+- isUpcoming: eventDate > DateTime.now()
+- spotsLeft: maxAttendees - attendeeIds.length
+
+**Used In:**
+- Events Page (events_page.dart) - List, filter, create
+- Event Detail Page (event_detail_page.dart) - View, register
+- Event Attendees Page (event_attendees_page.dart) - View list
+- Home Page (home_page.dart) - Upcoming events
+
+================================================================================
+3.4. 🏛️ CLUBS COLLECTION
+================================================================================
+
+**Collection Path:** clubs/{clubId}
+
+**Document Structure:**
+{
+  "id": "auto_generated",
+  "name": "Computer Science Club",
+  "description": "A club for CS enthusiasts...",
+  "category": "academic",               // "academic", "cultural", "sports"
+  "logoUrl": "https://...",
+
+  // Leadership
+  "presidentId": "user_uid",
+  "presidentName": "John Doe",
+
+  // Members
+  "memberIds": [],                      // Array of member UIDs
+  "maxMembers": 50,
+
+  // Contact
+  "contactEmail": "club@university.edu",
+  "contactPhone": "+1234567890",
+  "meetingLocation": "Room 301",
+  "meetingSchedule": "Every Friday 5 PM",
+
+  // Social
+  "socialLinks": {
+    "facebook": "https://...",
+    "instagram": "https://...",
+    "website": "https://..."
   },
-)
-```
+
+  // Status
+  "isActive": true,
+
+  // Metadata
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp
+}
+
+**Used In:**
+- Clubs Page (clubs_page.dart) - List, search
+- Club Detail Page (club_detail_page.dart) - View, join/leave
 
 ================================================================================
-6. CENTRALIZED SYSTEMS (USE THESE - DON'T RECREATE!)
+3.5. 🏆 COMPETITIONS COLLECTION
 ================================================================================
 
-**1. VALIDATION → lib/core/utils/validators.dart**
+**Collection Path:** competitions/{competitionId}
+
+**Document Structure:**
+{
+  "id": "auto_generated",
+  "title": "Coding Challenge 2026",
+  "description": "Annual coding competition...",
+  "category": "coding",                 // "coding", "design", "business"
+
+  // Dates
+  "registrationStartDate": Timestamp,
+  "registrationEndDate": Timestamp,
+  "competitionStartDate": Timestamp,
+  "competitionEndDate": Timestamp,
+
+  // Details
+  "location": "Computer Lab",
+  "imageUrl": "https://...",
+  "rules": "Full competition rules...",
+
+  // Organizer
+  "organizerId": "user_uid",
+  "organizerName": "John Doe",
+
+  // Registration
+  "participantIds": [],                 // Array of registered UIDs
+  "maxParticipants": 100,
+  "teamSize": 1,                        // 1 for individual
+
+  // Prizes
+  "prizes": {
+    "first": "Rs. 10,000",
+    "second": "Rs. 5,000",
+    "third": "Rs. 2,000"
+  },
+
+  // Status
+  "status": "upcoming",                 // "upcoming", "ongoing", "completed"
+  "isActive": true,
+
+  // Metadata
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp
+}
+
+**Used In:**
+- Competitions Page (competitions_page.dart) - List, filter
+- Competition Detail Page (competition_detail_page.dart) - View
+- Registration Page (registration_page.dart) - Register
+
+================================================================================
+3.6. 🔍 LOST_FOUND_ITEMS COLLECTION
+================================================================================
+
+**Collection Path:** lost_found_items/{itemId}
+
+**Document Structure:**
+{
+  "id": "auto_generated",
+  "title": "Lost Phone",
+  "description": "Black iPhone 13...",
+  "type": "lost",                       // "lost" or "found"
+  "category": "electronics",            // "electronics", "accessories", "documents"
+
+  // Location & Date
+  "location": "Library 2nd Floor",
+  "date": Timestamp,
+
+  // Media
+  "imageUrl": "https://...",
+
+  // Poster Info
+  "posterId": "user_uid",
+  "posterName": "John Doe",
+  "posterContact": "john@university.edu",
+  "posterPhone": "+1234567890",
+
+  // Status
+  "status": "open",                     // "open", "claimed", "returned", "closed"
+  "isActive": true,
+
+  // Claim Tracking
+  "claimedById": "user_uid",            // Optional
+  "claimedAt": Timestamp,               // Optional
+
+  // Metadata
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp
+}
+
+**Used In:**
+- Lost & Found Page (lost_and_found_page.dart) - List, filter
+- Item Detail Page (item_detail_page.dart) - View, claim
+
+================================================================================
+3.7. 💭 COMMENTS COLLECTION
+================================================================================
+
+**Collection Path:** comments/{commentId}
+
+**Document Structure:**
+{
+  "id": "auto_generated",
+
+  // Parent Reference
+  "parentId": "post_id_or_event_id",
+  "parentType": "post",                 // "post", "event", "competition"
+
+  // Content
+  "content": "This is a comment...",
+
+  // Author (Denormalized)
+  "authorId": "user_uid",
+  "authorName": "John Doe",
+  "authorAvatarUrl": "https://...",     // Optional
+
+  // Threading (for replies)
+  "replyToId": "comment_id",            // Optional
+  "replyToAuthor": "Jane Smith",        // Optional
+
+  // Engagement
+  "upvotes": 0,
+  "downvotes": 0,
+  "upvotedBy": [],                      // Array of user UIDs
+  "downvotedBy": [],
+
+  // Status
+  "isEdited": false,
+  "isDeleted": false,
+
+  // Metadata
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp
+}
+
+**Query Patterns:**
+- Get all comments: where('parentId', '==', postId).where('parentType', '==', 'post')
+- Get top-level: Add .where('replyToId', '==', null)
+- Get replies: where('replyToId', '==', commentId)
+
+**Used In:**
+- Thread Detail Page - Comments on posts
+- Event Comments Page - Comments on events
+
+================================================================================
+3.8. 📚 COURSE_ROUTINES COLLECTION
+================================================================================
+
+**Collection Path:** course_routines/{routineId}
+
+**Document Structure:**
+{
+  "id": "auto_generated",
+  "userId": "user_uid",                 // Owner
+  "semester": "Spring 2026",
+  "year": "2026",
+
+  // Courses Array
+  "courses": [
+    {
+      "courseCode": "CS101",
+      "courseName": "Intro to Programming",
+      "credits": 3,
+      "instructor": "Dr. Smith",
+      "room": "Room 101",
+      "schedule": [
+        {
+          "day": "Monday",
+          "startTime": "09:00",
+          "endTime": "10:30"
+        }
+      ],
+      "color": "#FF5733"
+    }
+  ],
+
+  // Metadata
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp
+}
+
+**Usage:**
+- One document per user per semester
+- Schedule array allows multiple class times
+- Color for calendar display
+
+**Used In:**
+- Course Routine Page (course_routine_page.dart)
+
+================================================================================
+3.9. 🎓 SCHOLARSHIPS COLLECTION
+================================================================================
+
+**Collection Path:** scholarships/{scholarshipId}
+
+**Document Structure:**
+{
+  "id": "auto_generated",
+  "title": "Merit Scholarship 2026",
+  "description": "Full scholarship...",
+  "category": "merit",                  // "merit", "need-based", "sports"
+
+  // Eligibility
+  "eligibilityRequirements": [
+    "GPA >= 3.5",
+    "Full-time student"
+  ],
+  "requiredDocuments": [
+    "Transcripts",
+    "Recommendation letters"
+  ],
+
+  // Details
+  "amount": "Full tuition",
+  "numberOfAwards": 10,
+  "deadline": Timestamp,
+  "applicationUrl": "https://...",
+
+  // Contact
+  "contactEmail": "scholarships@university.edu",
+  "contactPhone": "+1234567890",
+
+  // Status
+  "isActive": true,
+
+  // Metadata
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp
+}
+
+**Used In:**
+- Scholarship Page (scholarship_page.dart) - Read-only list
+
+================================================================================
+3.10. 🔔 NOTIFICATIONS COLLECTION
+================================================================================
+
+**Collection Path:** notifications/{notificationId}
+
+**Document Structure:**
+{
+  "id": "auto_generated",
+  "userId": "user_uid",                 // Recipient
+
+  // Content
+  "title": "New Comment",
+  "message": "John Doe commented on your post",
+  "type": "comment",                    // "comment", "vote", "event"
+
+  // Action Data
+  "actionType": "navigate",
+  "actionData": {
+    "route": "/thread/detail",
+    "postId": "post_id"
+  },
+
+  // Status
+  "isRead": false,
+
+  // Metadata
+  "createdAt": Timestamp
+}
+
+**Used In:**
+- Notifications Page (notifications_page.dart)
+
+================================================================================
+4. 📋 PHASE-BY-PHASE IMPLEMENTATION PLAN
+================================================================================
+
+### PHASE 1: Profile & Authentication (Week 1) ⭐
+**Goal:** User can register, login, view/edit profile
+
+**Tasks:**
+1. User Registration → Create document in users collection (3.1)
+2. Login → Update lastLogin timestamp
+3. View Profile → Read user document from Firestore
+4. Edit Profile → Update user document fields
+5. Settings → Update user preferences
+
+**Files:**
+- lib/providers/user_provider.dart
+- lib/providers/login_provider.dart
+- lib/ui/pages/more/profile/profile_page.dart
+- lib/ui/pages/more/profile/edit_profile_page.dart
+
+---
+
+### PHASE 2: Posts/Threads (Week 2) ⭐
+**Goal:** Users can create, view, vote on posts
+
+**Tasks:**
+1. List Posts → Query posts collection (3.2)
+2. Create Post → Add document to posts collection
+3. Vote on Post → Update votes subcollection + counts
+4. View Post Detail → Read post + comments
+5. Add Comment → Create comment document (3.7)
+
+**Files:**
+- lib/providers/post_provider.dart
+- lib/ui/pages/thread/thread_page.dart
+- lib/ui/pages/thread/thread_detail_page.dart
+
+---
+
+### PHASE 3: Events (Week 3)
+**Goal:** Users can view and register for events
+
+**Tasks:**
+1. List Events → Query events collection (3.3)
+2. View Event Detail → Read single event
+3. Register for Event → Add userId to attendeeIds
+4. Create Event → Add document
+5. View Attendees → Read attendeeIds
+
+**Files:**
+- lib/providers/event_provider.dart
+- lib/ui/pages/events/events_page.dart
+- lib/ui/pages/events/event_detail_page.dart
+
+---
+
+### PHASE 4: Study Hub (Week 4)
+**Tasks:**
+1. Course Routine → CRUD for user's schedule (3.8)
+2. Scholarships → Read-only list (3.9)
+3. Roadmap → Static data (no backend)
+4. CGPA Calculator → Local only (no backend)
+
+---
+
+### PHASE 5: Campus Hub (Week 5+)
+**Tasks:**
+1. Clubs → List and join (3.4)
+2. Competitions → View and register (3.5)
+3. Lost & Found → Create and search (3.6)
+
+================================================================================
+5. 🏗️ SIMPLIFIED ARCHITECTURE & CODE PATTERNS
+================================================================================
+
+### OLD Architecture (Too Complex):
+UI → Provider → Repository → DatabaseService → Adapter → Firestore
+
+### NEW Architecture (Simple):
+UI → Provider → Firestore
+
+---
+
+### PATTERN 1: Simple Provider
 
 ```dart
-CustomInput(
-  validator: Validators.email,  // or .required, .phone, .minLength(6)
-)
-```
+class PostProvider extends ChangeNotifier {
+  List<PostModel> _posts = [];
+  bool _isLoading = false;
+  String? _error;
 
-**2. SNACKBAR → lib/core/utils/snackbar_helper.dart**
+  List<PostModel> get posts => _posts;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
 
-```dart
-SnackbarHelper.showSuccess(context, 'Success!');
-SnackbarHelper.showError(context, 'Error occurred');
-SnackbarHelper.showInfo(context, 'Info message');
-SnackbarHelper.showWarning(context, 'Warning message');
-```
+  // Fetch from Firestore
+  Future<void> fetchPosts() async {
+    _isLoading = true;
+    notifyListeners();
 
-**3. DIALOGS → lib/core/utils/dialog_helper.dart**
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('posts')
+          .orderBy('created_at', descending: true)
+          .limit(20)
+          .get();
 
-```dart
-final confirmed = await DialogHelper.showConfirmation(
-  context,
-  title: 'Delete Item',
-  message: 'Are you sure?',
-);
-if (confirmed) {
-  // Delete
+      _posts = snapshot.docs
+          .map((doc) => PostModel.fromJson(doc.data()))
+          .toList();
+
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  // Create post
+  Future<void> createPost(PostModel post) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('posts')
+          .add(post.toJson());
+      await fetchPosts();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
 }
 ```
 
-**4. DATE FORMATTING → lib/core/utils/date_formatter.dart**
+---
+
+### PATTERN 2: Using Provider in UI
 
 ```dart
-DateFormatter.formatDate(date);           // "Jan 11, 2026"
-DateFormatter.timeAgo(date);              // "2 hours ago"
-DateFormatter.formatCustom(date, 'yyyy-MM-dd');
+class ThreadPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<PostProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return CircularProgressIndicator();
+        }
+
+        if (provider.error != null) {
+          return ErrorWidget(message: provider.error);
+        }
+
+        return ListView.builder(
+          itemCount: provider.posts.length,
+          itemBuilder: (context, index) {
+            return ThreadCard(post: provider.posts[index]);
+          },
+        );
+      },
+    );
+  }
+}
 ```
 
-**5. CONSTANTS**
+---
+
+### PATTERN 3: Reading from Firestore
 
 ```dart
-// lib/core/constants/error_messages.dart
-ErrorMessages.somethingWentWrong
-ErrorMessages.networkError
-ErrorMessages.postCreated
+// Get all documents
+final snapshot = await FirebaseFirestore.instance
+    .collection('posts')
+    .get();
 
-// lib/core/constants/validation_messages.dart
-ValidationMessages.emailRequired
-ValidationMessages.passwordTooShort
+final posts = snapshot.docs
+    .map((doc) => PostModel.fromJson(doc.data()))
+    .toList();
 
-// lib/core/constants/app_constants.dart
-AppConstants.appName
-AppConstants.apiUrl
+// Get with filters
+final snapshot = await FirebaseFirestore.instance
+    .collection('posts')
+    .where('type', isEqualTo: 'question')
+    .orderBy('created_at', descending: true)
+    .limit(20)
+    .get();
+
+// Get single document
+final doc = await FirebaseFirestore.instance
+    .collection('posts')
+    .doc(postId)
+    .get();
+
+if (doc.exists) {
+  final post = PostModel.fromJson(doc.data()!);
+}
+```
+
+---
+
+### PATTERN 4: Writing to Firestore
+
+```dart
+// Create (auto-generate ID)
+final docRef = await FirebaseFirestore.instance
+    .collection('posts')
+    .add(post.toJson());
+
+final newPostId = docRef.id;
+
+// Create (custom ID)
+await FirebaseFirestore.instance
+    .collection('posts')
+    .doc(customId)
+    .set(post.toJson());
+
+// Update
+await FirebaseFirestore.instance
+    .collection('posts')
+    .doc(postId)
+    .update({
+      'content': newContent,
+      'updated_at': FieldValue.serverTimestamp(),
+    });
+
+// Delete
+await FirebaseFirestore.instance
+    .collection('posts')
+    .doc(postId)
+    .delete();
+```
+
+---
+
+### PATTERN 5: Array Operations
+
+```dart
+// Add to array
+await FirebaseFirestore.instance
+    .collection('events')
+    .doc(eventId)
+    .update({
+      'attendeeIds': FieldValue.arrayUnion([userId]),
+    });
+
+// Remove from array
+await FirebaseFirestore.instance
+    .collection('events')
+    .doc(eventId)
+    .update({
+      'attendeeIds': FieldValue.arrayRemove([userId]),
+    });
+```
+
+---
+
+### PATTERN 6: Transactions (for votes)
+
+```dart
+await FirebaseFirestore.instance.runTransaction((transaction) async {
+  final postRef = FirebaseFirestore.instance
+      .collection('posts')
+      .doc(postId);
+
+  final voteRef = postRef
+      .collection('votes')
+      .doc(userId);
+
+  final postDoc = await transaction.get(postRef);
+  final currentCount = postDoc.data()?['upvote_count'] ?? 0;
+
+  transaction.set(voteRef, {'type': 'upvote'});
+  transaction.update(postRef, {'upvote_count': currentCount + 1});
+});
 ```
 
 ================================================================================
-7. THEME & STYLING GUIDELINES ⭐ CRITICAL
+6. 🎨 THEME & STYLING GUIDELINES (MUST FOLLOW!)
 ================================================================================
 
-**COLOR SCHEME (MUST USE)**
+### COLOR SCHEME
 
-✅ ALWAYS: `Theme.of(context).colorScheme.primary`
-❌ NEVER: `Color(0xFF3F51B5)` or `Colors.blue` or `Colors.white`
+✅ CORRECT:
+```dart
+Theme.of(context).colorScheme.primary
+Theme.of(context).colorScheme.surface
+Theme.of(context).colorScheme.onSurface
+```
+
+❌ WRONG:
+```dart
+Colors.blue
+Color(0xFF3F51B5)
+Colors.white
+```
 
 Common colorScheme properties:
-- `colorScheme.primary` - Primary brand color
-- `colorScheme.onPrimary` - Text/icons on primary
-- `colorScheme.secondary` - Secondary brand color
-- `colorScheme.surface` - Surface backgrounds
-- `colorScheme.onSurface` - Text on surfaces
-- `colorScheme.surfaceContainerHighest` - Elevated surfaces
-- `colorScheme.error` - Error states
-- `colorScheme.onError` - Text/icons on error
+- colorScheme.primary - Primary brand color
+- colorScheme.onPrimary - Text/icons on primary
+- colorScheme.surface - Surface backgrounds
+- colorScheme.onSurface - Text on surfaces
+- colorScheme.error - Error states
 
-**OPACITY/ALPHA VALUES**
+---
 
-Use `.withAlpha()` instead of deprecated `.withOpacity()`:
-- 60% opacity = `withAlpha(153)`
-- 30% opacity = `withAlpha(77)`
-- 20% opacity = `withAlpha(51)`
-- 10% opacity = `withAlpha(26)`
-
-Example:
-```dart
-colorScheme.onSurface.withAlpha(153)  // 60% opacity text
-```
-
-**DIMENSIONS (MUST USE)**
+### DIMENSIONS
 
 ✅ CORRECT:
 ```dart
@@ -604,342 +915,134 @@ fontSize: 14
 borderRadius: BorderRadius.circular(12)
 ```
 
-**Available AppDimensions:**
+Available AppDimensions:
+- Spacing: space4, space8, space12, space16, space24, space32
+- Height: h4, h8, h12, h16, h24, h32
+- Padding: horizontalPadding, verticalPadding
+- Font sizes: titleFontSize, bodyFontSize, captionFontSize
+- Radius: radius4, radius8, radius12, radius16
 
-Spacing: `space4`, `space8`, `space12`, `space16`, `space24`, `space32`
-Height: `h4`, `h8`, `h12`, `h16`, `h24`, `h32`
-Width: `w4`, `w8`, `w12`, `w16`, `w24`, `w32`
-Padding: `horizontalPadding`, `verticalPadding`
-Font sizes: `titleFontSize`, `bodyFontSize`, `captionFontSize`
-Icon sizes: `smallIconSize`, `mediumIconSize`, `largeIconSize`
-Radius: `radius4`, `radius8`, `radius12`, `radius16`
-Elevation: `elevation1`, `elevation2`, `elevation4`
+---
 
-================================================================================
-8. ARCHITECTURE & FILE ORGANIZATION
-================================================================================
+### CENTRALIZED SYSTEMS
 
-**WIDGET PLACEMENT RULES:**
-
-Global widgets (lib/ui/widgets/):
-- Used in 2+ different pages
-- Generic purpose (buttons, inputs, dialogs, appbars)
-
-Page-specific widgets (lib/ui/pages/[page]/widgets/):
-- Tightly coupled to specific feature
-- Custom cards, filters, forms
-
-**MODEL REQUIREMENTS:**
-
-All models must include:
-- `fromJson()` constructor
-- `toJson()` method
-- Field validation if needed
-
-**PROVIDER PATTERN:**
-
-- Extend `ChangeNotifier` or `PaginatedProvider`
-- Handle data fetching
-- Manage state
-- Business logic
-
-**REPOSITORY PATTERN:**
-
-- Extend `BaseRepository`
-- Firestore CRUD operations
-- Custom queries
-
-================================================================================
-9. CODING PATTERNS & BEST PRACTICES
-================================================================================
-
-**1. PAGE STRUCTURE PATTERN**
-
+**1. Validation** (lib/core/utils/validators.dart)
 ```dart
-class FeaturePage extends StatefulWidget {
-  const FeaturePage({super.key});
-
-  @override
-  State<FeaturePage> createState() => _FeaturePageState();
-}
-
-class _FeaturePageState extends State<FeaturePage> {
-  // 1. State variables
-  String? _selectedFilter;
-  bool _isLoading = false;
-
-  // 2. Controllers
-  final TextEditingController _searchController = TextEditingController();
-
-  // 3. initState
-  @override
-  void initState() {
-    super.initState();
-    // Initialize
-  }
-
-  // 4. dispose
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  // 5. build
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Scaffold(
-      appBar: DefaultAppBar(title: 'Feature'),
-      body: _buildBody(),
-    );
-  }
-
-  Widget _buildBody() {
-    // Body implementation
-  }
-}
+CustomInput(
+  validator: Validators.email,
+  // or Validators.required, Validators.phone, Validators.minLength(6)
+)
 ```
 
-**2. CARD WIDGET PATTERN**
-
+**2. Snackbar** (lib/core/utils/snackbar_helper.dart)
 ```dart
-class FeatureCard extends StatelessWidget {
-  final Map<String, dynamic> item;
-
-  const FeatureCard({super.key, required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Card(
-      margin: EdgeInsets.symmetric(
-        vertical: AppDimensions.space8,
-        horizontal: AppDimensions.horizontalPadding,
-      ),
-      elevation: AppDimensions.elevation2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppDimensions.radius12),
-      ),
-      child: InkWell(
-        onTap: () => _navigateToDetail(context),
-        borderRadius: BorderRadius.circular(AppDimensions.radius12),
-        child: Padding(
-          padding: EdgeInsets.all(AppDimensions.space16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Card content
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _navigateToDetail(BuildContext context) {
-    Navigator.pushNamed(
-      context,
-      AppRoutes.featureDetail,
-      arguments: item,
-    );
-  }
-}
+SnackbarHelper.showSuccess(context, 'Success!');
+SnackbarHelper.showError(context, 'Error occurred');
+SnackbarHelper.showInfo(context, 'Info message');
 ```
 
-**3. ERROR HANDLING PATTERN**
-
+**3. Dialogs** (lib/core/utils/dialog_helper.dart)
 ```dart
-try {
-  await someOperation();
-  if (context.mounted) {
-    SnackbarHelper.showSuccess(context, ErrorMessages.successMessage);
-  }
-} catch (e) {
-  if (context.mounted) {
-    SnackbarHelper.showError(context, ErrorMessages.somethingWentWrong);
-  }
-}
+final confirmed = await DialogHelper.showConfirmation(
+  context,
+  title: 'Delete Item',
+  message: 'Are you sure?',
+);
 ```
 
-**4. ICONS (icons_plus package - Iconsax)**
-
-Always use `_outline` variants:
-- Search: `Iconsax.search_normal_outline`
-- Add: `Iconsax.add_outline`
-- Calendar: `Iconsax.calendar_outline`
-- Heart: `Iconsax.heart_outline`
-- User: `Iconsax.user_outline`
-- Settings: `Iconsax.setting_2_outline`
-
-For active state: Use `_bold` variants
-- `Iconsax.home_2_bold`
-- `Iconsax.message_2_bold`
+**4. Date Formatting** (lib/core/utils/date_formatter.dart)
+```dart
+DateFormatter.formatDate(date);        // "Jan 11, 2026"
+DateFormatter.timeAgo(date);           // "2 hours ago"
+```
 
 ================================================================================
-10. REFERENCE IMPLEMENTATIONS
+7. ✅ WORKFLOW & CHECKLIST
 ================================================================================
 
-Before creating similar features, ALWAYS read these:
+### BEFORE STARTING A NEW FEATURE:
 
-1. **Events Page** (lib/ui/pages/campus/events/events_page.dart)
-   - Connected to Firebase via EventProvider
-   - Category filtering with chips
-   - Infinite scroll pagination
-   - Pull-to-refresh
-   - Empty/loading/error states
+1. ✅ Check Section 3 (DATABASE SCHEMA) for collection structure
+2. ✅ Identify which UI page needs backend
+3. ✅ Check if model class exists (it should!)
+4. ✅ Create or simplify the provider
+5. ✅ Use Consumer in UI to display data
 
-2. **Thread Page** (lib/ui/pages/thread/thread_page.dart)
-   - Connected to Firebase via PostProvider
-   - Type filtering (question, discussion, announcement)
-   - Pagination and refresh
+---
 
-3. **Profile Page** (lib/ui/pages/more/profile/profile_page.dart)
-   - Uses colorScheme (no hardcoded colors)
-   - No gradients (solid backgrounds)
-   - Proper data display with UserProvider
+### WHEN IMPLEMENTING:
 
-4. **Login Provider** (lib/providers/login_provider.dart)
-   - Last login tracking implementation
-   - Proper error handling
-   - Context-mounted checks
+1. ✅ Start with READ operations (display data)
+2. ✅ Then add CREATE operations (forms)
+3. ✅ Then add UPDATE and DELETE
+4. ✅ Test each operation before moving on
+5. ✅ Use SnackbarHelper for user feedback
+6. ✅ Handle loading and error states
 
-5. **User Repository** (lib/repository/user_repository.dart)
-   - Custom updateLastLogin method
-   - Extends BaseRepository
-   - Proper error handling
+---
 
-================================================================================
-11. NEXT STEPS & WHAT'S MISSING
-================================================================================
-
-**🎯 IMMEDIATE PRIORITIES:**
-
-**1. ADD DUMMY DATA TO FIREBASE** ⭐⭐⭐ CRITICAL
-All pages are connected but show empty states. Need:
-- Create Firestore collections
-- Add sample users (10-15)
-- Add sample posts (20-30)
-- Add sample events (10-15)
-- Add sample clubs (5-10)
-- Add sample competitions (5-10)
-- Add sample lost & found items (10-15)
-
-**2. TEST END-TO-END FUNCTIONALITY** ⭐⭐⭐
-- Test user registration and login
-- Test last login updates
-- Test all list pages with real data
-- Test pagination (scroll to load more)
-- Test pull-to-refresh
-- Test filters and search
-- Test profile page data display
-
-**3. IMPLEMENT COMMENT SYSTEM** ⭐⭐
-Create UI for comments:
-- thread_detail_page.dart with comments
-- comment_card.dart widget
-- comment_input.dart widget
-- Connect to CommentProvider
-
-**4. POLISH & OPTIMIZE** ⭐
-- Test on different screen sizes
-- Optimize performance
-- Fix any UI glitches
-- Improve loading states
-- Add better error messages
-
-**OPTIONAL ENHANCEMENTS:**
-- Image upload integration (StorageService ready)
-- Real-time updates (Firestore listeners)
-- Push notifications
-- Advanced search
-- User blocking/reporting
-
-================================================================================
-12. WORKFLOW & CHECKLIST
-================================================================================
-
-**BEFORE STARTING ANY WORK:**
-
-1. ✅ Read this file (DEVELOPMENT_INSTRUCTIONS.txt)
-2. ✅ Check Section 2 for current project status
-3. ✅ Check Section 11 for next priorities
-4. ✅ Read similar existing implementations
-5. ✅ Review Section 7 (Theme Guidelines)
-
-**WHEN CREATING A NEW FEATURE:**
-
-1. ✅ Read similar reference implementations
-2. ✅ Use AppDimensions for all spacing
-3. ✅ Use colorScheme for all colors
-4. ✅ Use ErrorMessages for all messages
-5. ✅ Use centralized helpers (validators, snackbar, dialogs)
-6. ✅ Handle empty/loading/error states
-7. ✅ Dispose controllers properly
-8. ✅ Test on different screen sizes
-9. ✅ Update this file with completion status
-
-**COMMON MISTAKES TO AVOID:**
+### COMMON MISTAKES TO AVOID:
 
 1. ❌ Hardcoding colors (use colorScheme)
-2. ❌ Hardcoding spacing (use AppDimensions)
-3. ❌ Hardcoding messages (use ErrorMessages)
+2. ❌ Hardcoding dimensions (use AppDimensions)
+3. ❌ Wrong field names (check Section 3)
 4. ❌ Not disposing controllers
-5. ❌ Not handling empty/loading/error states
-6. ❌ Using Colors.white, Colors.red, etc.
-7. ❌ Not checking context.mounted before async operations
-8. ❌ Bypassing BaseRepository
-9. ❌ Creating duplicate utilities
-10. ❌ Not reading existing implementations
+5. ❌ Not handling null/empty states
+6. ❌ Not showing loading indicators
+
+---
+
+### SUCCESS CRITERIA (Each phase complete when):
+
+✅ Users can see data from Firestore
+✅ Users can create new data
+✅ Users can edit/delete their data
+✅ Loading states work properly
+✅ Error handling shows helpful messages
+✅ No console errors or warnings
+✅ UI remains responsive
+✅ Data persists after app restart
 
 ================================================================================
-CURRENT FOCUS
+📞 QUICK HELP
 ================================================================================
 
-📍 **Phase 10: Testing & Polish** (IN PROGRESS)
+**Where is...?**
+- Database structure? → Section 3 (above)
+- Collection fields? → Section 3.1 to 3.10
+- Color constants? → Use Theme.of(context).colorScheme
+- Dimension constants? → AppDimensions class
+- Validation? → lib/core/utils/validators.dart
+- Error messages? → lib/core/constants/error_messages.dart
+- User feedback? → SnackbarHelper, DialogHelper
 
-**Next Action:**
-Choose ONE of these approaches:
-
-**Option 1: Add Dummy Data First** (Recommended)
-1. Create Firebase collections
-2. Add sample data for all entities
-3. Test all pages with real data
-4. Fix any issues that appear
-
-**Option 2: Implement Missing Features**
-1. Create thread_detail_page.dart with comments
-2. Integrate comment system
-3. Test comment functionality
-4. Add to other detail pages
-
-**Option 3: Polish & Optimize**
-1. Test all features end-to-end
-2. Fix UI glitches
-3. Optimize performance
-4. Improve error handling
-
-**Recommended: Start with Option 1** - Add dummy data so you can see the app working with real Firebase data, then test everything thoroughly.
+**How do I...?**
+- Read from Firestore? → Section 5 - PATTERN 3
+- Write to Firestore? → Section 5 - PATTERN 4
+- Use arrays? → Section 5 - PATTERN 5
+- Handle votes? → Section 5 - PATTERN 6
+- Display data in UI? → Section 5 - PATTERN 2
 
 ================================================================================
-REMEMBER
+🎯 REMEMBER
 ================================================================================
 
-- Quality over speed
-- Follow patterns religiously
-- Use centralized systems (NEVER hardcode)
-- colorScheme for colors, AppDimensions for spacing, ErrorMessages for text
-- Read before writing
-- Test thoroughly
-- Update this file when complete
+✨ Your UI is beautiful and complete
+✨ Your models are ready to use
+✨ Your database schema is documented (Section 3)
+✨ Now just connect the dots!
 
-**All infrastructure is COMPLETE!** ✅
-**Now focus on testing and polish!** 🚀
+Focus on ONE feature at a time:
+Profile (Phase 1) → Posts (Phase 2) → Events (Phase 3) → Others
 
-Last Updated: 2026-01-11
-Current Status: 97% Complete (Phases 0-9 ✅ | Phase 10 In Progress)
-Next Milestone: Add dummy data to Firebase and test all features
+Start simple, make it work, then optimize.
+
+You got this! 🚀
+
+================================================================================
+
+Last Updated: 2026-01-12
+Status: Ready for Phase-by-Phase Implementation
+Next Step: Start with Phase 1 (Profile & Auth)
 
 ================================================================================

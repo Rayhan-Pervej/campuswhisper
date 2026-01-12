@@ -1,25 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class VoteModel {
-  final String voteId;
-  final String postId;
-  final String voterId;
-  final String voteType;
+  final String userId;
+  final String voteType;  // "upvote" or "downvote"
   final DateTime createdAt;
 
-  VoteModel({
-    required this.voteId,
-    required this.postId,
-    required this.voterId,
+  const VoteModel({
+    required this.userId,
     required this.voteType,
     required this.createdAt,
   });
 
   factory VoteModel.fromJson(Map<String, dynamic> json) {
     return VoteModel(
-      voteId: json['vote_id'] as String,
-      postId: json['post_id'] as String,
-      voterId: json['voter_id'] as String,
+      userId: json['user_id'] as String,
       voteType: json['vote_type'] as String,
       createdAt: _parseDateTime(json['created_at']),
     );
@@ -27,20 +21,40 @@ class VoteModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'vote_id': voteId,
-      'post_id': postId,
-      'voter_id': voterId,
+      'user_id': userId,
       'vote_type': voteType,
       'created_at': Timestamp.fromDate(createdAt),
     };
   }
 
-  bool validate() {
-    return voteId.isNotEmpty &&
-           postId.isNotEmpty &&
-           voterId.isNotEmpty &&
-           voteType.isNotEmpty;
+  VoteModel copyWith({
+    String? userId,
+    String? voteType,
+    DateTime? createdAt,
+  }) {
+    return VoteModel(
+      userId: userId ?? this.userId,
+      voteType: voteType ?? this.voteType,
+      createdAt: createdAt ?? this.createdAt,
+    );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is VoteModel && other.userId == userId;
+  }
+
+  @override
+  int get hashCode => userId.hashCode;
+
+  bool validate() {
+    return userId.isNotEmpty && voteType.isNotEmpty;
+  }
+
+  // Helper getters
+  bool get isUpvote => voteType == 'upvote';
+  bool get isDownvote => voteType == 'downvote';
 
   static DateTime _parseDateTime(dynamic value) {
     if (value is Timestamp) {

@@ -131,22 +131,6 @@ class MorePage extends StatelessWidget {
 
             _buildMenuSection(
               context,
-              title: 'Developer Tools',
-              items: [
-                _MenuItem(
-                  icon: Iconsax.code_outline,
-                  title: 'Admin - Dummy Data',
-                  subtitle: 'Add sample data to Firebase',
-                  onTap: () {
-                    Navigator.pushNamed(context, AppRoutes.adminDummyData);
-                  },
-                ),
-              ],
-            ),
-            AppDimensions.h16,
-
-            _buildMenuSection(
-              context,
               title: 'Account Actions',
               items: [
                 _MenuItem(

@@ -30,10 +30,11 @@ abstract class BaseRepository<T> {
   Future<String> create(T model) async {
     try {
       final json = toJson(model);
+      final modelId = getId(model);
       return await database.create(
         collection: collectionName,
         data: json,
-        id: getId(model),
+        id: modelId.isEmpty ? null : modelId,
       );
     } catch (e) {
       throw RepositoryException(

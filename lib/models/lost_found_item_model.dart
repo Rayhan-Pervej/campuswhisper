@@ -2,128 +2,134 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LostFoundItemModel {
   final String id;
-  final String itemName;
+  final String title;
   final String description;
-  final String type;  // 'Lost' or 'Found'
-  final String category;  // 'Electronics', 'Documents', 'Accessories', etc.
-  final String location;  // Where it was lost/found
-  final DateTime date;  // When it was lost/found
-  final List<String> imageUrls;
+  final String type;  // "lost" or "found"
+  final String category;  // "electronics", "accessories", "documents"
+  final String location;
+  final DateTime date;
+  final String? imageUrl;
   final String posterId;
   final String posterName;
-  final String contactInfo;
-  final String status;  // 'Active' or 'Resolved'
-  final String? resolvedBy;
-  final DateTime? resolvedAt;
+  final String posterContact;
+  final String? posterPhone;
+  final String status;  // "open", "claimed", "returned", "closed"
+  final bool isActive;
+  final String? claimedById;
+  final DateTime? claimedAt;
   final DateTime createdAt;
   final DateTime? updatedAt;
-  final Map<String, dynamic>? additionalInfo;
 
   const LostFoundItemModel({
     required this.id,
-    required this.itemName,
+    required this.title,
     required this.description,
     required this.type,
     required this.category,
     required this.location,
     required this.date,
-    this.imageUrls = const [],
+    this.imageUrl,
     required this.posterId,
     required this.posterName,
-    required this.contactInfo,
-    this.status = 'Active',
-    this.resolvedBy,
-    this.resolvedAt,
+    required this.posterContact,
+    this.posterPhone,
+    this.status = 'open',
+    this.isActive = true,
+    this.claimedById,
+    this.claimedAt,
     required this.createdAt,
     this.updatedAt,
-    this.additionalInfo,
   });
 
   factory LostFoundItemModel.fromJson(Map<String, dynamic> json) {
     return LostFoundItemModel(
       id: json['id'] as String,
-      itemName: json['itemName'] as String,
+      title: json['title'] as String,
       description: json['description'] as String,
       type: json['type'] as String,
       category: json['category'] as String,
       location: json['location'] as String,
       date: (json['date'] as Timestamp).toDate(),
-      imageUrls: List<String>.from(json['imageUrls'] ?? []),
+      imageUrl: json['imageUrl'] as String?,
       posterId: json['posterId'] as String,
       posterName: json['posterName'] as String,
-      contactInfo: json['contactInfo'] as String,
-      status: json['status'] as String? ?? 'Active',
-      resolvedBy: json['resolvedBy'] as String?,
-      resolvedAt: json['resolvedAt'] != null
-          ? (json['resolvedAt'] as Timestamp).toDate()
+      posterContact: json['posterContact'] as String,
+      posterPhone: json['posterPhone'] as String?,
+      status: json['status'] as String? ?? 'open',
+      isActive: json['isActive'] as bool? ?? true,
+      claimedById: json['claimedById'] as String?,
+      claimedAt: json['claimedAt'] != null
+          ? (json['claimedAt'] as Timestamp).toDate()
           : null,
       createdAt: (json['createdAt'] as Timestamp).toDate(),
       updatedAt: json['updatedAt'] != null
           ? (json['updatedAt'] as Timestamp).toDate()
           : null,
-      additionalInfo: json['additionalInfo'] as Map<String, dynamic>?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'itemName': itemName,
+      'title': title,
       'description': description,
       'type': type,
       'category': category,
       'location': location,
       'date': Timestamp.fromDate(date),
-      'imageUrls': imageUrls,
+      'imageUrl': imageUrl,
       'posterId': posterId,
       'posterName': posterName,
-      'contactInfo': contactInfo,
+      'posterContact': posterContact,
+      'posterPhone': posterPhone,
       'status': status,
-      'resolvedBy': resolvedBy,
-      'resolvedAt': resolvedAt != null ? Timestamp.fromDate(resolvedAt!) : null,
+      'isActive': isActive,
+      'claimedById': claimedById,
+      'claimedAt': claimedAt != null ? Timestamp.fromDate(claimedAt!) : null,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
-      'additionalInfo': additionalInfo,
     };
   }
 
   LostFoundItemModel copyWith({
     String? id,
-    String? itemName,
+    String? title,
     String? description,
     String? type,
     String? category,
     String? location,
     DateTime? date,
-    List<String>? imageUrls,
+    String? imageUrl,
     String? posterId,
     String? posterName,
-    String? contactInfo,
+    String? posterContact,
+    String? posterPhone,
     String? status,
-    String? resolvedBy,
-    DateTime? resolvedAt,
+    bool? isActive,
+    String? claimedById,
+    DateTime? claimedAt,
     DateTime? createdAt,
     DateTime? updatedAt,
-    Map<String, dynamic>? additionalInfo,
   }) {
     return LostFoundItemModel(
       id: id ?? this.id,
-      itemName: itemName ?? this.itemName,
+      title: title ?? this.title,
       description: description ?? this.description,
       type: type ?? this.type,
       category: category ?? this.category,
       location: location ?? this.location,
       date: date ?? this.date,
-      imageUrls: imageUrls ?? this.imageUrls,
+      imageUrl: imageUrl ?? this.imageUrl,
       posterId: posterId ?? this.posterId,
       posterName: posterName ?? this.posterName,
-      contactInfo: contactInfo ?? this.contactInfo,
+      posterContact: posterContact ?? this.posterContact,
+      posterPhone: posterPhone ?? this.posterPhone,
       status: status ?? this.status,
-      resolvedBy: resolvedBy ?? this.resolvedBy,
-      resolvedAt: resolvedAt ?? this.resolvedAt,
+      isActive: isActive ?? this.isActive,
+      claimedById: claimedById ?? this.claimedById,
+      claimedAt: claimedAt ?? this.claimedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      additionalInfo: additionalInfo ?? this.additionalInfo,
     );
   }
 
@@ -137,9 +143,11 @@ class LostFoundItemModel {
   int get hashCode => id.hashCode;
 
   // Helper getters
-  bool get isLost => type == 'Lost';
-  bool get isFound => type == 'Found';
-  bool get isResolved => status == 'Resolved';
-  bool get isActive => status == 'Active';
-  bool get hasImages => imageUrls.isNotEmpty;
+  bool get isLost => type == 'lost';
+  bool get isFound => type == 'found';
+  bool get isOpen => status == 'open';
+  bool get isClaimed => status == 'claimed';
+  bool get isReturned => status == 'returned';
+  bool get isClosed => status == 'closed';
+  bool get hasImage => imageUrl != null && imageUrl!.isNotEmpty;
 }
