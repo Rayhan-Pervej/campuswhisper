@@ -276,6 +276,17 @@ class _ThreadPageState extends State<ThreadPage> {
                           }
                         },
                         onComment: () {
+                          // Don't navigate if post doesn't have a valid ID yet
+                          if (post.postId.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Please wait while the post is being saved...'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                            return;
+                          }
+
                           Navigator.pushNamed(
                             context,
                             AppRoutes.threadDetail,

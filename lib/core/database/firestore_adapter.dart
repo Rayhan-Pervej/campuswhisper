@@ -41,6 +41,14 @@ class FirestoreAdapter implements DatabaseService {
         ...data,
       };
 
+      // Add document ID to the data if not present
+      if (!dataToSave.containsKey('id')) {
+        dataToSave['id'] = docRef.id;
+      }
+      if (!dataToSave.containsKey('post_id') || dataToSave['post_id'] == '') {
+        dataToSave['post_id'] = docRef.id;
+      }
+
       // Only add server timestamps if not already set
       if (!dataToSave.containsKey('created_at') && !dataToSave.containsKey('createdAt')) {
         dataToSave['created_at'] = FieldValue.serverTimestamp();
@@ -162,7 +170,15 @@ class FirestoreAdapter implements DatabaseService {
       }
 
       return PaginatedResult<Map<String, dynamic>>(
-        items: docs.map((doc) => doc.data() as Map<String, dynamic>).toList(),
+        items: docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          // Add document ID to the data
+          data['id'] = doc.id;
+          if (!data.containsKey('post_id')) {
+            data['post_id'] = doc.id;
+          }
+          return data;
+        }).toList(),
         cursor: docs.isNotEmpty ? docs.last : null,
         hasMore: hasMore,
       );

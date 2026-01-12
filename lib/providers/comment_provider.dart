@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campuswhisper/models/comment_model.dart';
 import 'package:campuswhisper/models/comment_vote_model.dart';
 import 'package:campuswhisper/core/utils/snackbar_helper.dart';
+import 'package:campuswhisper/core/services/notification_service.dart';
 
 /// CommentProvider - Facebook-Style Scalable Architecture
 ///
@@ -17,19 +18,39 @@ import 'package:campuswhisper/core/utils/snackbar_helper.dart';
 /// - No 1MB document size limit
 class CommentProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final NotificationService _notificationService = NotificationService();
 
   // State
   List<CommentModel> _comments = [];
   Map<String, List<CommentModel>> _repliesCache = {};
   Map<String, String?> _userVotes = {}; // commentId -> voteType
-  bool _isLoading = false;
+  bool _isLoading = true; // Start with loading = true
   String? _error;
+
+  // Comment input state
+  final TextEditingController commentController = TextEditingController();
+  final FocusNode commentFocusNode = FocusNode();
+  String? _replyToId;
+  String? _replyToAuthor;
+  String? _editingCommentId;
+  String? _editingCommentOriginalContent;
 
   // Getters
   List<CommentModel> get comments => _comments;
   Map<String, List<CommentModel>> get repliesCache => _repliesCache;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  String? get replyToId => _replyToId;
+  String? get replyToAuthor => _replyToAuthor;
+  String? get editingCommentId => _editingCommentId;
+  String? get editingCommentOriginalContent => _editingCommentOriginalContent;
+
+  @override
+  void dispose() {
+    commentController.dispose();
+    commentFocusNode.dispose();
+    super.dispose();
+  }
 
   // ═══════════════════════════════════════════════════════════════
   // FETCH COMMENTS (from subcollection)
@@ -175,8 +196,20 @@ class CommentProvider extends ChangeNotifier {
         await fetchReplies(parentId, replyToId);
       }
 
+      // Send notifications
+      await _sendNotifications(
+        parentId: parentId,
+        replyToId: replyToId,
+        authorName: authorName,
+        content: content,
+      );
+
       // Notify parent to update PostProvider
       onCommentCreated();
+
+      // Clear input and modes
+      commentController.clear();
+      cancelReply();
 
       if (!context.mounted) return;
       SnackbarHelper.showSuccess(
@@ -385,6 +418,10 @@ class CommentProvider extends ChangeNotifier {
 
         notifyListeners();
 
+        // Clear edit mode and input
+        commentController.clear();
+        cancelEdit();
+
         if (!context.mounted) return;
         SnackbarHelper.showSuccess(context, 'Comment updated!');
       }
@@ -516,6 +553,174 @@ class CommentProvider extends ChangeNotifier {
     } catch (e) {
       print('Error getting comment count: $e');
       return 0;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // COMMENT INPUT STATE MANAGEMENT
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Start replying to a comment
+  void startReply(String commentId, String authorName) {
+    _replyToId = commentId;
+    _replyToAuthor = authorName;
+    _editingCommentId = null; // Clear edit mode
+    _editingCommentOriginalContent = null;
+    commentFocusNode.requestFocus();
+    notifyListeners();
+  }
+
+  /// Cancel reply mode
+  void cancelReply() {
+    _replyToId = null;
+    _replyToAuthor = null;
+    notifyListeners();
+  }
+
+  /// Start editing a comment
+  void startEdit(String commentId, String currentContent) {
+    _editingCommentId = commentId;
+    _editingCommentOriginalContent = currentContent;
+    commentController.text = currentContent;
+    _replyToId = null; // Clear reply mode
+    _replyToAuthor = null;
+    commentFocusNode.requestFocus();
+    notifyListeners();
+  }
+
+  /// Cancel edit mode
+  void cancelEdit() {
+    _editingCommentId = null;
+    _editingCommentOriginalContent = null;
+    commentController.clear();
+    notifyListeners();
+  }
+
+  /// Initialize for a new post
+  /// Call this when navigating to a new post to reset state
+  Future<void> initializeForPost(
+    String postId,
+    String? userId,
+  ) async {
+    // Clear everything first - this prevents showing old comments
+    _comments = [];
+    _repliesCache.clear();
+    _userVotes.clear();
+    _error = null;
+    _isLoading = true;
+
+    // Clear input state
+    _replyToId = null;
+    _replyToAuthor = null;
+    _editingCommentId = null;
+    _editingCommentOriginalContent = null;
+    commentController.clear();
+
+    notifyListeners();
+
+    // Now fetch fresh data
+    await fetchComments(postId, 'post');
+
+    // Load user votes if logged in
+    if (userId != null) {
+      await loadUserVotes(postId, userId);
+    }
+  }
+
+  /// Submit a comment (create new or edit existing)
+  /// This handles all the business logic for submitting comments
+  Future<void> submitComment({
+    required BuildContext context,
+    required String postId,
+    required String userId,
+    required String authorName,
+    required Function() onCommentCreated,
+  }) async {
+    if (commentController.text.trim().isEmpty) return;
+
+    final commentText = commentController.text.trim();
+
+    // Check if we're editing a comment
+    if (_editingCommentId != null) {
+      // Edit existing comment
+      await editComment(
+        context: context,
+        parentId: postId,
+        commentId: _editingCommentId!,
+        newContent: commentText,
+      );
+      return;
+    }
+
+    // Create new comment or reply
+    await createComment(
+      context: context,
+      parentId: postId,
+      parentType: 'post',
+      content: commentText,
+      authorId: userId,
+      authorName: authorName,
+      replyToId: _replyToId,
+      replyToAuthor: _replyToAuthor,
+      onCommentCreated: onCommentCreated,
+    );
+  }
+
+  /// Refresh comments for a post
+  Future<void> refreshComments(String postId, String? userId) async {
+    await initializeForPost(postId, userId);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // NOTIFICATION HELPERS
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Send notifications when a comment/reply is created
+  Future<void> _sendNotifications({
+    required String parentId,
+    required String? replyToId,
+    required String authorName,
+    required String content,
+  }) async {
+    try {
+      // Get post data to find post owner
+      final postDoc = await _firestore.collection('posts').doc(parentId).get();
+      final postOwnerId = postDoc.data()?['created_by'] as String?;
+
+      if (postOwnerId == null) return;
+
+      if (replyToId == null) {
+        // This is a top-level comment - notify post owner
+        await _notificationService.sendCommentNotification(
+          postId: parentId,
+          postOwnerId: postOwnerId,
+          commenterName: authorName,
+          commentText: content,
+        );
+      } else {
+        // This is a reply - get comment owner and notify both
+        final commentDoc = await _firestore
+            .collection('posts')
+            .doc(parentId)
+            .collection('comments')
+            .doc(replyToId)
+            .get();
+
+        final commentOwnerId = commentDoc.data()?['authorId'] as String?;
+
+        if (commentOwnerId != null) {
+          await _notificationService.sendReplyNotification(
+            postId: parentId,
+            postOwnerId: postOwnerId,
+            commentOwnerId: commentOwnerId,
+            replierName: authorName,
+            replyText: content,
+          );
+        }
+      }
+    } catch (e) {
+      // Silently fail - don't block comment creation if notification fails
+      print('Error sending notification: $e');
     }
   }
 }

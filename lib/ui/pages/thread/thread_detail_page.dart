@@ -25,36 +25,24 @@ class ThreadDetailPage extends StatefulWidget {
 }
 
 class _ThreadDetailPageState extends State<ThreadDetailPage> {
-  final TextEditingController _commentController = TextEditingController();
-  final FocusNode _commentFocusNode = FocusNode();
-  String? _replyToId;
-  String? _replyToAuthor;
-  String? _editingCommentId;
-  String? _editingCommentOriginalContent;
-
   @override
   void initState() {
     super.initState();
 
-    // Set loading state and fetch comments
-    // Schedule for after build to avoid setState during build error
-    Future.microtask(() {
-      if (!mounted) return;
-      final commentProvider = context.read<CommentProvider>();
-      commentProvider.clearComments();
-      commentProvider.setLoading(true);
-    });
+    // Initialize comments for this post using proper provider pattern
+    final postId = widget.thread['post_id'] ?? widget.thread['id'] ?? '';
+    final currentUser = FirebaseAuth.instance.currentUser;
 
-    // Fetch comments when page loads
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final postId = widget.thread['post_id'] ?? widget.thread['id'] ?? '';
-      if (postId.isNotEmpty) {
-        // Fetch fresh post data from Firestore to ensure comment count is accurate
+    if (postId.isNotEmpty) {
+      // Use Future.microtask as per Provider best practices for async in initState
+      Future.microtask(() async {
+        if (!mounted) return;
+
+        // Fetch fresh post data first
         await _refreshPostData(postId);
 
         // Load user's vote status for this post
         if (!mounted) return;
-        final currentUser = FirebaseAuth.instance.currentUser;
         if (currentUser != null) {
           await context.read<PostProvider>().getUserVote(
             postId,
@@ -62,18 +50,14 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
           );
         }
 
-        // Then fetch comments
+        // Initialize comment provider for this post (handles loading state internally)
         if (!mounted) return;
-        final commentProvider = context.read<CommentProvider>();
-        await commentProvider.fetchComments(postId, 'post');
-
-        // Load user votes for comments
-        if (!mounted) return;
-        if (currentUser != null) {
-          commentProvider.loadUserVotes(postId, currentUser.uid);
-        }
-      }
-    });
+        await context.read<CommentProvider>().initializeForPost(
+          postId,
+          currentUser?.uid,
+        );
+      });
+    }
   }
 
   /// Fetch fresh post data from Firestore to sync comment count
@@ -93,13 +77,6 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
     } catch (e) {
       // Silently fail, use cached data
     }
-  }
-
-  @override
-  void dispose() {
-    _commentController.dispose();
-    _commentFocusNode.dispose();
-    super.dispose();
   }
 
   void _handleUpvote() {
@@ -122,46 +99,9 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
     context.read<PostProvider>().downvotePost(postId, currentUser.uid);
   }
 
-  void _handleReply(String commentId, String authorName) {
-    setState(() {
-      _replyToId = commentId;
-      _replyToAuthor = authorName;
-    });
-    _commentFocusNode.requestFocus();
-  }
-
-  void _handleEditComment(String commentId, String currentContent) {
-    setState(() {
-      _editingCommentId = commentId;
-      _editingCommentOriginalContent = currentContent;
-      _commentController.text = currentContent;
-      _replyToId = null; // Clear reply mode if active
-      _replyToAuthor = null;
-    });
-    _commentFocusNode.requestFocus();
-  }
-
-  void _cancelEdit() {
-    setState(() {
-      _editingCommentId = null;
-      _editingCommentOriginalContent = null;
-      _commentController.clear();
-    });
-  }
-
-  void _cancelReply() {
-    setState(() {
-      _replyToId = null;
-      _replyToAuthor = null;
-    });
-  }
-
   Future<void> _submitComment() async {
-    if (_commentController.text.trim().isEmpty) return;
-
-    final commentText = _commentController.text.trim();
-    final userProvider = context.read<UserProvider>();
     final commentProvider = context.read<CommentProvider>();
+    final userProvider = context.read<UserProvider>();
     final postProvider = context.read<PostProvider>();
 
     // Get current user info
@@ -178,42 +118,18 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
       return;
     }
 
-    // Check if we're editing a comment
-    if (_editingCommentId != null) {
-      // Edit existing comment
-      await commentProvider.editComment(
-        context: context,
-        parentId: postId,
-        commentId: _editingCommentId!,
-        newContent: commentText,
-      );
-
-      _commentController.clear();
-      _cancelEdit();
-      return;
-    }
-
-    // Create new comment or reply
-    await commentProvider.createComment(
+    // Submit comment via provider (handles all business logic)
+    await commentProvider.submitComment(
       context: context,
-      parentId: postId,
-      parentType: 'post',
-      content: commentText,
-      authorId: currentUser.uid,
+      postId: postId,
+      userId: currentUser.uid,
       authorName: '${currentUser.firstName} ${currentUser.lastName}',
-      replyToId: _replyToId,
-      replyToAuthor: _replyToAuthor,
       onCommentCreated: () async {
-        // Callback: Update PostProvider to reflect new comment count EVERYWHERE
+        // Callback: Update PostProvider to reflect new comment count
         await _refreshPostData(postId);
-
-        // Also update PostProvider's cached list
         postProvider.refresh();
       },
     );
-
-    _commentController.clear();
-    _cancelReply();
   }
 
   Future<void> _handleRefresh() async {
@@ -234,14 +150,11 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
 
     if (!mounted) return;
 
-    // Refresh comments
-    final commentProvider = context.read<CommentProvider>();
-    await commentProvider.fetchComments(postId, 'post');
-
-    // Reload comment votes
-    if (currentUser != null) {
-      commentProvider.loadUserVotes(postId, currentUser.uid);
-    }
+    // Refresh comments via provider
+    await context.read<CommentProvider>().refreshComments(
+      postId,
+      currentUser?.uid,
+    );
   }
 
   void _showPostOptions(BuildContext context, String postId) {
@@ -435,70 +348,23 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                         // Comments section with Consumer
                         Consumer<CommentProvider>(
                           builder: (context, commentProvider, child) {
+                            // Show loading state
                             if (commentProvider.isLoading) {
-                              return Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(
-                                    AppDimensions.space32,
-                                  ),
-                                  child: const CircularProgressIndicator(),
-                                ),
-                              );
+                              return _buildLoadingState(colorScheme);
                             }
 
                             final comments = commentProvider.comments;
 
-                            // Calculate total count including all replies
-                            int totalCount = comments.length;
-                            for (final comment in comments) {
-                              final replies =
-                                  commentProvider.repliesCache[comment.id] ??
-                                  [];
-                              totalCount += replies.length;
+                            // Show empty state
+                            if (comments.isEmpty) {
+                              return _buildEmptyState(colorScheme);
                             }
 
-                            return Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: AppDimensions.horizontalPadding,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  BuildText(
-                                    text: 'Comments ($totalCount)',
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  AppDimensions.h16,
-
-                                  // Comments list
-                                  ...comments.map((comment) {
-                                    return _buildCommentItem(
-                                      comment,
-                                      colorScheme,
-                                      commentProvider,
-                                    );
-                                  }),
-
-                                  if (comments.isEmpty &&
-                                      !commentProvider.isLoading)
-                                    Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(
-                                          AppDimensions.space32,
-                                        ),
-                                        child: BuildText(
-                                          text:
-                                              'No comments yet. Be the first to comment!',
-                                          fontSize: 14,
-                                          color: colorScheme.onSurface
-                                              .withAlpha(153),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
+                            // Show comments list
+                            return _buildCommentsList(
+                              comments,
+                              commentProvider,
+                              colorScheme,
                             );
                           },
                         ),
@@ -686,6 +552,118 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
     );
   }
 
+  Widget _buildLoadingState(ColorScheme colorScheme) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppDimensions.horizontalPadding,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BuildText(
+            text: 'Comments',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+          AppDimensions.h32,
+          Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(colorScheme.primary),
+            ),
+          ),
+          AppDimensions.h32,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(ColorScheme colorScheme) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppDimensions.horizontalPadding,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BuildText(
+            text: 'Comments (0)',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+          AppDimensions.h32,
+          Center(
+            child: Padding(
+              padding: EdgeInsets.all(AppDimensions.space32),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.comment_outlined,
+                    size: AppDimensions.largeIconSize * 1.5,
+                    color: colorScheme.onSurface.withAlpha(77),
+                  ),
+                  AppDimensions.h16,
+                  BuildText(
+                    text: 'No comments yet',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface.withAlpha(153),
+                    textAlign: TextAlign.center,
+                  ),
+                  AppDimensions.h8,
+                  BuildText(
+                    text: 'Be the first to comment!',
+                    fontSize: 14,
+                    color: colorScheme.onSurface.withAlpha(102),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommentsList(
+    List<CommentModel> comments,
+    CommentProvider commentProvider,
+    ColorScheme colorScheme,
+  ) {
+    // Calculate total count including all replies
+    int totalCount = comments.length;
+    for (final comment in comments) {
+      final replies = commentProvider.repliesCache[comment.id] ?? [];
+      totalCount += replies.length;
+    }
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppDimensions.horizontalPadding,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BuildText(
+            text: 'Comments ($totalCount)',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+          AppDimensions.h16,
+
+          // Comments list
+          ...comments.map((comment) {
+            return _buildCommentItem(
+              comment,
+              colorScheme,
+              commentProvider,
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCommentItem(
     CommentModel comment,
     ColorScheme colorScheme,
@@ -725,7 +703,7 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
           onReply: isReply
               ? null
               : () {
-                  _handleReply(comment.id, comment.authorName);
+                  commentProvider.startReply(comment.id, comment.authorName);
                   commentProvider.fetchReplies(postId, comment.id);
                 },
           onUpvote: currentUser != null
@@ -752,7 +730,7 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
               : null,
           onEdit: isCommentOwner
               ? () {
-                  _handleEditComment(comment.id, comment.content);
+                  commentProvider.startEdit(comment.id, comment.content);
                 }
               : null,
           onDelete: isCommentOwner
@@ -775,14 +753,21 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
   }
 
   Widget _buildCommentInput(ColorScheme colorScheme) {
-    return CommentInput(
-      controller: _commentController,
-      focusNode: _commentFocusNode,
-      onSubmit: _submitComment,
-      replyToAuthor: _replyToAuthor,
-      onCancelReply: _cancelReply,
-      editingCommentAuthor: _editingCommentId != null ? 'your comment' : null,
-      onCancelEdit: _editingCommentId != null ? _cancelEdit : null,
+    return Consumer<CommentProvider>(
+      builder: (context, commentProvider, child) {
+        return CommentInput(
+          controller: commentProvider.commentController,
+          focusNode: commentProvider.commentFocusNode,
+          onSubmit: _submitComment,
+          replyToAuthor: commentProvider.replyToAuthor,
+          onCancelReply: commentProvider.cancelReply,
+          editingCommentAuthor:
+              commentProvider.editingCommentId != null ? 'your comment' : null,
+          onCancelEdit: commentProvider.editingCommentId != null
+              ? commentProvider.cancelEdit
+              : null,
+        );
+      },
     );
   }
 }

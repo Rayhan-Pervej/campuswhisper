@@ -15,14 +15,23 @@ import 'package:campuswhisper/ui/pages/auth/login_page.dart';
 import 'package:campuswhisper/ui/pages/navigation/navigation_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'package:campuswhisper/core/database/database_service.dart';
 import 'package:campuswhisper/core/database/firestore_adapter.dart';
+import 'package:campuswhisper/core/services/notification_service.dart';
 
 // Global database instance
 late final DatabaseService database;
+
+// Background message handler (must be top-level function)
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('📨 Background message: ${message.messageId}');
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +40,12 @@ void main() async {
   // Initialize database (Firestore for now)
   database = FirestoreAdapter();
   await database.initialize();
+
+  // Initialize FCM background handler
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Initialize notification service
+  await NotificationService().initialize();
 
   // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 

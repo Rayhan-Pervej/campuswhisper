@@ -31,7 +31,7 @@ class PostModel {
 
   factory PostModel.fromJson(Map<String, dynamic> json) {
     return PostModel(
-      postId: json['post_id'] as String,
+      postId: (json['post_id'] as String?) ?? (json['id'] as String?) ?? '',
       type: json['type'] as String,
       createdBy: json['created_by'] as String,
       createdByName: json['created_by_name'] as String?,
